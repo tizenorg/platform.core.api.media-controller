@@ -1,0 +1,19 @@
+<manifest>
+	<define>
+		<domain name="mediacontroller"/>
+		<provide>
+			<label name="mediacontroller::svc"/>
+		</provide>
+		<request>
+			<smack request="security-server::api-privilege-by-pid" type="w"/>
+			<smack request="mediacontroller::db" type="rw"/>
+		</request>
+	</define>
+	<request>
+		<domain name="_"/>
+	</request>
+	<assign>
+		<filesystem path="/usr/bin/mediacontroller" label="mediacontroller" exec_label="mediacontroller" />
+	</assign>
+</manifest>
+
