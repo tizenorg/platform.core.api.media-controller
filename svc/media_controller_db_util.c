@@ -34,8 +34,7 @@ int mc_db_util_connect(void **handle)
 
 	/*Connect DB*/
 	ret = db_util_open(MC_DB_NAME, &db_handle, DB_UTIL_REGISTER_HOOK_METHOD);
-	if (SQLITE_OK != ret)
-	{
+	if (SQLITE_OK != ret) {
 		mc_error("error when db open");
 		*handle = NULL;
 
@@ -44,8 +43,7 @@ int mc_db_util_connect(void **handle)
 
 	/*Register busy handler*/
 	ret = sqlite3_busy_handler(db_handle, __mc_db_util_busy_handler, NULL);
-	if (SQLITE_OK != ret)
-	{
+	if (SQLITE_OK != ret) {
 		if (db_handle) {
 			mc_error("error when register busy handler %s\n", sqlite3_errmsg(db_handle));
 		}
@@ -88,8 +86,7 @@ int mc_db_util_disconnect(void *handle)
 	mc_retvm_if(db_handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 
 	ret = db_util_close(db_handle);
-	if (SQLITE_OK != ret)
-	{
+	if (SQLITE_OK != ret) {
 		mc_error("error when db close");
 		mc_error("Error : %s", sqlite3_errmsg(db_handle));
 		db_handle = NULL;

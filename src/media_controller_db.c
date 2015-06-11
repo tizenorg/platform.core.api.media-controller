@@ -59,15 +59,13 @@ static int __media_db_request_update_tcp(mc_msg_type_e msg_type, const char *req
 	int port = MC_DB_UPDATE_PORT;
 	int retry_count = 0;
 
-	if(!MC_STRING_VALID(request_msg))
-	{
+	if (!MC_STRING_VALID(request_msg)) {
 		mc_error("invalid query");
 		return MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER;
 	}
 
 	request_msg_size = strlen(request_msg);
-	if(request_msg_size >= MAX_MSG_SIZE)
-	{
+	if (request_msg_size >= MAX_MSG_SIZE) {
 		mc_error("Query is Too long. [%d] query size limit is [%d]", request_msg_size, MAX_MSG_SIZE);
 		return MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER;
 	}
@@ -77,7 +75,7 @@ static int __media_db_request_update_tcp(mc_msg_type_e msg_type, const char *req
 
 	send_msg.msg_type = msg_type;
 	send_msg.msg_size = request_msg_size;
-	strncpy(send_msg.msg, request_msg, sizeof(send_msg.msg)-1);
+	strncpy(send_msg.msg, request_msg, sizeof(send_msg.msg) - 1);
 
 	/*Create Socket*/
 	ret = mc_ipc_create_client_socket(MC_TIMEOUT_SEC_10, &sock_info);
@@ -87,10 +85,10 @@ static int __media_db_request_update_tcp(mc_msg_type_e msg_type, const char *req
 	/*Set server Address*/
 	memset(&serv_addr, 0, sizeof(serv_addr));
 	serv_addr.sun_family = AF_UNIX;
-	strncpy(serv_addr.sun_path, MC_IPC_PATH[port], sizeof(serv_addr.sun_path)-1);
+	strncpy(serv_addr.sun_path, MC_IPC_PATH[port], sizeof(serv_addr.sun_path) - 1);
 
 	/* Connecting to the media db server */
-	if (connect(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
+	if (connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
 		mc_stderror("connect error");
 		mc_ipc_delete_client_socket(&sock_info);
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
@@ -111,17 +109,17 @@ RETRY:
 		mc_error("recv failed : [%d]", sockfd);
 		mc_stderror("recv failed");
 
-		 if (errno == EINTR) {
+		if (errno == EINTR) {
 			mc_stderror("catch interrupt");
 			goto RETRY;
-	 	}
+		}
 
 		if (errno == EWOULDBLOCK) {
-			if(retry_count < MAX_RETRY_COUNT)	{
+			if (retry_count < MAX_RETRY_COUNT) {
 				mc_error("TIME OUT[%d]", retry_count);
-				retry_count ++;
+				retry_count++;
 				goto RETRY;
-		 	}
+			}
 
 			mc_ipc_delete_client_socket(&sock_info);
 			mc_error("Timeout. Can't try any more");
@@ -176,7 +174,7 @@ static int __mc_db_create_server_list_table(sqlite3 *handle)
 
 	sql_str = sqlite3_mprintf("CREATE TABLE IF NOT EXISTS %s (\
 				server_name   TEXT PRIMARY KEY);",
-				MC_DB_TABLE_SERVER_LIST);
+	                          MC_DB_TABLE_SERVER_LIST);
 
 	ret = __mc_db_update_db(handle, sql_str);
 
@@ -184,7 +182,7 @@ static int __mc_db_create_server_list_table(sqlite3 *handle)
 	return ret;
 }
 
-static int __mc_db_get_int_value_of_key(void *handle, const char* server_name, const char *key, int *value)
+static int __mc_db_get_int_value_of_key(void *handle, const char *server_name, const char *key, int *value)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	char *sql_str = NULL;
@@ -198,8 +196,7 @@ static int __mc_db_get_int_value_of_key(void *handle, const char* server_name, c
 	sql_str = sqlite3_mprintf(DB_SELECT_VALUE_OF_KEY, key, server_name);
 
 	ret = sqlite3_prepare_v2(db_handle, sql_str, strlen(sql_str), &stmt, NULL);
-	if (SQLITE_OK != ret)
-	{
+	if (SQLITE_OK != ret) {
 		mc_error("prepare error [%s]\n", sqlite3_errmsg(db_handle));
 		SQLITE3_SAFE_FREE(sql_str);
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
@@ -212,8 +209,7 @@ static int __mc_db_get_int_value_of_key(void *handle, const char* server_name, c
 		SQLITE3_SAFE_FREE(sql_str);
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}
-	while(SQLITE_ROW==ret)
-	{
+	while (SQLITE_ROW == ret) {
 		*value = sqlite3_column_int(stmt, 0);
 		ret = sqlite3_step(stmt);
 	}
@@ -224,7 +220,7 @@ static int __mc_db_get_int_value_of_key(void *handle, const char* server_name, c
 	return MEDIA_CONTROLLER_ERROR_NONE;
 }
 
-static int __mc_db_get_ulong_value_of_key(void *handle, const char* server_name, const char *key, unsigned long long *value)
+static int __mc_db_get_ulong_value_of_key(void *handle, const char *server_name, const char *key, unsigned long long *value)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	char *sql_str = NULL;
@@ -238,8 +234,7 @@ static int __mc_db_get_ulong_value_of_key(void *handle, const char* server_name,
 	sql_str = sqlite3_mprintf(DB_SELECT_VALUE_OF_KEY, key, server_name);
 
 	ret = sqlite3_prepare_v2(db_handle, sql_str, strlen(sql_str), &stmt, NULL);
-	if (SQLITE_OK != ret)
-	{
+	if (SQLITE_OK != ret) {
 		mc_error("prepare error [%s]\n", sqlite3_errmsg(db_handle));
 		SQLITE3_SAFE_FREE(sql_str);
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
@@ -252,8 +247,7 @@ static int __mc_db_get_ulong_value_of_key(void *handle, const char* server_name,
 		SQLITE3_SAFE_FREE(sql_str);
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}
-	while(SQLITE_ROW==ret)
-	{
+	while (SQLITE_ROW == ret) {
 		*value = (unsigned long long)sqlite3_column_int64(stmt, 0);
 		ret = sqlite3_step(stmt);
 	}
@@ -273,8 +267,7 @@ int mc_db_connect(void **handle)
 
 	/*Connect DB*/
 	ret = db_util_open(MC_DB_NAME, &db_handle, DB_UTIL_REGISTER_HOOK_METHOD);
-	if (SQLITE_OK != ret)
-	{
+	if (SQLITE_OK != ret) {
 		mc_error("error when db open");
 		*handle = NULL;
 
@@ -283,8 +276,7 @@ int mc_db_connect(void **handle)
 
 	/*Register busy handler*/
 	ret = sqlite3_busy_handler(db_handle, __mc_db_busy_handler, NULL);
-	if (SQLITE_OK != ret)
-	{
+	if (SQLITE_OK != ret) {
 		if (db_handle) {
 			mc_error("error when register busy handler %s\n", sqlite3_errmsg(db_handle));
 		}
@@ -315,7 +307,7 @@ int mc_db_clear_table(void *handle, const char *table_name)
 	return ret;
 }
 
-int mc_db_update_playback_info(void *handle, const char* server_name, int playback_state, unsigned long long playback_position)
+int mc_db_update_playback_info(void *handle, const char *server_name, int playback_state, unsigned long long playback_position)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	char *sql_str = NULL;
@@ -332,9 +324,9 @@ int mc_db_update_playback_info(void *handle, const char* server_name, int playba
 	return ret;
 }
 
-int mc_db_update_whole_metadata(void *handle, const char* server_name,
-	const char *title, const char *artist, const char *album, const char *author, const char *genre, const char *duration, const char *date,
-	const char *copyright, const char *description, const char *track_num, const char *picture)
+int mc_db_update_whole_metadata(void *handle, const char *server_name,
+                                const char *title, const char *artist, const char *album, const char *author, const char *genre, const char *duration, const char *date,
+                                const char *copyright, const char *description, const char *track_num, const char *picture)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	char *sql_str = NULL;
@@ -343,7 +335,7 @@ int mc_db_update_whole_metadata(void *handle, const char* server_name,
 	mc_retvm_if(server_name == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "server_name is NULL");
 
 	sql_str = sqlite3_mprintf(DB_UPDATE_METADATA_INFO_INFO_SERVER_TABLE, server_name,
-		title, artist, album, author, genre, duration, date, copyright, description, track_num, picture);
+	                          title, artist, album, author, genre, duration, date, copyright, description, track_num, picture);
 
 	ret = __mc_db_update_db(handle, sql_str);
 
@@ -352,7 +344,7 @@ int mc_db_update_whole_metadata(void *handle, const char* server_name,
 	return ret;
 }
 
-int mc_db_update_metadata(void *handle, const char* server_name, char *name, char *value)
+int mc_db_update_metadata(void *handle, const char *server_name, char *name, char *value)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	char *sql_str = NULL;
@@ -369,7 +361,7 @@ int mc_db_update_metadata(void *handle, const char* server_name, char *name, cha
 	return ret;
 }
 
-int mc_db_update_shuffle_mode(void *handle, const char* server_name, int shuffle_mode)
+int mc_db_update_shuffle_mode(void *handle, const char *server_name, int shuffle_mode)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	char *sql_str = NULL;
@@ -386,7 +378,7 @@ int mc_db_update_shuffle_mode(void *handle, const char* server_name, int shuffle
 	return ret;
 }
 
-int mc_db_update_repeat_mode(void *handle, const char* server_name, int repeat_mode)
+int mc_db_update_repeat_mode(void *handle, const char *server_name, int repeat_mode)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	char *sql_str = NULL;
@@ -429,16 +421,16 @@ int mc_db_get_latest_server_name(void *handle, char **latest_server_name)
 		mc_error("end of row [%s]\n", sqlite3_errmsg(db_handle));
 		SQLITE3_FINALIZE(stmt);
 		SQLITE3_SAFE_FREE(sql_str);
-		return MEDIA_CONTROLLER_ERROR_NONE;	//There is no activated server yet.
+		return MEDIA_CONTROLLER_ERROR_NONE;	/*There is no activated server yet. */
 	}
 
 	while (SQLITE_ROW == ret) {
 		MC_SAFE_FREE(server_name);
-		server_name = strdup((char*)sqlite3_column_text(stmt, 0));
+		server_name = strdup((char *)sqlite3_column_text(stmt, 0));
 		ret = sqlite3_step(stmt);
 	}
 
-	if(server_name)
+	if (server_name)
 		*latest_server_name = server_name;
 
 	SQLITE3_FINALIZE(stmt);
@@ -447,7 +439,7 @@ int mc_db_get_latest_server_name(void *handle, char **latest_server_name)
 	return MEDIA_CONTROLLER_ERROR_NONE;
 }
 
-int mc_db_get_playback_info(void *handle, const char* server_name, mc_playback_h *playback)
+int mc_db_get_playback_info(void *handle, const char *server_name, mc_playback_h *playback)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	mc_playback_states_e playback_state = MEDIA_PLAYBACK_STATE_PLAYING;
@@ -463,7 +455,7 @@ int mc_db_get_playback_info(void *handle, const char* server_name, mc_playback_h
 	ret = __mc_db_get_ulong_value_of_key(handle, server_name, "playback_position", &position);
 	mc_retvm_if(ret != MEDIA_CONTROLLER_ERROR_NONE, MEDIA_CONTROLLER_ERROR_INVALID_OPERATION, "Fail to get position");
 
-	_playback = (media_controller_playback_s*)calloc(1, sizeof(media_controller_playback_s));
+	_playback = (media_controller_playback_s *)calloc(1, sizeof(media_controller_playback_s));
 	mc_retvm_if(_playback == NULL, MEDIA_CONTROLLER_ERROR_OUT_OF_MEMORY, "OUT_OF_MEMORY");
 
 	_playback->state = playback_state;
@@ -474,7 +466,7 @@ int mc_db_get_playback_info(void *handle, const char* server_name, mc_playback_h
 	return MEDIA_CONTROLLER_ERROR_NONE;
 }
 
-int mc_db_get_metadata_info(void *handle, const char* server_name, mc_metadata_h *metadata)
+int mc_db_get_metadata_info(void *handle, const char *server_name, mc_metadata_h *metadata)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	char *sql_str = NULL;
@@ -488,8 +480,7 @@ int mc_db_get_metadata_info(void *handle, const char* server_name, mc_metadata_h
 	sql_str = sqlite3_mprintf(DB_SELECT_METADATA_FROM_DB, server_name);
 
 	ret = sqlite3_prepare_v2(db_handle, sql_str, strlen(sql_str), &stmt, NULL);
-	if (SQLITE_OK != ret)
-	{
+	if (SQLITE_OK != ret) {
 		mc_error("prepare error [%s]\n", sqlite3_errmsg(db_handle));
 		SQLITE3_SAFE_FREE(sql_str);
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
@@ -500,33 +491,31 @@ int mc_db_get_metadata_info(void *handle, const char* server_name, mc_metadata_h
 		SQLITE3_FINALIZE(stmt);
 		SQLITE3_SAFE_FREE(sql_str);
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
-	}
-else
-	{
-		_metadata = (media_controller_metadata_s*)calloc(1, sizeof(media_controller_metadata_s));
+	} else {
+		_metadata = (media_controller_metadata_s *)calloc(1, sizeof(media_controller_metadata_s));
 		mc_retvm_if(_metadata == NULL, MEDIA_CONTROLLER_ERROR_OUT_OF_MEMORY, "OUT_OF_MEMORY");
 
-		if(MC_STRING_VALID((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_TITLE)))
+		if (MC_STRING_VALID((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_TITLE)))
 			_metadata->title = strdup((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_TITLE));
-		if(MC_STRING_VALID((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_ARTIST)))
+		if (MC_STRING_VALID((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_ARTIST)))
 			_metadata->artist = strdup((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_ARTIST));
-		if(MC_STRING_VALID((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_ALBUM)))
+		if (MC_STRING_VALID((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_ALBUM)))
 			_metadata->album = strdup((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_ALBUM));
-		if(MC_STRING_VALID((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_AUTHOR)))
+		if (MC_STRING_VALID((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_AUTHOR)))
 			_metadata->author = strdup((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_AUTHOR));
-		if(MC_STRING_VALID((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_GENRE)))
+		if (MC_STRING_VALID((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_GENRE)))
 			_metadata->genre = strdup((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_GENRE));
-		if(MC_STRING_VALID((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_DURATION)))
+		if (MC_STRING_VALID((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_DURATION)))
 			_metadata->duration = strdup((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_DURATION));
-		if(MC_STRING_VALID((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_DATE)))
+		if (MC_STRING_VALID((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_DATE)))
 			_metadata->date = strdup((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_DATE));
-		if(MC_STRING_VALID((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_COPYRIGHT)))
+		if (MC_STRING_VALID((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_COPYRIGHT)))
 			_metadata->copyright = strdup((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_COPYRIGHT));
-		if(MC_STRING_VALID((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_DESCRIPTION)))
+		if (MC_STRING_VALID((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_DESCRIPTION)))
 			_metadata->description = strdup((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_DESCRIPTION));
-		if(MC_STRING_VALID((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_TRACK_NUM)))
+		if (MC_STRING_VALID((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_TRACK_NUM)))
 			_metadata->track_num = strdup((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_TRACK_NUM));
-		if(MC_STRING_VALID((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_PICTURE)))
+		if (MC_STRING_VALID((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_PICTURE)))
 			_metadata->picture = strdup((const char *)sqlite3_column_text(stmt, MC_SERVER_FIELD_PICTURE));
 	}
 
@@ -538,7 +527,7 @@ else
 	return MEDIA_CONTROLLER_ERROR_NONE;
 }
 
-int mc_db_get_server_state(void *handle, const char* server_name, mc_server_state_e *state)
+int mc_db_get_server_state(void *handle, const char *server_name, mc_server_state_e *state)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 
@@ -550,7 +539,7 @@ int mc_db_get_server_state(void *handle, const char* server_name, mc_server_stat
 	return ret;
 }
 
-int mc_db_get_shuffle_mode(void *handle, const char* server_name, mc_shuffle_mode_e *mode)
+int mc_db_get_shuffle_mode(void *handle, const char *server_name, mc_shuffle_mode_e *mode)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 
@@ -562,7 +551,7 @@ int mc_db_get_shuffle_mode(void *handle, const char* server_name, mc_shuffle_mod
 	return ret;
 }
 
-int mc_db_get_repeat_mode(void *handle, const char* server_name, mc_repeat_mode_e *mode)
+int mc_db_get_repeat_mode(void *handle, const char *server_name, mc_repeat_mode_e *mode)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 
@@ -614,8 +603,7 @@ int mc_db_disconnect(void *handle)
 	mc_retvm_if(db_handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 
 	ret = db_util_close(db_handle);
-	if (SQLITE_OK != ret)
-	{
+	if (SQLITE_OK != ret) {
 		mc_error("error when db close");
 		mc_error("Error : %s", sqlite3_errmsg(db_handle));
 		db_handle = NULL;
@@ -634,15 +622,15 @@ int mc_db_create_tables(void *handle)
 	mc_retvm_if(db_handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 
 	ret = __mc_db_create_latest_server_table(db_handle);
-	mc_retvm_if(ret != MEDIA_CONTROLLER_ERROR_NONE, ret, "create latest_server table failed!err= [%d]",ret);
+	mc_retvm_if(ret != MEDIA_CONTROLLER_ERROR_NONE, ret, "create latest_server table failed!err= [%d]", ret);
 
 	ret = __mc_db_create_server_list_table(db_handle);
-	mc_retvm_if(ret != MEDIA_CONTROLLER_ERROR_NONE, ret, "create server_list table failed!err= [%d]",ret);
+	mc_retvm_if(ret != MEDIA_CONTROLLER_ERROR_NONE, ret, "create server_list table failed!err= [%d]", ret);
 
 	return MEDIA_CONTROLLER_ERROR_NONE;
 }
 
-int mc_db_create_server_table(void *handle, const char* server_name) 
+int mc_db_create_server_table(void *handle, const char *server_name)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	char *sql_str = NULL;
@@ -669,7 +657,7 @@ int mc_db_create_server_table(void *handle, const char* server_name)
 				shuffle_mode		INTEGER DEFAULT 1, \
 				repeat_mode			INTEGER DEFAULT 1 \
 				);",
-				server_name);
+	                          server_name);
 
 	ret = __mc_db_update_db(handle, sql_str);
 
@@ -678,7 +666,7 @@ int mc_db_create_server_table(void *handle, const char* server_name)
 	return ret;
 }
 
-int mc_db_delete_server_table(void *handle, const char* server_name)
+int mc_db_delete_server_table(void *handle, const char *server_name)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	char *sql_str = NULL;
@@ -695,12 +683,12 @@ int mc_db_delete_server_table(void *handle, const char* server_name)
 	return ret;
 }
 
-int mc_db_check_server_table_exist(void *handle, const char* server_name, bool *exist)
+int mc_db_check_server_table_exist(void *handle, const char *server_name, bool *exist)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	char *sql_str = NULL;
 	sqlite3_stmt *stmt = NULL;
-	int count= 0;
+	int count = 0;
 
 	mc_retvm_if(handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 	mc_retvm_if(server_name == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "server_name is NULL");
@@ -726,7 +714,7 @@ int mc_db_check_server_table_exist(void *handle, const char* server_name, bool *
 
 	mc_debug("table count [%d]", count);
 
-	if(count > 0)
+	if (count > 0)
 		*exist = TRUE;
 	else
 		*exist = FALSE;
@@ -764,9 +752,8 @@ int mc_db_foreach_server_list(void *handle, mc_activated_server_cb callback, voi
 
 	while (SQLITE_ROW == ret) {
 		char *server_name = NULL;
-		server_name = strdup((char*)sqlite3_column_text(stmt, 0));
-		if(callback(server_name, user_data) == false)
-		{
+		server_name = strdup((char *)sqlite3_column_text(stmt, 0));
+		if (callback(server_name, user_data) == false) {
 			MC_SAFE_FREE(server_name);
 			break;
 		}
@@ -781,7 +768,7 @@ int mc_db_foreach_server_list(void *handle, mc_activated_server_cb callback, voi
 	return MEDIA_CONTROLLER_ERROR_NONE;
 }
 
-int mc_db_update_server_state(void *handle, const char* server_name, mc_server_state_e server_state)
+int mc_db_update_server_state(void *handle, const char *server_name, mc_server_state_e server_state)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	char *sql_str = NULL;
@@ -799,7 +786,7 @@ int mc_db_update_server_state(void *handle, const char* server_name, mc_server_s
 }
 
 
-int mc_db_update_latest_server_table(void *handle, const char* server_name)
+int mc_db_update_latest_server_table(void *handle, const char *server_name)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	char *sql_str = NULL;

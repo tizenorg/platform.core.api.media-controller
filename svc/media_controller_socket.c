@@ -44,7 +44,8 @@ static int __mc_privilege_ask(int client_sockfd, char *type, char *privilege_obj
 	return ret;
 }
 
-int mc_ipc_create_client_socket(int timeout_sec, mc_sock_info_s* sock_info) {
+int mc_ipc_create_client_socket(int timeout_sec, mc_sock_info_s *sock_info)
+{
 	int sock = -1;
 
 	struct timeval tv_timeout = { timeout_sec, 0 };
@@ -69,7 +70,7 @@ int mc_ipc_create_client_socket(int timeout_sec, mc_sock_info_s* sock_info) {
 	return MEDIA_CONTROLLER_ERROR_NONE;
 }
 
-int mc_ipc_delete_client_socket(mc_sock_info_s* sock_info)
+int mc_ipc_delete_client_socket(mc_sock_info_s *sock_info)
 {
 	int ret = 0;
 
@@ -77,7 +78,7 @@ int mc_ipc_delete_client_socket(mc_sock_info_s* sock_info)
 	mc_debug("sockfd %d close", sock_info->sock_fd);
 	if (sock_info->sock_path != NULL) {
 		ret = unlink(sock_info->sock_path);
-		if (ret< 0) {
+		if (ret < 0) {
 			mc_stderror("unlink failed");
 		}
 		free(sock_info->sock_path);
@@ -86,7 +87,8 @@ int mc_ipc_delete_client_socket(mc_sock_info_s* sock_info)
 	return ret;
 }
 
-int mc_ipc_create_server_socket(mc_msg_port_type_e port, int *sock_fd) {
+int mc_ipc_create_server_socket(mc_msg_port_type_e port, int *sock_fd)
+{
 	int i;
 	bool bind_success = false;
 	int sock = -1;
@@ -105,15 +107,15 @@ int mc_ipc_create_server_socket(mc_msg_port_type_e port, int *sock_fd) {
 
 	serv_addr.sun_family = AF_UNIX;
 	unlink(MC_IPC_PATH[serv_port]);
-	strncpy(serv_addr.sun_path, MC_IPC_PATH[serv_port], sizeof(serv_addr.sun_path)-1);
+	strncpy(serv_addr.sun_path, MC_IPC_PATH[serv_port], sizeof(serv_addr.sun_path) - 1);
 
 	/* Bind to the local address */
-	for (i = 0; i < 20; i ++) {
+	for (i = 0; i < 20; i++) {
 		if (bind(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) == 0) {
 			bind_success = true;
 			break;
 		}
-		mc_debug("%d",i);
+		mc_debug("%d", i);
 		usleep(250000);
 	}
 
@@ -146,7 +148,8 @@ int mc_ipc_create_server_socket(mc_msg_port_type_e port, int *sock_fd) {
 
 }
 
-int mc_ipc_send_msg_to_client_tcp(int sockfd, mc_comm_msg_s *send_msg, struct sockaddr_un *client_addr) {
+int mc_ipc_send_msg_to_client_tcp(int sockfd, mc_comm_msg_s *send_msg, struct sockaddr_un *client_addr)
+{
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 
 	if (write(sockfd, send_msg, sizeof(*(send_msg))) != sizeof(*(send_msg))) {
@@ -160,7 +163,8 @@ int mc_ipc_send_msg_to_client_tcp(int sockfd, mc_comm_msg_s *send_msg, struct so
 	return ret;
 }
 
-int mc_ipc_receive_message_tcp(int client_sock, mc_comm_msg_s *recv_msg) {
+int mc_ipc_receive_message_tcp(int client_sock, mc_comm_msg_s *recv_msg)
+{
 	int recv_msg_size = 0;
 
 	if ((recv_msg_size = read(client_sock, recv_msg, sizeof(mc_comm_msg_s))) < 0) {
@@ -178,7 +182,8 @@ int mc_ipc_receive_message_tcp(int client_sock, mc_comm_msg_s *recv_msg) {
 	return MEDIA_CONTROLLER_ERROR_NONE;
 }
 
-int mc_ipc_accept_client_tcp(int serv_sock, int* client_sock) {
+int mc_ipc_accept_client_tcp(int serv_sock, int *client_sock)
+{
 	int sockfd = -1;
 	struct sockaddr_un client_addr;
 	socklen_t client_addr_len;
@@ -187,7 +192,7 @@ int mc_ipc_accept_client_tcp(int serv_sock, int* client_sock) {
 		return MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER;
 
 	client_addr_len = sizeof(client_addr);
-	if ((sockfd = accept(serv_sock, (struct sockaddr*)&client_addr, &client_addr_len)) < 0) {
+	if ((sockfd = accept(serv_sock, (struct sockaddr *)&client_addr, &client_addr_len)) < 0) {
 		mc_stderror("accept failed");
 		*client_sock  = -1;
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
@@ -198,15 +203,16 @@ int mc_ipc_accept_client_tcp(int serv_sock, int* client_sock) {
 	return MEDIA_CONTROLLER_ERROR_NONE;
 }
 
-gboolean mc_read_db_update_tcp_socket(GIOChannel *src, GIOCondition condition, gpointer data) {
+gboolean mc_read_db_update_tcp_socket(GIOChannel *src, GIOCondition condition, gpointer data)
+{
 	int sock = -1;
 	int client_sock = -1;
-	char * sql_query = NULL;
+	char *sql_query = NULL;
 	mc_comm_msg_s recv_msg;
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	void *db_handle = (void *)data;
 	int send_msg = MEDIA_CONTROLLER_ERROR_NONE;
-//	gboolean privilege = TRUE;
+	/*	gboolean privilege = TRUE; */
 
 	mc_debug("[GD] mc_read_db_update_tcp_socket is called!!!!!");
 
@@ -230,19 +236,19 @@ gboolean mc_read_db_update_tcp_socket(GIOChannel *src, GIOCondition condition, g
 	}
 
 	/* check privileage, it is removed for smack rule */
-/*	if(__mc_privilege_check(recv_msg.msg, &privilege) != MEDIA_CONTROLLER_ERROR_NONE) {
-		mc_error("invalid query. size[%d]", recv_msg.msg_size);
-		send_msg = MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED;
-		goto ERROR;
-	}
-
-	if (privilege == TRUE) {
-		ret = __mc_privilege_ask(client_sock, "mediacontroller::db", "w");
-		if (ret == MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED) {
+	/*	if(__mc_privilege_check(recv_msg.msg, &privilege) != MEDIA_CONTROLLER_ERROR_NONE) {
+			mc_error("invalid query. size[%d]", recv_msg.msg_size);
 			send_msg = MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED;
 			goto ERROR;
 		}
-	}*/
+
+		if (privilege == TRUE) {
+			ret = __mc_privilege_ask(client_sock, "mediacontroller::db", "w");
+			if (ret == MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED) {
+				send_msg = MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED;
+				goto ERROR;
+			}
+		}*/
 
 	sql_query = strndup(recv_msg.msg, recv_msg.msg_size);
 	if (sql_query != NULL) {
@@ -263,21 +269,22 @@ ERROR:
 		mc_debug("Sent successfully");
 	}
 
-	if (close(client_sock) <0) {
+	if (close(client_sock) < 0) {
 		mc_stderror("close failed");
 	}
 
 	return TRUE;
 }
 
-gboolean mc_read_client_set_tcp_socket(GIOChannel *src, GIOCondition condition, gpointer data) {
+gboolean mc_read_client_set_tcp_socket(GIOChannel *src, GIOCondition condition, gpointer data)
+{
 	int sock = -1;
 	int client_sock = -1;
 	mc_comm_msg_s recv_msg;
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	int send_msg = MEDIA_CONTROLLER_ERROR_NONE;
 	int i = 0;
-	GList *mc_svc_list = (GList*)data;
+	GList *mc_svc_list = (GList *)data;
 	bool is_duplicated = FALSE;
 
 	sock = g_io_channel_unix_get_fd(src);
@@ -309,7 +316,7 @@ gboolean mc_read_client_set_tcp_socket(GIOChannel *src, GIOCondition condition, 
 
 	if (mc_svc_list != NULL && g_list_length(mc_svc_list) == 0) {
 		for (i = 0; i < g_list_length(mc_svc_list); i++) {
-			char *data = (char*)g_list_nth_data(mc_svc_list, i);
+			char *data = (char *)g_list_nth_data(mc_svc_list, i);
 			if (strcmp(data, recv_msg.msg) == 0) {
 				is_duplicated = TRUE;
 			}
@@ -326,21 +333,22 @@ ERROR:
 		mc_debug("Sent successfully");
 	}
 
-	if (close(client_sock) <0) {
+	if (close(client_sock) < 0) {
 		mc_stderror("close failed");
 	}
 
 	return TRUE;
 }
 
-gboolean mc_read_client_get_tcp_socket(GIOChannel *src, GIOCondition condition, gpointer data) {
+gboolean mc_read_client_get_tcp_socket(GIOChannel *src, GIOCondition condition, gpointer data)
+{
 	int sock = -1;
 	int client_sock = -1;
 	mc_comm_msg_s recv_msg;
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	int send_msg = MEDIA_CONTROLLER_ERROR_NONE;
 	int i = 0;
-	GList *mc_svc_list = (GList*)data;
+	GList *mc_svc_list = (GList *)data;
 
 	sock = g_io_channel_unix_get_fd(src);
 	if (sock < 0) {
@@ -371,7 +379,7 @@ gboolean mc_read_client_get_tcp_socket(GIOChannel *src, GIOCondition condition, 
 
 	for (i = 0; i < g_list_length(mc_svc_list); i++) {
 		send_msg = MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED;
-		char *data = (char*)g_list_nth_data(mc_svc_list, i);
+		char *data = (char *)g_list_nth_data(mc_svc_list, i);
 		if (strcmp(data, recv_msg.msg) == 0) {
 			mc_svc_list = g_list_remove(mc_svc_list, data);
 			send_msg = MEDIA_CONTROLLER_ERROR_NONE;
@@ -385,7 +393,7 @@ ERROR:
 		mc_debug("Sent successfully");
 	}
 
-	if (close(client_sock) <0) {
+	if (close(client_sock) < 0) {
 		mc_stderror("close failed");
 	}
 

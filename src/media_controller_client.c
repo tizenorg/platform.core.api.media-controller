@@ -19,7 +19,7 @@
 #include "media_controller_db.h"
 
 
-static void __client_server_cb(char* interface_name, char *signal_name, char *message, int size, void *user_data)
+static void __client_server_cb(char *interface_name, char *signal_name, char *message, int size, void *user_data)
 {
 	gchar **params;
 	media_controller_reciever_s *reciever = (media_controller_reciever_s *)user_data;
@@ -37,12 +37,12 @@ static void __client_server_cb(char* interface_name, char *signal_name, char *me
 	g_strfreev(params);
 }
 
-static void __client_playback_cb(char* interface_name, char *signal_name, char *message, int size, void *user_data)
+static void __client_playback_cb(char *interface_name, char *signal_name, char *message, int size, void *user_data)
 {
 	gchar **params;
 	media_controller_reciever_s *reciever = (media_controller_reciever_s *)user_data;
 	mc_playback_updated_cb callback = (mc_playback_updated_cb)reciever->callback;
-	media_controller_playback_s * playback = NULL;
+	media_controller_playback_s *playback = NULL;
 
 	mc_retm_if(reciever == NULL, "reciever is NULL");
 	mc_retm_if(reciever->callback == NULL, "playback_cb is NULL");
@@ -53,7 +53,7 @@ static void __client_playback_cb(char* interface_name, char *signal_name, char *
 	playback = (media_controller_playback_s *)g_malloc(sizeof(media_controller_playback_s));
 
 	params = g_strsplit(message, MC_STRING_DELIMITER, 0);
-	playback->state = atoi (params[1]);
+	playback->state = atoi(params[1]);
 	playback->position = atol(params[2]);
 
 	callback(params[0], (mc_playback_h) playback, reciever->user_data);
@@ -61,7 +61,7 @@ static void __client_playback_cb(char* interface_name, char *signal_name, char *
 	g_strfreev(params);
 }
 
-static void __client_metadata_cb(char* interface_name, char* signal_name, char* message, int size, void* user_data)
+static void __client_metadata_cb(char *interface_name, char *signal_name, char *message, int size, void *user_data)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	mc_metadata_h metadata = NULL;
@@ -75,15 +75,15 @@ static void __client_metadata_cb(char* interface_name, char* signal_name, char* 
 	mc_debug("__client_metadata_cb(%s, %s, %s, %d, %p)", interface_name, signal_name, message, size, user_data);
 
 	ret = mc_db_get_metadata_info(mc_client->db_handle, message, &metadata);
-	if ( ret != MEDIA_CONTROLLER_ERROR_NONE)
-		mc_error ("Fail to mc_db_get_metadata_info");
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE)
+		mc_error("Fail to mc_db_get_metadata_info");
 
 	callback(message, metadata, mc_client->metadata_cb.user_data);
 
 	mc_client_destroy_metadata(metadata);
 }
 
-static void __client_shuffle_cb(char* interface_name, char *signal_name, char *message, int size, void *user_data)
+static void __client_shuffle_cb(char *interface_name, char *signal_name, char *message, int size, void *user_data)
 {
 	gchar **params;
 	media_controller_reciever_s *reciever = (media_controller_reciever_s *)user_data;
@@ -100,7 +100,7 @@ static void __client_shuffle_cb(char* interface_name, char *signal_name, char *m
 	g_strfreev(params);
 }
 
-static void __client_repeat_cb(char* interface_name, char *signal_name, char *message, int size, void *user_data)
+static void __client_repeat_cb(char *interface_name, char *signal_name, char *message, int size, void *user_data)
 {
 	gchar **params;
 	media_controller_reciever_s *reciever = (media_controller_reciever_s *)user_data;
@@ -117,7 +117,7 @@ static void __client_repeat_cb(char* interface_name, char *signal_name, char *me
 	g_strfreev(params);
 }
 
-static void __client_reply_cb(char* interface_name, char *signal_name, char *message, int size, void *user_data)
+static void __client_reply_cb(char *interface_name, char *signal_name, char *message, int size, void *user_data)
 {
 	gchar **params = NULL;
 	int enc_size = 0;
@@ -135,7 +135,7 @@ static void __client_reply_cb(char* interface_name, char *signal_name, char *mes
 	mc_retm_if(params == NULL, "invalid custom data");
 
 	enc_size = atoi(params[2]);
-	if(enc_size > 0)
+	if (enc_size > 0)
 		bundle_data = bundle_decode((bundle_raw *)params[3], enc_size);
 
 	callback(params[0], atoi(params[1]), bundle_data, reciever->user_data);
@@ -149,17 +149,15 @@ static int __mc_client_destroy(media_controller_client_s *mc_client)
 
 	mc_retvm_if(mc_client == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 
-	if(mc_client->dconn)
-	{
+	if (mc_client->dconn) {
 		ret = mc_ipc_unref_dbus_connection(mc_client->dconn, &mc_client->dref_count);
-		if(ret != MEDIA_CONTROLLER_ERROR_NONE)
+		if (ret != MEDIA_CONTROLLER_ERROR_NONE)
 			mc_error("fail to mc_ipc_unref_dbus_connection");
 	}
 
-	if(mc_client->db_handle)
-	{
+	if (mc_client->db_handle) {
 		ret = mc_db_disconnect(mc_client->db_handle);
-		if(ret != MEDIA_CONTROLLER_ERROR_NONE)
+		if (ret != MEDIA_CONTROLLER_ERROR_NONE)
 			mc_error("fail to mc_db_disconnect");
 	}
 
@@ -180,43 +178,38 @@ int mc_client_create(mc_client_h *client)
 	mc_client = (media_controller_client_s *)calloc(1, sizeof(media_controller_client_s));
 	mc_retvm_if(mc_client == NULL, MEDIA_CONTROLLER_ERROR_OUT_OF_MEMORY, "Error allocation memory");
 
-	mc_client->listeners = g_list_alloc ();
-	if (mc_client->listeners == NULL)
-	{
+	mc_client->listeners = g_list_alloc();
+	if (mc_client->listeners == NULL) {
 		ret = MEDIA_CONTROLLER_ERROR_OUT_OF_MEMORY;
-		mc_error ("Error allocation list %d", ret);
+		mc_error("Error allocation list %d", ret);
 		__mc_client_destroy(mc_client);
 		return ret;
 	}
 
 	ret = mc_util_get_own_name(&(mc_client->client_name));
-	if(ret != MEDIA_CONTROLLER_ERROR_NONE)
-	{
-		mc_error ("Filed to get client name %d", ret);
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+		mc_error("Filed to get client name %d", ret);
 		__mc_client_destroy(mc_client);
 		return ret;
 	}
 
 	ret = mc_ipc_get_dbus_connection(&(mc_client->dconn), &(mc_client->dref_count));
-	if(ret != MEDIA_CONTROLLER_ERROR_NONE)
-	{
-		mc_error ("error in client init %d", ret);
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+		mc_error("error in client init %d", ret);
 		__mc_client_destroy(mc_client);
 		return ret;
 	}
 
 	ret = mc_db_connect(&mc_client->db_handle);
-	if(ret != MEDIA_CONTROLLER_ERROR_NONE)
-	{
-		mc_error ("error in connecting to DB %d", ret);
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+		mc_error("error in connecting to DB %d", ret);
 		__mc_client_destroy(mc_client);
 		return ret;
 	}
 
 	ret = mc_db_create_tables(mc_client->db_handle);
-	if(ret != MEDIA_CONTROLLER_ERROR_NONE)
-	{
-		mc_error ("mc_db_create_tables failed %d", ret);
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+		mc_error("mc_db_create_tables failed %d", ret);
 		__mc_client_destroy(mc_client);
 		return ret;
 	}
@@ -238,7 +231,7 @@ int mc_client_set_server_update_cb(mc_client_h client, mc_server_state_updated_c
 	mc_client->server_state_cb.user_data = user_data;
 
 	ret = mc_ipc_register_listener(mc_client->listeners, mc_client->dconn, MC_DBUS_UPDATE_INTERFACE, MC_DBUS_SIGNAL_NAME_SERVER_STATE,
-		__client_server_cb, (void*)&(mc_client->server_state_cb));
+	                               __client_server_cb, (void *)&(mc_client->server_state_cb));
 
 	return ret;
 }
@@ -270,7 +263,7 @@ int mc_client_set_playback_update_cb(mc_client_h client, mc_playback_updated_cb 
 	mc_client->playback_cb.user_data = user_data;
 
 	ret = mc_ipc_register_listener(mc_client->listeners, mc_client->dconn, MC_DBUS_UPDATE_INTERFACE, MC_DBUS_SIGNAL_NAME_PLAY_BACK	,
-		__client_playback_cb, (void*)&(mc_client->playback_cb));
+	                               __client_playback_cb, (void *)&(mc_client->playback_cb));
 
 	return ret;
 }
@@ -302,7 +295,7 @@ int mc_client_set_metadata_update_cb(mc_client_h client, mc_metadata_updated_cb 
 	mc_client->metadata_cb.user_data = user_data;
 
 	ret = mc_ipc_register_listener(mc_client->listeners, mc_client->dconn, MC_DBUS_UPDATE_INTERFACE, MC_DBUS_SIGNAL_NAME_METADATA,
-		__client_metadata_cb, (void*)(mc_client));
+	                               __client_metadata_cb, (void *)(mc_client));
 
 	return ret;
 }
@@ -334,7 +327,7 @@ int mc_client_set_shuffle_mode_update_cb(mc_client_h client, mc_shuffle_mode_cha
 	mc_client->shuffle_cb.user_data = user_data;
 
 	ret = mc_ipc_register_listener(mc_client->listeners, mc_client->dconn, MC_DBUS_UPDATE_INTERFACE, MC_DBUS_SIGNAL_NAME_PLAYBACK_SHUFFLE,
-		__client_shuffle_cb, (void*)&(mc_client->shuffle_cb));
+	                               __client_shuffle_cb, (void *)&(mc_client->shuffle_cb));
 
 	return ret;
 }
@@ -366,7 +359,7 @@ int mc_client_set_repeat_mode_update_cb(mc_client_h client, mc_repeat_mode_chang
 	mc_client->repeat_cb.user_data = user_data;
 
 	ret = mc_ipc_register_listener(mc_client->listeners, mc_client->dconn, MC_DBUS_UPDATE_INTERFACE, MC_DBUS_SIGNAL_NAME_PLAYBACK_REPEAT,
-		__client_repeat_cb, (void*)&(mc_client->repeat_cb));
+	                               __client_repeat_cb, (void *)&(mc_client->repeat_cb));
 
 	return ret;
 }
@@ -413,7 +406,7 @@ int mc_client_get_playback_position(mc_playback_h playback, unsigned long long *
 int mc_client_get_metadata(mc_metadata_h metadata, mc_meta_e attribute, char **value)
 {
 	char *meta_val = NULL;
-	media_controller_metadata_s *mc_metadata = (media_controller_metadata_s*)metadata;
+	media_controller_metadata_s *mc_metadata = (media_controller_metadata_s *)metadata;
 
 	mc_retvm_if(mc_metadata == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 	mc_retvm_if(value == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "value is NULL");
@@ -422,50 +415,49 @@ int mc_client_get_metadata(mc_metadata_h metadata, mc_meta_e attribute, char **v
 
 	mc_debug("attribute[%d]", attribute);
 
-	switch(attribute)
-	{
+	switch (attribute) {
 		case MEDIA_TITLE:
-			if(mc_metadata->title != NULL)
+			if (mc_metadata->title != NULL)
 				meta_val = strdup(mc_metadata->title);
 			break;
 		case MEDIA_ARTIST:
-			if(mc_metadata->artist != NULL)
+			if (mc_metadata->artist != NULL)
 				meta_val = strdup(mc_metadata->artist);
 			break;
 		case MEDIA_ALBUM:
-			if(mc_metadata->album != NULL)
+			if (mc_metadata->album != NULL)
 				meta_val = strdup(mc_metadata->album);
 			break;
 		case MEDIA_AUTHOR:
-			if(mc_metadata->author != NULL)
+			if (mc_metadata->author != NULL)
 				meta_val = strdup(mc_metadata->author);
 			break;
 		case MEDIA_GENRE:
-			if(mc_metadata->genre != NULL)
+			if (mc_metadata->genre != NULL)
 				meta_val = strdup(mc_metadata->genre);
 			break;
 		case MEDIA_DURATION:
-			if(mc_metadata->duration != NULL)
+			if (mc_metadata->duration != NULL)
 				meta_val = strdup(mc_metadata->duration);
 			break;
 		case MEDIA_DATE:
-			if(mc_metadata->date != NULL)
+			if (mc_metadata->date != NULL)
 				meta_val = strdup(mc_metadata->date);
 			break;
 		case MEDIA_COPYRIGHT:
-			if(mc_metadata->copyright != NULL)
+			if (mc_metadata->copyright != NULL)
 				meta_val = strdup(mc_metadata->copyright);
 			break;
 		case MEDIA_DESCRIPTION:
-			if(mc_metadata->description != NULL)
+			if (mc_metadata->description != NULL)
 				meta_val = strdup(mc_metadata->description);
 			break;
 		case MEDIA_TRACK_NUM:
-			if(mc_metadata->track_num != NULL)
+			if (mc_metadata->track_num != NULL)
 				meta_val = strdup(mc_metadata->track_num);
 			break;
 		case MEDIA_PICTURE:
-			if(mc_metadata->picture != NULL)
+			if (mc_metadata->picture != NULL)
 				meta_val = strdup(mc_metadata->picture);
 			break;
 		default:
@@ -491,7 +483,7 @@ int mc_client_destroy_playback(mc_playback_h playback)
 
 int mc_client_destroy_metadata(mc_metadata_h metadata)
 {
-	media_controller_metadata_s *mc_metadata = (media_controller_metadata_s*)metadata;
+	media_controller_metadata_s *mc_metadata = (media_controller_metadata_s *)metadata;
 
 	mc_retvm_if(mc_metadata == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 
@@ -515,7 +507,7 @@ int mc_client_destroy_metadata(mc_metadata_h metadata)
 int mc_client_get_latest_server_info(mc_client_h client, char **server_name, mc_server_state_e *server_state)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
-	char * latest_server_name = NULL;
+	char *latest_server_name = NULL;
 	mc_server_state_e latest_server_state = MC_SERVER_STATE_NONE;
 
 	media_controller_client_s *mc_client = (media_controller_client_s *)client;
@@ -525,23 +517,19 @@ int mc_client_get_latest_server_info(mc_client_h client, char **server_name, mc_
 	mc_retvm_if(server_state == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "server_state is NULL");
 
 	ret = mc_db_get_latest_server_name(mc_client->db_handle, &latest_server_name);
-	mc_retvm_if(ret != MEDIA_CONTROLLER_ERROR_NONE, ret, "fail mc_db_get_latest_server_name [%d]",ret);
+	mc_retvm_if(ret != MEDIA_CONTROLLER_ERROR_NONE, ret, "fail mc_db_get_latest_server_name [%d]", ret);
 
-	if(latest_server_name != NULL)
-	{
+	if (latest_server_name != NULL) {
 		ret = mc_db_get_server_state(mc_client->db_handle, latest_server_name, &latest_server_state);
-		if(ret != MEDIA_CONTROLLER_ERROR_NONE)
-		{
-			mc_error ("error in getting latest server state %d", ret);
+		if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+			mc_error("error in getting latest server state %d", ret);
 			MC_SAFE_FREE(latest_server_name);
 			return ret;
 		}
 
 		*server_name = latest_server_name;
 		*server_state = latest_server_state;
-	}
-	else
-	{
+	} else {
 		*server_name = NULL;
 		*server_state = MC_SERVER_STATE_NONE;
 	}
@@ -559,7 +547,7 @@ int mc_client_get_server_playback_info(mc_client_h client, const char *server_na
 	mc_retvm_if(playback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "playback Handle is NULL");
 
 	ret = mc_db_get_playback_info(mc_client->db_handle, server_name, playback);
-	mc_retvm_if(ret != MEDIA_CONTROLLER_ERROR_NONE, ret, "fail mc_db_get_playback_info [%d]",ret);
+	mc_retvm_if(ret != MEDIA_CONTROLLER_ERROR_NONE, ret, "fail mc_db_get_playback_info [%d]", ret);
 
 	return ret;
 }
@@ -574,7 +562,7 @@ int mc_client_get_server_metadata(mc_client_h client, const char *server_name, m
 	mc_retvm_if(metadata == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "metadata Handle is NULL");
 
 	ret = mc_db_get_metadata_info(mc_client->db_handle, server_name, metadata);
-	mc_retvm_if(ret != MEDIA_CONTROLLER_ERROR_NONE, ret, "fail mc_db_get_metadata_info [%d]",ret);
+	mc_retvm_if(ret != MEDIA_CONTROLLER_ERROR_NONE, ret, "fail mc_db_get_metadata_info [%d]", ret);
 
 	return ret;
 }
@@ -628,21 +616,19 @@ int mc_client_send_playback_state_command(mc_client_h client, const char *server
 
 	mc_retvm_if(mc_client == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 	mc_retvm_if(server_name == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "server_name is NULL");
-	mc_retvm_if(((state < MEDIA_PLAYBACK_STATE_PLAYING) ||( state > MEDIA_PLAYBACK_STATE_REWIND)) , MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "state is invalid");
+	mc_retvm_if(((state < MEDIA_PLAYBACK_STATE_PLAYING) || (state > MEDIA_PLAYBACK_STATE_REWIND)), MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "state is invalid");
 
-	message = g_strdup_printf ("%s%s%d", mc_client->client_name, MC_STRING_DELIMITER, state);
-	mc_retvm_if(message == NULL, MEDIA_CONTROLLER_ERROR_INVALID_OPERATION, "fail making message [%d]",ret);
+	message = g_strdup_printf("%s%s%d", mc_client->client_name, MC_STRING_DELIMITER, state);
+	mc_retvm_if(message == NULL, MEDIA_CONTROLLER_ERROR_INVALID_OPERATION, "fail making message [%d]", ret);
 
 	ret = mc_util_set_command_availabe(mc_client->client_name, MC_COMMAND_PLAYBACKSTATE, NULL);
-	if(ret != MEDIA_CONTROLLER_ERROR_NONE)
-	{
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("Error mc_util_set_command_availabe [%d]", ret);
 		return ret;
 	}
 
 	ret = mc_ipc_send_message(mc_client->dconn, NULL, mc_util_get_interface_name(NULL, MC_SERVER, server_name), MC_DBUS_SIGNAL_NAME_PLAYBACK_STATE_CMD, message, 0);
-	if(ret != MEDIA_CONTROLLER_ERROR_NONE)
-	{
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("Error mc_ipc_send_message [%d]", ret);
 	}
 
@@ -657,45 +643,41 @@ int mc_client_send_custom_command(mc_client_h client, const char *server_name, c
 	char *message = NULL;
 	int size_r = 0;
 	bundle_raw *raw_data = NULL;
-	media_controller_client_s *mc_client = (media_controller_client_s*)client;
+	media_controller_client_s *mc_client = (media_controller_client_s *)client;
 
 	mc_retvm_if(mc_client == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 	mc_retvm_if(server_name == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "server_name is NULL");
 
 	ret = mc_util_set_command_availabe(mc_client->client_name, MC_COMMAND_CUSTOM, command);
-	if(ret != MEDIA_CONTROLLER_ERROR_NONE)
-	{
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("Error mc_util_set_command_availabe [%d]", ret);
 		return ret;
 	}
 
-	if(callback)
-	{
+	if(callback) {
 		mc_client->reply_cb.callback = callback;
 		mc_client->reply_cb.user_data = user_data;
 		mc_ipc_register_listener(mc_client->listeners, mc_client->dconn, mc_util_get_interface_name(NULL, MC_CLIENT, mc_client->client_name),
-			MC_DBUS_SIGNAL_NAME_CMD_REPLY, __client_reply_cb, (void*)&(mc_client->reply_cb));
+		                         MC_DBUS_SIGNAL_NAME_CMD_REPLY, __client_reply_cb, (void *)&(mc_client->reply_cb));
 	}
 
-	if(data)
-	{
+	if (data) {
 		ret = bundle_encode(data, &raw_data, &size_r);
-		mc_retvm_if(ret != MEDIA_CONTROLLER_ERROR_NONE, ret, "fail while encoding bundle [%d]",ret);
+		mc_retvm_if(ret != MEDIA_CONTROLLER_ERROR_NONE, ret, "fail while encoding bundle [%d]", ret);
 	}
 
 	if ((size_r == 0)  || (raw_data == NULL)) {
-		message = g_strdup_printf ("%s%s%s%s%d", mc_client->client_name, MC_STRING_DELIMITER, command, MC_STRING_DELIMITER, size_r);
+		message = g_strdup_printf("%s%s%s%s%d", mc_client->client_name, MC_STRING_DELIMITER, command, MC_STRING_DELIMITER, size_r);
 	} else {
-		message = g_strdup_printf ("%s%s%s%s%d%s%s", mc_client->client_name, MC_STRING_DELIMITER, command, MC_STRING_DELIMITER, size_r, MC_STRING_DELIMITER, (unsigned char*)raw_data);
+		message = g_strdup_printf("%s%s%s%s%d%s%s", mc_client->client_name, MC_STRING_DELIMITER, command, MC_STRING_DELIMITER, size_r, MC_STRING_DELIMITER, (unsigned char *)raw_data);
 	}
-	if(message == NULL)
-	{
+	if (message == NULL) {
 		mc_error("Error when making message");
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}
 
 	ret = mc_ipc_send_message(mc_client->dconn, NULL, mc_util_get_interface_name(NULL, MC_SERVER, server_name), MC_DBUS_SIGNAL_NAME_CUSTOM_CMD, message, 0);
-	if(ret != MEDIA_CONTROLLER_ERROR_NONE)
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE)
 		mc_error("Error mc_ipc_send_message [%d]", ret);
 
 	MC_SAFE_FREE(message);
@@ -711,8 +693,7 @@ int mc_client_destroy(mc_client_h client)
 	mc_retvm_if(mc_client == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 
 	ret = mc_ipc_unregister_all_listener(mc_client->listeners, mc_client->dconn);
-	if(ret != MEDIA_CONTROLLER_ERROR_NONE)
-	{
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("Error mc_ipc_unregister_all_listener [%d]", ret);
 	}
 
