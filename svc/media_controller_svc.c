@@ -41,7 +41,7 @@ gboolean mc_svc_thread(void *data)
 
 	/* Create TCP Socket*/
 	ret = mc_ipc_create_server_socket(MC_DB_UPDATE_PORT, &sockfd);
-	if(ret != MEDIA_CONTROLLER_ERROR_NONE) {
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		/* Disconnect DB*/
 		mc_error("Failed to create socket");
 		return FALSE;
@@ -49,7 +49,7 @@ gboolean mc_svc_thread(void *data)
 
 	/* Create TCP Socket for set client*/
 	ret = mc_ipc_create_server_socket(MC_DB_SET_PORT, &sockfd_set);
-	if(ret != MEDIA_CONTROLLER_ERROR_NONE) {
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		/* Disconnect DB*/
 		close(sockfd);
 		mc_error("Failed to create socket");
@@ -58,7 +58,7 @@ gboolean mc_svc_thread(void *data)
 
 	/* Create TCP Socket for get client*/
 	ret = mc_ipc_create_server_socket(MC_DB_GET_PORT, &sockfd_get);
-	if(ret != MEDIA_CONTROLLER_ERROR_NONE) {
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		/* Disconnect DB*/
 		close(sockfd);
 		close(sockfd_set);
@@ -67,14 +67,14 @@ gboolean mc_svc_thread(void *data)
 	}
 
 	/* Connect Media DB*/
-	if(mc_db_util_connect(&db_handle) != MEDIA_CONTROLLER_ERROR_NONE) {
+	if (mc_db_util_connect(&db_handle) != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("Failed to connect DB");
 		close(sockfd);
 		close(sockfd_set);
 		close(sockfd_get);
 		return FALSE;
 	}
-	g_mc_svc_list = g_list_alloc ();
+	g_mc_svc_list = g_list_alloc();
 
 	context = g_main_context_new();
 	if (context == NULL) {

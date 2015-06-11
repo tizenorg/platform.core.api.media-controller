@@ -68,8 +68,7 @@ typedef void *mc_metadata_h;
  * @brief Enumeration for the media controller error.
  * @since_tizen 2.4
  */
-typedef enum
-{
+typedef enum {
 	MEDIA_CONTROLLER_ERROR_NONE						= TIZEN_ERROR_NONE,						/**< Successful */
 	MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER		= TIZEN_ERROR_INVALID_PARAMETER,		/**< Invalid parameter */
 	MEDIA_CONTROLLER_ERROR_OUT_OF_MEMORY			= TIZEN_ERROR_OUT_OF_MEMORY,			/**< Out of memory */
@@ -83,8 +82,7 @@ typedef enum
  * @brief Enumeration for the media controller server state.
  * @since_tizen 2.4
  */
-typedef enum
-{
+typedef enum {
 	MC_SERVER_STATE_NONE = 0,					/**< None state*/
 	MC_SERVER_STATE_ACTIVATE,					/**< Activate state*/
 	MC_SERVER_STATE_DEACTIVATE,					/**< Deactivate state*/
@@ -95,8 +93,7 @@ typedef enum
  * @brief Enumeration for the media meta info.
  * @since_tizen 2.4
  */
-typedef enum
-{
+typedef enum {
 	MEDIA_TITLE = 0,					/** < Title */
 	MEDIA_ARTIST,						/** < Artist */
 	MEDIA_ALBUM,						/** < Album */
@@ -115,8 +112,7 @@ typedef enum
  * @brief Enumeration for the media playback state.
  * @since_tizen 2.4
  */
-typedef enum
-{
+typedef enum {
 	MEDIA_PLAYBACK_STATE_NONE = 0,				/** < None */
 	MEDIA_PLAYBACK_STATE_PLAYING,				/** < Play */
 	MEDIA_PLAYBACK_STATE_PAUSED,				/** < Pause */
@@ -132,8 +128,7 @@ typedef enum
  * @brief Enumeration for the shuffle mode.
  * @since_tizen 2.4
  */
-typedef enum
-{
+typedef enum {
 	SHUFFLE_MODE_ON = 0,				/** < Shuffle mode on */
 	SHUFFLE_MODE_OFF,					/** < Shuffle mode off */
 } mc_shuffle_mode_e;
@@ -143,8 +138,7 @@ typedef enum
  * @brief Enumeration for the repeat mode.
  * @since_tizen 2.4
  */
-typedef enum
-{
+typedef enum {
 	REPEAT_MODE_ON = 0,					/** < Repeat mode on */
 	REPEAT_MODE_OFF,					/** < Repeat mode off */
 } mc_repeat_mode_e;

@@ -46,14 +46,12 @@ typedef enum{
 	MC_MSG_MAX,
 } mc_msg_type_e;
 
-typedef struct
-{
+typedef struct {
 	int sock_fd;
 	char *sock_path;
 }mc_sock_info_s;
 
-typedef struct
-{
+typedef struct {
 	mc_msg_type_e msg_type;
 	int pid;
 	int result;

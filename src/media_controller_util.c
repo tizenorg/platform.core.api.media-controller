@@ -27,7 +27,7 @@ static void _mc_util_check_valid_name(const char *name, char **new_name)
 	char new_word[MAX_NAME_LENGTH];
 	int i = 0;
 
-	mc_retm_if (name == NULL, "Invalid parameter.");
+	mc_retm_if(name == NULL, "Invalid parameter.");
 
 	memset(old_word, 0, MAX_NAME_LENGTH);
 	memset(new_word, 0, MAX_NAME_LENGTH);
@@ -38,16 +38,15 @@ static void _mc_util_check_valid_name(const char *name, char **new_name)
 		memcpy(old_word, name, strlen(name));
 	}
 
-	// only 0~9, a~z, A~Z, '.', '_' will be used
-	for(i=0; i<strlen(old_word); i++)
-	{
+	/* only 0~9, a~z, A~Z, '.', '_' will be used */
+	for (i = 0; i < strlen(old_word); i++) {
 		if ((old_word[i] >= '0' && old_word[i] <= '9') ||
-			(old_word[i] >= 'a' && old_word[i] <= 'z') ||
-			(old_word[i] >= 'A' && old_word[i] <= 'Z') ||
-			(old_word[i] == '.' && i != 0)) {
+		    (old_word[i] >= 'a' && old_word[i] <= 'z') ||
+		    (old_word[i] >= 'A' && old_word[i] <= 'Z') ||
+		    (old_word[i] == '.' && i != 0)) {
 			new_word[i] = old_word[i];
 		} else {
-			if (i-1 > 1 && new_word[i-1] != '.')
+			if (i - 1 > 1 && new_word[i - 1] != '.')
 				new_word[i] = '_';
 			else
 				new_word[i] = 'x';
@@ -55,7 +54,7 @@ static void _mc_util_check_valid_name(const char *name, char **new_name)
 	}
 
 	(*new_name) = strdup(new_word);
-	mc_retm_if ((*new_name) == NULL, "Error allocation memory.");
+	mc_retm_if((*new_name) == NULL, "Error allocation memory.");
 }
 
 int mc_util_get_own_name(char **name)
@@ -106,20 +105,18 @@ int mc_util_set_command_availabe(const char *name, const char *command_type, con
 	int retry_count = 0;
 	char *message = NULL;
 
-	if(!MC_STRING_VALID(name) ||!MC_STRING_VALID(command_type))
-	{
+	if (!MC_STRING_VALID(name) || !MC_STRING_VALID(command_type)) {
 		mc_error("invalid query");
 		return MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER;
 	}
 
-	if(command == NULL)
-		message = g_strdup_printf ("%s%s", name, command_type);
+	if (command == NULL)
+		message = g_strdup_printf("%s%s", name, command_type);
 	else
-		message = g_strdup_printf ("%s%s%s", name, command_type, command);
+		message = g_strdup_printf("%s%s%s", name, command_type, command);
 
 	request_msg_size = strlen(message);
-	if(request_msg_size >= MAX_MSG_SIZE)
-	{
+	if (request_msg_size >= MAX_MSG_SIZE) {
 		mc_error("Query is Too long. [%d] query size limit is [%d]", request_msg_size, MAX_MSG_SIZE);
 		return MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER;
 	}
@@ -129,7 +126,7 @@ int mc_util_set_command_availabe(const char *name, const char *command_type, con
 
 	send_msg.msg_type = MC_MSG_CLIENT_SET;
 	send_msg.msg_size = request_msg_size;
-	strncpy(send_msg.msg, message, sizeof(send_msg.msg)-1);
+	strncpy(send_msg.msg, message, sizeof(send_msg.msg) - 1);
 
 	/*Create Socket*/
 	ret = mc_ipc_create_client_socket(MC_TIMEOUT_SEC_10, &sock_info);
@@ -139,10 +136,10 @@ int mc_util_set_command_availabe(const char *name, const char *command_type, con
 	/*Set server Address*/
 	memset(&serv_addr, 0, sizeof(serv_addr));
 	serv_addr.sun_family = AF_UNIX;
-	strncpy(serv_addr.sun_path, MC_IPC_PATH[port], sizeof(serv_addr.sun_path)-1);
+	strncpy(serv_addr.sun_path, MC_IPC_PATH[port], sizeof(serv_addr.sun_path) - 1);
 
 	/* Connecting to the media db server */
-	if (connect(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
+	if (connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
 		mc_stderror("connect error");
 		mc_ipc_delete_client_socket(&sock_info);
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
@@ -163,15 +160,15 @@ RETRY:
 		mc_error("recv failed : [%d]", sockfd);
 		mc_stderror("recv failed");
 
-		 if (errno == EINTR) {
+		if (errno == EINTR) {
 			mc_stderror("catch interrupt");
 			goto RETRY;
 		}
 
 		if (errno == EWOULDBLOCK) {
-			if(retry_count < MAX_RETRY_COUNT)	{
+			if (retry_count < MAX_RETRY_COUNT)	{
 				mc_error("TIME OUT[%d]", retry_count);
-				retry_count ++;
+				retry_count++;
 				goto RETRY;
 			}
 
@@ -207,20 +204,18 @@ int mc_util_get_command_availabe(const char *name, const char *command_type, con
 	int retry_count = 0;
 	char *message = NULL;
 
-	if(!MC_STRING_VALID(name) ||!MC_STRING_VALID(command_type))
-	{
+	if (!MC_STRING_VALID(name) || !MC_STRING_VALID(command_type)) {
 		mc_error("invalid query");
 		return MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER;
 	}
 
-	if(command == NULL)
-		message = g_strdup_printf ("%s%s", name, command_type);
+	if (command == NULL)
+		message = g_strdup_printf("%s%s", name, command_type);
 	else
-		message = g_strdup_printf ("%s%s%s", name, command_type, command);
+		message = g_strdup_printf("%s%s%s", name, command_type, command);
 
 	request_msg_size = strlen(message);
-	if(request_msg_size >= MAX_MSG_SIZE)
-	{
+	if (request_msg_size >= MAX_MSG_SIZE) {
 		mc_error("Query is Too long. [%d] query size limit is [%d]", request_msg_size, MAX_MSG_SIZE);
 		return MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER;
 	}
@@ -230,7 +225,7 @@ int mc_util_get_command_availabe(const char *name, const char *command_type, con
 
 	send_msg.msg_type = MC_MSG_CLIENT_GET;
 	send_msg.msg_size = request_msg_size;
-	strncpy(send_msg.msg, message, sizeof(send_msg.msg)-1);
+	strncpy(send_msg.msg, message, sizeof(send_msg.msg) - 1);
 
 	/*Create Socket*/
 	ret = mc_ipc_create_client_socket(MC_TIMEOUT_SEC_10, &sock_info);
@@ -240,10 +235,10 @@ int mc_util_get_command_availabe(const char *name, const char *command_type, con
 	/*Set server Address*/
 	memset(&serv_addr, 0, sizeof(serv_addr));
 	serv_addr.sun_family = AF_UNIX;
-	strncpy(serv_addr.sun_path, MC_IPC_PATH[port], sizeof(serv_addr.sun_path)-1);
+	strncpy(serv_addr.sun_path, MC_IPC_PATH[port], sizeof(serv_addr.sun_path) - 1);
 
 	/* Connecting to the media db server */
-	if (connect(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
+	if (connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
 		mc_stderror("connect error");
 		mc_ipc_delete_client_socket(&sock_info);
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
@@ -264,15 +259,15 @@ RETRY:
 		mc_error("recv failed : [%d]", sockfd);
 		mc_stderror("recv failed");
 
-		 if (errno == EINTR) {
+		if (errno == EINTR) {
 			mc_stderror("catch interrupt");
 			goto RETRY;
 		}
 
 		if (errno == EWOULDBLOCK) {
-			if(retry_count < MAX_RETRY_COUNT)	{
+			if (retry_count < MAX_RETRY_COUNT)	{
 				mc_error("TIME OUT[%d]", retry_count);
-				retry_count ++;
+				retry_count++;
 				goto RETRY;
 			}
 

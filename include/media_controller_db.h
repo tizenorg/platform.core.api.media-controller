@@ -62,31 +62,31 @@ int mc_db_connect(void **db_handle);
 int mc_db_disconnect(void *db_handle);
 int mc_db_create_tables(void *handle);
 int mc_db_create_server_table(void *handle, const char *server_name);
-int mc_db_delete_server_table(void *handle, const char* server_name);
-int mc_db_check_server_table_exist(void *handle, const char* server_name, bool *exist);
+int mc_db_delete_server_table(void *handle, const char *server_name);
+int mc_db_check_server_table_exist(void *handle, const char *server_name, bool *exist);
 int mc_db_clear_table(void *db_handle, const char *table_name);
 
-int mc_db_update_playback_info(void *handle, const char* table_name, int playback_state, unsigned long long playback_position);
-int mc_db_update_whole_metadata(void *handle, const char* server_name,
-	const char *title, const char *artist, const char *album, const char *author, const char *genre, const char *duration, const char *date,
-	const char *copyright, const char *description, const char *track_num, const char *picture);
-int mc_db_update_metadata(void *handle, const char* table_name, char *name, char *value);
-int mc_db_update_shuffle_mode(void *handle, const char* table_name, int shuffle_mode);
-int mc_db_update_repeat_mode(void *handle, const char* table_name, int repeat_mode);
+int mc_db_update_playback_info(void *handle, const char *table_name, int playback_state, unsigned long long playback_position);
+int mc_db_update_whole_metadata(void *handle, const char *server_name,
+                                const char *title, const char *artist, const char *album, const char *author, const char *genre, const char *duration, const char *date,
+                                const char *copyright, const char *description, const char *track_num, const char *picture);
+int mc_db_update_metadata(void *handle, const char *table_name, char *name, char *value);
+int mc_db_update_shuffle_mode(void *handle, const char *table_name, int shuffle_mode);
+int mc_db_update_repeat_mode(void *handle, const char *table_name, int repeat_mode);
 
 int mc_db_get_latest_server_name(void *handle, char **latest_server_name);
-int mc_db_get_server_state(void *handle, const char* server_name, mc_server_state_e *state);
-int mc_db_get_playback_info(void *handle, const char* server_name, mc_playback_h *playback);
-int mc_db_get_metadata_info(void *handle, const char* server_name, mc_metadata_h *metadata);
-int mc_db_get_shuffle_mode(void *handle, const char* server_name, mc_shuffle_mode_e *mode);
-int mc_db_get_repeat_mode(void *handle, const char* server_name, mc_repeat_mode_e *mode);
+int mc_db_get_server_state(void *handle, const char *server_name, mc_server_state_e *state);
+int mc_db_get_playback_info(void *handle, const char *server_name, mc_playback_h *playback);
+int mc_db_get_metadata_info(void *handle, const char *server_name, mc_metadata_h *metadata);
+int mc_db_get_shuffle_mode(void *handle, const char *server_name, mc_shuffle_mode_e *mode);
+int mc_db_get_repeat_mode(void *handle, const char *server_name, mc_repeat_mode_e *mode);
 
 int mc_db_insert_server_address_into_table(void *db_handle, const char *table_name, char *address);
 int mc_db_delete_server_address_from_table(void *db_handle, const char *table_name, char *address);
 
 int mc_db_foreach_server_list(void *handle, mc_activated_server_cb callback, void *user_data);
-int mc_db_update_server_state(void *handle, const char* server_name, mc_server_state_e server_state);
-int mc_db_update_latest_server_table(void *handle, const char* server_name);
+int mc_db_update_server_state(void *handle, const char *server_name, mc_server_state_e server_state);
+int mc_db_update_latest_server_table(void *handle, const char *server_name);
 
 
 #endif /*__MEDIA_CONTROL_DB_H__*/

@@ -16,31 +16,29 @@
 
 #include "media_controller_private.h"
 
-static char* __make_key_for_map(const char* main_key, const char* sub_key)
+static char *__make_key_for_map(const char *main_key, const char *sub_key)
 {
 	return g_strdup_printf("%s.%s", main_key, sub_key);
 }
 
-static void __mc_ipc_signal_cb(GDBusConnection* connection,
-					const gchar* sender_name,
-					const gchar* object_path,
-					const gchar* interface_name,
-					const gchar* signal_name,
-					GVariant* parameters,
-					gpointer user_data)
-	{
+static void __mc_ipc_signal_cb(GDBusConnection *connection,
+                               const gchar *sender_name,
+                               const gchar *object_path,
+                               const gchar *interface_name,
+                               const gchar *signal_name,
+                               GVariant *parameters,
+                               gpointer user_data)
+{
 	char *key = __make_key_for_map(interface_name, signal_name);
-	GList *listener_list = (GList*)user_data;
+	GList *listener_list = (GList *)user_data;
 	int i;
 
 	mc_debug("__mc_ipc_signal_cb Received : ");
 
-	for(i=0;i<g_list_length(listener_list); i++)
-	{
+	for (i = 0; i < g_list_length(listener_list); i++) {
 		mc_ipc_listener_s *listener = (mc_ipc_listener_s *)g_list_nth_data(listener_list, i);
-		if(listener && !strcmp(listener->key, key))
-		{
-			gchar* message = NULL;
+		if (listener && !strcmp(listener->key, key)) {
+			gchar *message = NULL;
 			int internal_flags = 0;
 			g_variant_get(parameters, "(i&s)", &internal_flags, &message);
 			if (!message) {
@@ -56,32 +54,31 @@ static void __mc_ipc_signal_cb(GDBusConnection* connection,
 static gboolean _mc_ipc_is_listener_duplicated(GList *listener_list, const char *key)
 {
 	int i = 0;
-	for (i=0; i<g_list_length(listener_list);i++)
-	{
-		mc_ipc_listener_s *listener = (mc_ipc_listener_s*)g_list_nth_data((listener_list), i);
+	for (i = 0; i < g_list_length(listener_list); i++) {
+		mc_ipc_listener_s *listener = (mc_ipc_listener_s *)g_list_nth_data((listener_list), i);
 		mc_retvm_if(listener && !strcmp(listener->key, key), TRUE, "listener[%s] is duplicated ", key);
 	}
 	return FALSE;
 }
 
-static guint _mc_ipc_signal_subscribe(GDBusConnection* connection, const char* interface_name, const char* signal_name, void *user_data)
+static guint _mc_ipc_signal_subscribe(GDBusConnection *connection, const char *interface_name, const char *signal_name, void *user_data)
 {
 	guint ret = g_dbus_connection_signal_subscribe(
-							connection,
-							NULL,
-							interface_name,
-							signal_name,
-							MC_DBUS_PATH,
-							NULL,
-							G_DBUS_SIGNAL_FLAGS_NONE,
-							__mc_ipc_signal_cb,
-							user_data,
-							NULL);
+	                connection,
+	                NULL,
+	                interface_name,
+	                signal_name,
+	                MC_DBUS_PATH,
+	                NULL,
+	                G_DBUS_SIGNAL_FLAGS_NONE,
+	                __mc_ipc_signal_cb,
+	                user_data,
+	                NULL);
 
 	return ret;
 }
 
-static void _mc_ipc_signal_unsubscribe(GDBusConnection* connection, guint handler)
+static void _mc_ipc_signal_unsubscribe(GDBusConnection *connection, guint handler)
 {
 	g_dbus_connection_signal_unsubscribe(connection, handler);
 }
@@ -100,7 +97,7 @@ int mc_ipc_get_dbus_connection(GDBusConnection **connection, int *dref_count)
 
 	_connection = g_bus_get_sync(G_BUS_TYPE_SYSTEM, NULL, &error);
 	if (!_connection) {
-		mc_error("g_bus_get_sync failed : %s", error?error->message:"none");
+		mc_error("g_bus_get_sync failed : %s", error ? error->message : "none");
 		g_object_unref(_connection);
 		if (error) g_error_free(error);
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
@@ -192,17 +189,14 @@ int mc_ipc_unregister_listener(GList *listener_list, GDBusConnection *connection
 	mc_retvm_if(signal_name == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "signal_name is NULL");
 
 	key = __make_key_for_map(interface_name, signal_name);
-	if(key == NULL)
-	{
+	if (key == NULL) {
 		mc_error("fail to get key");
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}
 
-	for (i=g_list_length(listener_list); i > 0; i--)
-	{
-		mc_ipc_listener_s *listener = (mc_ipc_listener_s*)g_list_nth_data(listener_list, i);
-		if (listener && !strcmp(listener->key, key))
-		{
+	for (i = g_list_length(listener_list); i > 0; i--) {
+		mc_ipc_listener_s *listener = (mc_ipc_listener_s *)g_list_nth_data(listener_list, i);
+		if (listener && !strcmp(listener->key, key)) {
 			_mc_ipc_signal_unsubscribe(connection, listener->handler);
 			MC_SAFE_FREE(listener->interface_name);
 			MC_SAFE_FREE(listener->signal_name);
@@ -225,11 +219,9 @@ int mc_ipc_unregister_all_listener(GList *listener_list, GDBusConnection *connec
 	mc_retvm_if(connection == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "connection is NULL");
 	mc_retvm_if(listener_list == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "listener_list is NULL");
 
-	for (i=g_list_length(listener_list); i > 0; i--)
-	{
-		mc_ipc_listener_s *listener = (mc_ipc_listener_s*)g_list_nth_data(listener_list, i);
-		if (listener)
-		{
+	for (i = g_list_length(listener_list); i > 0; i--) {
+		mc_ipc_listener_s *listener = (mc_ipc_listener_s *)g_list_nth_data(listener_list, i);
+		if (listener) {
 			_mc_ipc_signal_unsubscribe(connection, listener->handler);
 			MC_SAFE_FREE(listener->interface_name);
 			MC_SAFE_FREE(listener->signal_name);
@@ -242,9 +234,9 @@ int mc_ipc_unregister_all_listener(GList *listener_list, GDBusConnection *connec
 	return MEDIA_CONTROLLER_ERROR_NONE;
 }
 
-int mc_ipc_send_message(GDBusConnection *connection, const char *dbus_name, const char *interface_name, const char* signal_name, const char* message, int flags)
+int mc_ipc_send_message(GDBusConnection *connection, const char *dbus_name, const char *interface_name, const char *signal_name, const char *message, int flags)
 {
-	GError* error = NULL;
+	GError *error = NULL;
 
 	mc_retvm_if(connection == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "connection is NULL");
 	mc_retvm_if(signal_name == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "signal_name is NULL");
@@ -253,18 +245,16 @@ int mc_ipc_send_message(GDBusConnection *connection, const char *dbus_name, cons
 	mc_debug("emit signal - interface: %s, signal: %s", interface_name, signal_name);
 
 	gboolean emmiting = g_dbus_connection_emit_signal(
-				connection,
-				dbus_name,
-				MC_DBUS_PATH,
-				interface_name,
-				signal_name,
-				g_variant_new("(is)", 0, message),
-				&error);
-	if (!emmiting)
-	{
-		mc_error("g_dbus_connection_emit_signal failed : %s", error?error->message:"none");
-		if (error)
-		{
+	                        connection,
+	                        dbus_name,
+	                        MC_DBUS_PATH,
+	                        interface_name,
+	                        signal_name,
+	                        g_variant_new("(is)", 0, message),
+	                        &error);
+	if (!emmiting) {
+		mc_error("g_dbus_connection_emit_signal failed : %s", error ? error->message : "none");
+		if (error) {
 			mc_error("Error in g_dbus_connection_emit_signal");
 			g_error_free(error);
 		}

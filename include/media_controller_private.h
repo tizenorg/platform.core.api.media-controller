@@ -46,24 +46,24 @@ extern "C" {
 #define FONT_COLOR_GRAY     "\033[37m"
 
 #define mc_debug(fmt, arg...) do { \
-			LOGD(FONT_COLOR_RESET""fmt"", ##arg);     \
-		} while (0)
+		LOGD(FONT_COLOR_RESET""fmt"", ##arg);     \
+	} while (0)
 
 #define mc_info(fmt, arg...) do { \
-			LOGI(FONT_COLOR_GREEN""fmt"", ##arg);     \
-		} while (0)
+		LOGI(FONT_COLOR_GREEN""fmt"", ##arg);     \
+	} while (0)
 
 #define mc_error(fmt, arg...) do { \
-			LOGE(FONT_COLOR_RED""fmt"", ##arg);     \
-		} while (0)
+		LOGE(FONT_COLOR_RED""fmt"", ##arg);     \
+	} while (0)
 
 #define mc_debug_fenter() do { \
-			LOGD(FONT_COLOR_RESET"<Enter>");     \
-		} while (0)
+		LOGD(FONT_COLOR_RESET"<Enter>");     \
+	} while (0)
 
 #define mc_debug_fleave() do { \
-			LOGD(FONT_COLOR_RESET"<Leave>");     \
-		} while (0)
+		LOGD(FONT_COLOR_RESET"<Leave>");     \
+	} while (0)
 
 #define mc_retm_if(expr, fmt, arg...) do { \
 		if(expr) { \
@@ -81,7 +81,7 @@ extern "C" {
 
 #define ERR_BUF_LENGHT 256
 #define mc_stderror(fmt) do { \
-		char buf[ERR_BUF_LENGHT] = {0,}; \
+		char buf[ERR_BUF_LENGHT] = {0, }; \
 		strerror_r(errno, buf, ERR_BUF_LENGHT); \
 		LOGE(fmt" : standard error= [%s]", buf); \
 	} while (0)
@@ -131,20 +131,17 @@ extern "C" {
 #define MC_COMMAND_PLAYBACKSTATE		"_playback_command_"
 #define MC_COMMAND_CUSTOM				"_custom_command_"
 
-typedef struct
-{
+typedef struct {
 	void *callback;
 	void *user_data;
 }media_controller_reciever_s;
 
-typedef struct
-{
+typedef struct {
 	mc_playback_states_e state;
 	unsigned long long position;
 }media_controller_playback_s;
 
-typedef struct
-{
+typedef struct {
 	char *title;
 	char *artist;
 	char *album;
@@ -158,8 +155,7 @@ typedef struct
 	char *picture;
 }media_controller_metadata_s;
 
-typedef struct
-{
+typedef struct {
 	char *server_name;
 	void* db_handle;
 
@@ -176,8 +172,7 @@ typedef struct
 	media_controller_reciever_s custom_cmd_reciever;
 }media_controller_server_s;
 
-typedef struct
-{
+typedef struct {
 	char		*client_name;
 	void		*db_handle;
 
@@ -194,10 +189,9 @@ typedef struct
 	media_controller_reciever_s reply_cb;
 }media_controller_client_s;
 
-// formal callback to receive signal
-typedef void (*mc_signal_received_cb)(char* interface_name, char *signal_name, char *message, int size, void *user_data);
-typedef struct
-{
+/* formal callback to receive signal */
+typedef void(*mc_signal_received_cb)(char *interface_name, char *signal_name, char *message, int size, void *user_data);
+typedef struct {
 	GDBusConnection			*dbus_conn;
 	char					*interface_name;
 	char					*signal_name;
@@ -208,13 +202,13 @@ typedef struct
 } mc_ipc_listener_s;
 
 
-// util
+/* util */
 int mc_util_get_own_name(char **name);
-char* mc_util_get_interface_name(const char *prefix, const char *type, const char *name);
+char* mc_util_get_interface_name(const char *type, const char *name);
 int mc_util_set_command_availabe(const char *name, const char *command_type, const char *command);
 int mc_util_get_command_availabe(const char *name, const char *command_type, const char *command);
 
-// for d-bus IPC
+/* for d-bus IPC */
 int mc_ipc_get_dbus_connection(GDBusConnection **conn, int *dref_count);
 int mc_ipc_unref_dbus_connection(GDBusConnection *conn, int *dref_count);
 int mc_ipc_register_listener(GList *manage_list, GDBusConnection *connection, const char *interface_name, const char *signal_name, mc_signal_received_cb callback, void *user_data);
