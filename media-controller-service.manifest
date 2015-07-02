@@ -3,10 +3,13 @@
 		<domain name="mediacontroller"/>
 		<provide>
 			<label name="mediacontroller::svc"/>
+			<label name="mediacontroller::db"/>
 		</provide>
 		<request>
 			<smack request="security-server::api-privilege-by-pid" type="w"/>
 			<smack request="mediacontroller::db" type="rw"/>
+			<smack request="device::app_logging" type="w"/>
+			<smack request="device::sys_logging" type="w"/>
 		</request>
 	</define>
 	<request>

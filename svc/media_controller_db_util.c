@@ -15,6 +15,7 @@
 */
 
 #include "media_controller_db_util.h"
+#include "media_controller_private.h"
 
 static int __mc_db_util_busy_handler(void *pData, int count)
 {
@@ -41,12 +42,15 @@ int mc_db_util_connect(void **handle)
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}
 
+	if (db_handle == NULL) {
+		mc_error("*db_handle is NULL");
+		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+	}
+
 	/*Register busy handler*/
 	ret = sqlite3_busy_handler(db_handle, __mc_db_util_busy_handler, NULL);
 	if (SQLITE_OK != ret) {
-		if (db_handle) {
-			mc_error("error when register busy handler %s\n", sqlite3_errmsg(db_handle));
-		}
+		mc_error("error when register busy handler %s\n", sqlite3_errmsg(db_handle));
 		db_util_close(db_handle);
 		*handle = NULL;
 
