@@ -18,8 +18,6 @@
 #include "media_controller_db.h"
 #include "media_controller_socket.h"
 
-#define MAX_RETRY_COUNT 3
-
 typedef enum {
 	MC_SERVER_FIELD_SERVER_NAME = 0,
 	MC_SERVER_FIELD_SERVER_STATE,
@@ -49,105 +47,15 @@ static int __mc_db_busy_handler(void *pData, int count)
 	return 100 - count;
 }
 
-static int __media_db_request_update_tcp(mc_msg_type_e msg_type, const char *request_msg)
-{
-	int ret = MEDIA_CONTROLLER_ERROR_NONE;
-	int request_msg_size = 0;
-	int sockfd = -1;
-	mc_sock_info_s sock_info;
-	struct sockaddr_un serv_addr;
-	int port = MC_DB_UPDATE_PORT;
-	int retry_count = 0;
-
-	if (!MC_STRING_VALID(request_msg)) {
-		mc_error("invalid query");
-		return MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER;
-	}
-
-	request_msg_size = strlen(request_msg);
-	if (request_msg_size >= MAX_MSG_SIZE) {
-		mc_error("Query is Too long. [%d] query size limit is [%d]", request_msg_size, MAX_MSG_SIZE);
-		return MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER;
-	}
-
-	mc_comm_msg_s send_msg;
-	memset((void *)&send_msg, 0, sizeof(mc_comm_msg_s));
-
-	send_msg.msg_type = msg_type;
-	send_msg.msg_size = request_msg_size;
-	strncpy(send_msg.msg, request_msg, sizeof(send_msg.msg) - 1);
-
-	/*Create Socket*/
-	ret = mc_ipc_create_client_socket(MC_TIMEOUT_SEC_10, &sock_info);
-	sockfd = sock_info.sock_fd;
-	mc_retvm_if(ret != MEDIA_CONTROLLER_ERROR_NONE, ret, "socket is not created properly");
-
-	/*Set server Address*/
-	memset(&serv_addr, 0, sizeof(serv_addr));
-	serv_addr.sun_family = AF_UNIX;
-	strncpy(serv_addr.sun_path, MC_IPC_PATH[port], sizeof(serv_addr.sun_path) - 1);
-
-	/* Connecting to the media db server */
-	if (connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
-		mc_stderror("connect error");
-		mc_ipc_delete_client_socket(&sock_info);
-		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
-	}
-
-	/* Send request */
-	if (send(sockfd, &send_msg, sizeof(send_msg), 0) != sizeof(send_msg)) {
-		mc_stderror("send failed");
-		mc_ipc_delete_client_socket(&sock_info);
-		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
-	}
-
-	/*Receive Response*/
-	int recv_msg_size = -1;
-	int recv_msg = -1;
-RETRY:
-	if ((recv_msg_size = recv(sockfd, &recv_msg, sizeof(recv_msg), 0)) < 0) {
-		mc_error("recv failed : [%d]", sockfd);
-		mc_stderror("recv failed");
-
-		if (errno == EINTR) {
-			mc_stderror("catch interrupt");
-			goto RETRY;
-		}
-
-		if (errno == EWOULDBLOCK) {
-			if (retry_count < MAX_RETRY_COUNT) {
-				mc_error("TIME OUT[%d]", retry_count);
-				retry_count++;
-				goto RETRY;
-			}
-
-			mc_ipc_delete_client_socket(&sock_info);
-			mc_error("Timeout. Can't try any more");
-			return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
-		} else {
-			mc_stderror("recv failed");
-			mc_ipc_delete_client_socket(&sock_info);
-			return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
-		}
-	}
-
-	mc_debug("RECEIVE OK [%d]", recv_msg);
-	ret = recv_msg;
-
-	mc_ipc_delete_client_socket(&sock_info);
-
-	return ret;
-}
-
 static int __mc_db_update_db(void *handle, const char *sql_str)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 
 	mc_retvm_if(!MC_STRING_VALID(sql_str), MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid Query");
 
-	ret = __media_db_request_update_tcp(MC_MSG_DB_UPDATE, sql_str);
+	ret = mc_ipc_send_message_to_server(MC_MSG_DB_UPDATE, sql_str);
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-		mc_error("__media_db_request_update_tcp failed : %d", ret);
+		mc_error("mc_ipc_send_message_to_server failed : %d", ret);
 	}
 
 	return ret;
@@ -263,6 +171,8 @@ int mc_db_connect(void **handle)
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	sqlite3 *db_handle = NULL;
 
+	mc_debug("mc_db_connect");
+
 	mc_retvm_if(handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 
 	/*Connect DB*/
@@ -274,12 +184,15 @@ int mc_db_connect(void **handle)
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}
 
+	if (db_handle == NULL) {
+		mc_error("*db_handle is NULL");
+		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+	}
+
 	/*Register busy handler*/
 	ret = sqlite3_busy_handler(db_handle, __mc_db_busy_handler, NULL);
 	if (SQLITE_OK != ret) {
-		if (db_handle) {
-			mc_error("error when register busy handler %s\n", sqlite3_errmsg(db_handle));
-		}
+		mc_error("error when register busy handler %s\n", sqlite3_errmsg(db_handle));
 		db_util_close(db_handle);
 		*handle = NULL;
 
@@ -289,22 +202,6 @@ int mc_db_connect(void **handle)
 	*handle = db_handle;
 
 	return MEDIA_CONTROLLER_ERROR_NONE;
-}
-
-int mc_db_clear_table(void *handle, const char *table_name)
-{
-	int ret = MEDIA_CONTROLLER_ERROR_NONE;
-	char *sql_str = NULL;
-
-	mc_retvm_if(handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
-
-	sql_str = sqlite3_mprintf(DB_DELETE_ALL_FROM_TABLE, table_name);
-
-	ret = __mc_db_update_db(handle, sql_str);
-
-	SQLITE3_SAFE_FREE(sql_str);
-
-	return ret;
 }
 
 int mc_db_update_playback_info(void *handle, const char *server_name, int playback_state, unsigned long long playback_position)
@@ -336,23 +233,6 @@ int mc_db_update_whole_metadata(void *handle, const char *server_name,
 
 	sql_str = sqlite3_mprintf(DB_UPDATE_METADATA_INFO_INFO_SERVER_TABLE, server_name,
 	                          title, artist, album, author, genre, duration, date, copyright, description, track_num, picture);
-
-	ret = __mc_db_update_db(handle, sql_str);
-
-	SQLITE3_SAFE_FREE(sql_str);
-
-	return ret;
-}
-
-int mc_db_update_metadata(void *handle, const char *server_name, char *name, char *value)
-{
-	int ret = MEDIA_CONTROLLER_ERROR_NONE;
-	char *sql_str = NULL;
-
-	mc_retvm_if(handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
-	mc_retvm_if(server_name == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "server_name is NULL");
-
-	sql_str = sqlite3_mprintf(DB_UPDATE_METADATA_INTO_SERVER_TABLE, server_name, name, value);
 
 	ret = __mc_db_update_db(handle, sql_str);
 

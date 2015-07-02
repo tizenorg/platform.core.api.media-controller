@@ -16,6 +16,8 @@
 
 #include "media_controller_private.h"
 
+#define MAX_RETRY_COUNT 3
+
 static char *__make_key_for_map(const char *main_key, const char *sub_key)
 {
 	return g_strdup_printf("%s.%s", main_key, sub_key);
@@ -31,7 +33,7 @@ static void __mc_ipc_signal_cb(GDBusConnection *connection,
 {
 	char *key = __make_key_for_map(interface_name, signal_name);
 	GList *listener_list = (GList *)user_data;
-	int i;
+	unsigned int i = 0;
 
 	mc_debug("__mc_ipc_signal_cb Received : ");
 
@@ -53,11 +55,13 @@ static void __mc_ipc_signal_cb(GDBusConnection *connection,
 
 static gboolean _mc_ipc_is_listener_duplicated(GList *listener_list, const char *key)
 {
-	int i = 0;
+	unsigned int i = 0;
+
 	for (i = 0; i < g_list_length(listener_list); i++) {
 		mc_ipc_listener_s *listener = (mc_ipc_listener_s *)g_list_nth_data((listener_list), i);
 		mc_retvm_if(listener && !strcmp(listener->key, key), TRUE, "listener[%s] is duplicated ", key);
 	}
+
 	return FALSE;
 }
 
@@ -98,7 +102,6 @@ int mc_ipc_get_dbus_connection(GDBusConnection **connection, int *dref_count)
 	_connection = g_bus_get_sync(G_BUS_TYPE_SYSTEM, NULL, &error);
 	if (!_connection) {
 		mc_error("g_bus_get_sync failed : %s", error ? error->message : "none");
-		g_object_unref(_connection);
 		if (error) g_error_free(error);
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}
@@ -138,7 +141,6 @@ int mc_ipc_unref_dbus_connection(GDBusConnection *connection, int *dref_count)
 int mc_ipc_register_listener(GList *listener_list, GDBusConnection *connection, const char *interface_name, const char *signal_name, mc_signal_received_cb callback, void *user_data)
 {
 	char *key = NULL;
-	char *copied_key = NULL;
 	guint handler = 0;
 
 	mc_retvm_if(listener_list == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "listener_list is NULL");
@@ -148,32 +150,32 @@ int mc_ipc_register_listener(GList *listener_list, GDBusConnection *connection, 
 	mc_retvm_if(callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "callback is NULL");
 
 	key = __make_key_for_map(interface_name, signal_name);
-	copied_key = g_strdup(key);
 
-	if (_mc_ipc_is_listener_duplicated(listener_list, key))
-	{
+	if (_mc_ipc_is_listener_duplicated(listener_list, key)) {
 		mc_error("listener is duplicated");
 
-		MC_SAFE_FREE(copied_key);
 		MC_SAFE_FREE(key);
 		return MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER;
 	}
 
+	mc_ipc_listener_s *listener = (mc_ipc_listener_s *)g_malloc(sizeof(mc_ipc_listener_s));
+	if (listener == NULL) {
+		mc_error("Error memroy allocation");
+		MC_SAFE_FREE(key);
+		return MEDIA_CONTROLLER_ERROR_OUT_OF_MEMORY;
+	}
 	handler = _mc_ipc_signal_subscribe(connection, interface_name, signal_name, listener_list);
-
-	mc_ipc_listener_s *listener = (mc_ipc_listener_s*)g_malloc(sizeof(mc_ipc_listener_s));
 	listener->dbus_conn = connection;
 	listener->interface_name = g_strdup(interface_name);
 	listener->signal_name = g_strdup(signal_name);
 	listener->callback = callback;
 	listener->user_data = user_data;
 	listener->handler = handler;
-	listener->key = copied_key;
+	listener->key = key;
 
 	(listener_list) = g_list_append((listener_list), listener);
 
 	mc_debug("listener[%s.%s] is registered", interface_name, signal_name);
-	MC_SAFE_FREE(key);
 
 	return MEDIA_CONTROLLER_ERROR_NONE;
 }
@@ -194,7 +196,7 @@ int mc_ipc_unregister_listener(GList *listener_list, GDBusConnection *connection
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}
 
-	for (i = g_list_length(listener_list); i > 0; i--) {
+	for (i = g_list_length(listener_list) - 1; i >= 0; i--) {
 		mc_ipc_listener_s *listener = (mc_ipc_listener_s *)g_list_nth_data(listener_list, i);
 		if (listener && !strcmp(listener->key, key)) {
 			_mc_ipc_signal_unsubscribe(connection, listener->handler);
@@ -219,7 +221,7 @@ int mc_ipc_unregister_all_listener(GList *listener_list, GDBusConnection *connec
 	mc_retvm_if(connection == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "connection is NULL");
 	mc_retvm_if(listener_list == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "listener_list is NULL");
 
-	for (i = g_list_length(listener_list); i > 0; i--) {
+	for (i = g_list_length(listener_list) - 1; i >= 0; i--) {
 		mc_ipc_listener_s *listener = (mc_ipc_listener_s *)g_list_nth_data(listener_list, i);
 		if (listener) {
 			_mc_ipc_signal_unsubscribe(connection, listener->handler);
@@ -262,4 +264,123 @@ int mc_ipc_send_message(GDBusConnection *connection, const char *dbus_name, cons
 	}
 
 	return MEDIA_CONTROLLER_ERROR_NONE;
+}
+
+int mc_ipc_send_message_to_server(mc_msg_type_e msg_type, const char *request_msg)
+{
+	int ret = MEDIA_CONTROLLER_ERROR_NONE;
+	int request_msg_size = 0;
+	int sockfd = -1;
+	mc_sock_info_s sock_info;
+	struct sockaddr_un serv_addr;
+	int retry_count = 0;
+
+	if (!MC_STRING_VALID(request_msg)) {
+		mc_error("invalid query");
+		return MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER;
+	}
+
+	request_msg_size = strlen(request_msg);
+	if (request_msg_size >= MAX_MSG_SIZE) {
+		mc_error("Query is Too long. [%d] query size limit is [%d]", request_msg_size, MAX_MSG_SIZE);
+		return MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER;
+	}
+
+	mc_comm_msg_s send_msg;
+	memset((void *)&send_msg, 0, sizeof(mc_comm_msg_s));
+
+	send_msg.msg_type = msg_type;
+	send_msg.msg_size = request_msg_size;
+	strncpy(send_msg.msg, request_msg, sizeof(send_msg.msg) - 1);
+
+	/*Create Socket*/
+	ret = mc_ipc_create_client_socket(MC_TIMEOUT_SEC_10, &sock_info);
+	sockfd = sock_info.sock_fd;
+	mc_retvm_if(ret != MEDIA_CONTROLLER_ERROR_NONE, ret, "socket is not created properly");
+
+	/*Set server Address*/
+	memset(&serv_addr, 0, sizeof(serv_addr));
+	serv_addr.sun_family = AF_UNIX;
+	strncpy(serv_addr.sun_path, MC_IPC_PATH, sizeof(serv_addr.sun_path) - 1);
+
+	/* Connecting to the media db server */
+	if (connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+		mc_stderror("connect error");
+		mc_ipc_delete_client_socket(&sock_info);
+		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+	}
+
+	/* Send request */
+	if (send(sockfd, &send_msg, sizeof(send_msg), 0) != sizeof(send_msg)) {
+		mc_stderror("send failed");
+		mc_ipc_delete_client_socket(&sock_info);
+		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+	}
+
+	/*Receive Response*/
+	int recv_msg_size = -1;
+	int recv_msg = -1;
+RETRY:
+	if ((recv_msg_size = recv(sockfd, &recv_msg, sizeof(recv_msg), 0)) < 0) {
+		mc_error("recv failed : [%d]", sockfd);
+		mc_stderror("recv failed");
+
+		if (errno == EINTR) {
+			mc_stderror("catch interrupt");
+			goto RETRY;
+		}
+
+		if (errno == EWOULDBLOCK) {
+			if (retry_count < MAX_RETRY_COUNT) {
+				mc_error("TIME OUT[%d]", retry_count);
+				retry_count++;
+				goto RETRY;
+			}
+
+			mc_ipc_delete_client_socket(&sock_info);
+			mc_error("Timeout. Can't try any more");
+			return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+		} else {
+			mc_stderror("recv failed");
+			mc_ipc_delete_client_socket(&sock_info);
+			return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+		}
+	}
+
+	mc_debug("RECEIVE OK [%d]", recv_msg);
+	ret = recv_msg;
+
+	mc_ipc_delete_client_socket(&sock_info);
+
+	return ret;
+}
+
+int mc_ipc_service_connect(void)
+{
+	int ret = MEDIA_CONTROLLER_ERROR_NONE;
+	int sockfd = -1;
+	mc_sock_info_s sock_info;
+	struct sockaddr_un serv_addr;
+
+	/*Create Socket*/
+	ret = mc_ipc_create_client_socket(MC_TIMEOUT_SEC_10, &sock_info);
+	sockfd = sock_info.sock_fd;
+	mc_retvm_if(ret != MEDIA_CONTROLLER_ERROR_NONE, ret, "socket is not created properly");
+
+	/*Set server Address*/
+	memset(&serv_addr, 0, sizeof(serv_addr));
+	serv_addr.sun_family = AF_UNIX;
+	strncpy(serv_addr.sun_path, MC_SOCK_ACTIVATION_PATH, sizeof(serv_addr.sun_path) - 1);
+
+	/* Connecting to the media db server */
+	if (connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+		mc_stderror("connect error");
+		mc_ipc_delete_client_socket(&sock_info);
+		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+	}
+
+	mc_debug("CONNECT OK");
+
+	mc_ipc_delete_client_socket(&sock_info);
+	return ret;
 }
