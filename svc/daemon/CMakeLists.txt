@@ -1,7 +1,7 @@
 SET(fw_daemon "mediacontroller")
 
 INCLUDE(FindPkgConfig)
-pkg_check_modules(${fw_daemon} REQUIRED glib-2.0 security-server)
+pkg_check_modules(${fw_daemon} REQUIRED glib-2.0)
 
 FOREACH(flag ${${fw_daemon}_CFLAGS})
     SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} ${flag}")
