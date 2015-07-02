@@ -1,5 +1,5 @@
 # for package file
-SET(dependents "capi-base-common glib-2.0 gio-2.0 dlog sqlite3 db-util security-server")
+SET(dependents "capi-base-common glib-2.0 gio-2.0 dlog sqlite3 db-util libsystemd-daemon libtzplatform-config")
 SET(fw_svc "media-controller-svc")
 
 PROJECT(${fw_svc})
@@ -28,7 +28,7 @@ ADD_DEFINITIONS("-DPREFIX=\"${CMAKE_INSTALL_PREFIX}\"")
 ADD_DEFINITIONS("-DTIZEN_DEBUG")
 ADD_DEFINITIONS("-D_FILE_OFFSET_BITS=64")
 
-SET(CMAKE_EXE_LINKER_FLAGS "-Wl,--as-needed -Wl,--rpath=${LIB_INSTALL_DIR}")
+SET(CMAKE_EXE_LINKER_FLAGS "-Wl,--as-needed -Wl,--rpath=/usr/lib")
 
 aux_source_directory(. SOURCES_SVC)
 ADD_LIBRARY(${fw_svc} SHARED ${SOURCES_SVC})
@@ -42,5 +42,5 @@ SET_TARGET_PROPERTIES(${fw_svc}
      CLEAN_DIRECT_OUTPUT 1
 )
 
-INSTALL(TARGETS ${fw_svc} DESTINATION ${LIB_INSTALL_DIR})
+INSTALL(TARGETS ${fw_svc} DESTINATION lib)
 ADD_SUBDIRECTORY(daemon)
