@@ -19,9 +19,9 @@
 
 #include <db-util.h>
 #include <sqlite3.h>
-#include "media_controller_private.h"
+#include <tzplatform_config.h>
 
-#define MC_DB_NAME "/opt/usr/dbspace/.media_controller.db"
+#define MC_DB_NAME tzplatform_mkpath(TZ_USER_DB, ".media_controller.db")
 
 #define SQLITE3_SAFE_FREE(sql_string) 	{if(sql_string) { sqlite3_free(sql_string); sql_string = NULL;}}
 #define SQLITE3_FINALIZE(x)	{if(x != NULL) {sqlite3_finalize(x);}}

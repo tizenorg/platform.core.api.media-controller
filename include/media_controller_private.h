@@ -22,13 +22,14 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include "media_controller_server.h"
-#include "media_controller_client.h"
 #include <glib.h>
 #include <dlog.h>
 #include <stdlib.h>
 #include <string.h>
 #include <gio/gio.h>
+#include "media_controller_server.h"
+#include "media_controller_client.h"
+#include "media_controller_socket.h"
 
 #ifdef LOG_TAG
 #undef LOG_TAG
@@ -81,9 +82,9 @@ extern "C" {
 
 #define ERR_BUF_LENGHT 256
 #define mc_stderror(fmt) do { \
-		char buf[ERR_BUF_LENGHT] = {0, }; \
-		strerror_r(errno, buf, ERR_BUF_LENGHT); \
-		LOGE(fmt" : standard error= [%s]", buf); \
+		char mc_stderror_buf[ERR_BUF_LENGHT] = {0, }; \
+		strerror_r(errno, mc_stderror_buf, ERR_BUF_LENGHT); \
+		LOGE(fmt" : standard error= [%s]", mc_stderror_buf); \
 	} while (0)
 
 #define MC_SAFE_FREE(src)			{if(src) {free(src); src = NULL;}}
@@ -190,7 +191,7 @@ typedef struct {
 }media_controller_client_s;
 
 /* formal callback to receive signal */
-typedef void(*mc_signal_received_cb)(char *interface_name, char *signal_name, char *message, int size, void *user_data);
+typedef void(*mc_signal_received_cb)(const char *interface_name, const char *signal_name, const char *message, int size, void *user_data);
 typedef struct {
 	GDBusConnection			*dbus_conn;
 	char					*interface_name;
@@ -204,7 +205,7 @@ typedef struct {
 
 /* util */
 int mc_util_get_own_name(char **name);
-char *mc_util_get_interface_name(const char *prefix, const char *type, const char *name);
+char* mc_util_get_interface_name(const char *type, const char *name);
 int mc_util_set_command_availabe(const char *name, const char *command_type, const char *command);
 int mc_util_get_command_availabe(const char *name, const char *command_type, const char *command);
 
@@ -215,7 +216,8 @@ int mc_ipc_register_listener(GList *manage_list, GDBusConnection *connection, co
 int mc_ipc_unregister_listener(GList *manage_list, GDBusConnection *connection, const char *interface_name, const char *signal_name);
 int mc_ipc_unregister_all_listener(GList *manage_list, GDBusConnection *connection);
 int mc_ipc_send_message(GDBusConnection *connection, const char *dbus_name, const char *interface_name, const char* signal_name, const char* message, int flags);
-
+int mc_ipc_send_message_to_server(mc_msg_type_e msg_type, const char *request_msg);
+int mc_ipc_service_connect(void);
 
 #ifdef __cplusplus
 }

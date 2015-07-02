@@ -23,7 +23,15 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef struct {
+	void *db_handle;
+	void *mc_svc_list;
+} mc_svc_data_t;
+
+int mc_create_socket_activation(void);
 gboolean mc_svc_thread(void *data);
+GMainLoop *mc_svc_get_main_loop(void);
+int mc_svc_get_connection_cnt(void);
 
 #ifdef __cplusplus
 }
