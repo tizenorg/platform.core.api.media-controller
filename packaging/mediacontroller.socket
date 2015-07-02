@@ -1,0 +1,13 @@
+[Unit]
+Description=MediaController Service socket
+
+[Socket]
+SocketUser=system
+SocketGroup=system
+ListenStream=/var/run/mediacontroller/media_sa_controller
+SmackLabelIPIn=mediacontroller
+SmackLabelIPOut=mediacontroller
+Service=mediacontroller.service
+
+[Install]
+WantedBy=sockets.target
