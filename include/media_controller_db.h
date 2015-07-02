@@ -19,8 +19,9 @@
 
 #include <db-util.h>
 #include <sqlite3.h>
+#include <tzplatform_config.h>
 
-#define MC_DB_NAME "/opt/usr/dbspace/.media_controller.db"
+#define MC_DB_NAME tzplatform_mkpath(TZ_SYS_DB, ".media_controller.db")
 
 #define MC_DB_TABLE_SERVER_LIST		"server_list"
 #define MC_DB_TABLE_LATEST_SERVER		"latest_server"
@@ -64,13 +65,11 @@ int mc_db_create_tables(void *handle);
 int mc_db_create_server_table(void *handle, const char *server_name);
 int mc_db_delete_server_table(void *handle, const char *server_name);
 int mc_db_check_server_table_exist(void *handle, const char *server_name, bool *exist);
-int mc_db_clear_table(void *db_handle, const char *table_name);
 
 int mc_db_update_playback_info(void *handle, const char *table_name, int playback_state, unsigned long long playback_position);
 int mc_db_update_whole_metadata(void *handle, const char *server_name,
                                 const char *title, const char *artist, const char *album, const char *author, const char *genre, const char *duration, const char *date,
                                 const char *copyright, const char *description, const char *track_num, const char *picture);
-int mc_db_update_metadata(void *handle, const char *table_name, char *name, char *value);
 int mc_db_update_shuffle_mode(void *handle, const char *table_name, int shuffle_mode);
 int mc_db_update_repeat_mode(void *handle, const char *table_name, int repeat_mode);
 

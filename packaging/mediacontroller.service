@@ -1,13 +1,12 @@
 [Unit]
 Description=Media controller
-After=vconf-setup.service
 
 [Service]
-Type=simple
+User=system
+Group=system
+SmackProcessLabel=mediacontroller
 ExecStart=/usr/bin/mediacontroller
-Restart=always
-RestartSec=0
-
+Type=simple
 
 [Install]
 WantedBy=multi-user.target

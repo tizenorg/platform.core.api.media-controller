@@ -19,9 +19,9 @@
 #include "media_controller_db.h"
 
 
-static void __client_server_cb(char *interface_name, char *signal_name, char *message, int size, void *user_data)
+static void __client_server_cb(const char *interface_name, const char *signal_name, const char *message, int size, void *user_data)
 {
-	gchar **params;
+	gchar **params = NULL;
 	media_controller_reciever_s *reciever = (media_controller_reciever_s *)user_data;
 	mc_server_state_updated_cb callback = (mc_server_state_updated_cb)reciever->callback;
 
@@ -32,14 +32,16 @@ static void __client_server_cb(char *interface_name, char *signal_name, char *me
 	mc_debug("__client_server_cb(%s, %s, %s, %d, %p)", interface_name, signal_name, message, size, user_data);
 
 	params = g_strsplit(message, MC_STRING_DELIMITER, 0);
+	mc_retm_if(params == NULL, "invalid server data");
+
 	callback(params[0], (mc_server_state_e)atoi(params[1]), reciever->user_data);
 
 	g_strfreev(params);
 }
 
-static void __client_playback_cb(char *interface_name, char *signal_name, char *message, int size, void *user_data)
+static void __client_playback_cb(const char *interface_name, const char *signal_name, const char *message, int size, void *user_data)
 {
-	gchar **params;
+	gchar **params = NULL;
 	media_controller_reciever_s *reciever = (media_controller_reciever_s *)user_data;
 	mc_playback_updated_cb callback = (mc_playback_updated_cb)reciever->callback;
 	media_controller_playback_s *playback = NULL;
@@ -51,8 +53,11 @@ static void __client_playback_cb(char *interface_name, char *signal_name, char *
 	mc_debug("__client_playback_cb(%s, %s, %s, %d, %p)", interface_name, signal_name, message, size, user_data);
 
 	playback = (media_controller_playback_s *)g_malloc(sizeof(media_controller_playback_s));
+	mc_retm_if(playback == NULL, "Error allocation memory");
 
 	params = g_strsplit(message, MC_STRING_DELIMITER, 0);
+	mc_retm_if(params == NULL, "invalid playback data");
+
 	playback->state = atoi(params[1]);
 	playback->position = atol(params[2]);
 
@@ -61,7 +66,7 @@ static void __client_playback_cb(char *interface_name, char *signal_name, char *
 	g_strfreev(params);
 }
 
-static void __client_metadata_cb(char *interface_name, char *signal_name, char *message, int size, void *user_data)
+static void __client_metadata_cb(const char *interface_name, const char *signal_name, const char *message, int size, void *user_data)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	mc_metadata_h metadata = NULL;
@@ -83,9 +88,9 @@ static void __client_metadata_cb(char *interface_name, char *signal_name, char *
 	mc_client_destroy_metadata(metadata);
 }
 
-static void __client_shuffle_cb(char *interface_name, char *signal_name, char *message, int size, void *user_data)
+static void __client_shuffle_cb(const char *interface_name, const char *signal_name, const char *message, int size, void *user_data)
 {
-	gchar **params;
+	gchar **params = NULL;
 	media_controller_reciever_s *reciever = (media_controller_reciever_s *)user_data;
 	mc_shuffle_mode_changed_cb callback = (mc_shuffle_mode_changed_cb)reciever->callback;
 
@@ -95,14 +100,16 @@ static void __client_shuffle_cb(char *interface_name, char *signal_name, char *m
 	mc_debug("__client_shuffle_cb(%s, %s, %s, %d, %p)", interface_name, signal_name, message, size, user_data);
 
 	params = g_strsplit(message, MC_STRING_DELIMITER, 0);
+	mc_retm_if(params == NULL, "invalid shuffle mode data");
+
 	callback(params[0], (mc_shuffle_mode_e)atoi(params[1]), reciever->user_data);
 
 	g_strfreev(params);
 }
 
-static void __client_repeat_cb(char *interface_name, char *signal_name, char *message, int size, void *user_data)
+static void __client_repeat_cb(const char *interface_name, const char *signal_name, const char *message, int size, void *user_data)
 {
-	gchar **params;
+	gchar **params = NULL;
 	media_controller_reciever_s *reciever = (media_controller_reciever_s *)user_data;
 	mc_repeat_mode_changed_cb callback = (mc_repeat_mode_changed_cb)reciever->callback;
 
@@ -112,12 +119,14 @@ static void __client_repeat_cb(char *interface_name, char *signal_name, char *me
 	mc_debug("__client_repeat_cb(%s, %s, %s, %d, %p)", interface_name, signal_name, message, size, user_data);
 
 	params = g_strsplit(message, MC_STRING_DELIMITER, 0);
+	mc_retm_if(params == NULL, "invalid repeat mode data");
+
 	callback(params[0], (mc_repeat_mode_e)atoi(params[1]), reciever->user_data);
 
 	g_strfreev(params);
 }
 
-static void __client_reply_cb(char *interface_name, char *signal_name, char *message, int size, void *user_data)
+static void __client_reply_cb(const char *interface_name, const char *signal_name, const char *message, int size, void *user_data)
 {
 	gchar **params = NULL;
 	int enc_size = 0;
@@ -183,6 +192,19 @@ int mc_client_create(mc_client_h *client)
 		ret = MEDIA_CONTROLLER_ERROR_OUT_OF_MEMORY;
 		mc_error("Error allocation list %d", ret);
 		__mc_client_destroy(mc_client);
+		return ret;
+	}
+
+	/*Try Socket Activation by systemd*/
+	ret = mc_ipc_service_connect();
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+		mc_error("Failed to get mc_ipc_service_connect [%d]", ret);
+	}
+
+	/*Send Connection Msg to Server*/
+	ret = mc_ipc_send_message_to_server(MC_MSG_SERVER_CONNECTION, MC_SERVER_CONNECTION_MSG);
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+		mc_error("Failed to mc_ipc_send_message_to_server [%d]", ret);
 		return ret;
 	}
 
@@ -627,12 +649,14 @@ int mc_client_send_playback_state_command(mc_client_h client, const char *server
 		return ret;
 	}
 
-	ret = mc_ipc_send_message(mc_client->dconn, NULL, mc_util_get_interface_name(NULL, MC_SERVER, server_name), MC_DBUS_SIGNAL_NAME_PLAYBACK_STATE_CMD, message, 0);
+	char *interface_name = mc_util_get_interface_name(MC_SERVER, server_name);
+	ret = mc_ipc_send_message(mc_client->dconn, NULL, interface_name, MC_DBUS_SIGNAL_NAME_PLAYBACK_STATE_CMD, message, 0);
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("Error mc_ipc_send_message [%d]", ret);
 	}
 
 	MC_SAFE_FREE(message);
+	MC_SAFE_FREE(interface_name);
 
 	return ret;
 }
@@ -654,11 +678,13 @@ int mc_client_send_custom_command(mc_client_h client, const char *server_name, c
 		return ret;
 	}
 
-	if(callback) {
+	if (callback) {
+		char *interface_name_for_reply = mc_util_get_interface_name(MC_CLIENT, mc_client->client_name);
 		mc_client->reply_cb.callback = callback;
 		mc_client->reply_cb.user_data = user_data;
-		mc_ipc_register_listener(mc_client->listeners, mc_client->dconn, mc_util_get_interface_name(NULL, MC_CLIENT, mc_client->client_name),
+		mc_ipc_register_listener(mc_client->listeners, mc_client->dconn, interface_name_for_reply,
 		                         MC_DBUS_SIGNAL_NAME_CMD_REPLY, __client_reply_cb, (void *)&(mc_client->reply_cb));
+		MC_SAFE_FREE(interface_name_for_reply);
 	}
 
 	if (data) {
@@ -676,11 +702,13 @@ int mc_client_send_custom_command(mc_client_h client, const char *server_name, c
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}
 
-	ret = mc_ipc_send_message(mc_client->dconn, NULL, mc_util_get_interface_name(NULL, MC_SERVER, server_name), MC_DBUS_SIGNAL_NAME_CUSTOM_CMD, message, 0);
+	char *interface_name = mc_util_get_interface_name(MC_SERVER, server_name);
+	ret = mc_ipc_send_message(mc_client->dconn, NULL, interface_name, MC_DBUS_SIGNAL_NAME_CUSTOM_CMD, message, 0);
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE)
 		mc_error("Error mc_ipc_send_message [%d]", ret);
 
 	MC_SAFE_FREE(message);
+	MC_SAFE_FREE(interface_name);
 
 	return ret;
 }
@@ -697,7 +725,15 @@ int mc_client_destroy(mc_client_h client)
 		mc_error("Error mc_ipc_unregister_all_listener [%d]", ret);
 	}
 
-	g_list_free(mc_client->listeners);
+	if (mc_client->listeners != NULL) {
+		g_list_free(mc_client->listeners);
+	}
+
+	/*Send Disconnection Msg to Server*/
+	ret = mc_ipc_send_message_to_server(MC_MSG_SERVER_DISCONNECTION, MC_SERVER_DISCONNECTION_MSG);
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+		mc_error("Failed to mc_ipc_send_message_to_server [%d]", ret);
+	}
 
 	ret = __mc_client_destroy(mc_client);
 

@@ -1,15 +1,17 @@
 Name:       capi-media-controller
 Summary:    Multimedia Controller for player application
-Version:    0.0.2
+Version:    0.0.3
 Release:    1
 Group:      System/Libraries
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
 Source1:    mediacontroller.service
+Source2:    mediacontroller.socket
 Source1001: media-controller_create_db.sh
 Requires(post):  /sbin/ldconfig
 Requires(postun):  /sbin/ldconfig
 BuildRequires:  cmake
+BuildRequires:  sqlite
 BuildRequires:  pkgconfig(capi-base-common)
 BuildRequires:  pkgconfig(dlog)
 BuildRequires:  pkgconfig(glib-2.0)
@@ -19,6 +21,8 @@ BuildRequires:  pkgconfig(db-util)
 BuildRequires:  pkgconfig(aul)
 BuildRequires:  pkgconfig(bundle)
 BuildRequires:  pkgconfig(security-server)
+BuildRequires:  pkgconfig(libsystemd-daemon)
+BuildRequires:  pkgconfig(libtzplatform-config)
 
 %description
 A media controller library in SLP C API
@@ -41,7 +45,11 @@ A media controller library in SLP C API
 %setup -q
 
 %build
+export CFLAGS+=" -Wextra -Wno-array-bounds"
+export CFLAGS+=" -Wno-ignored-qualifiers -Wno-unused-parameter -Wshadow"
+export CFLAGS+=" -Wwrite-strings -Wswitch-default"
 MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
+export CFLAGS+=" -DGST_EXT_TIME_ANALYSIS -include stdint.h"
 %cmake . -DFULLVER=%{version} -DMAJORVER=${MAJORVER}
 %__make %{?jobs:-j%jobs}
 
@@ -49,21 +57,23 @@ MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
 rm -rf %{buildroot}
 %make_install
 
-mkdir -p %{buildroot}%{_unitdir}/multi-user.target.wants
+# Daemon & socket activation
+mkdir -p %{buildroot}%{_unitdir}
+mkdir -p %{buildroot}%{_unitdir}/sockets.target.wants
 install -m 644 %{SOURCE1} %{buildroot}%{_unitdir}/mediacontroller.service
-ln -s ../mediacontroller.service %{buildroot}%{_unitdir}/multi-user.target.wants/mediacontroller.service
+install -m 644 %{SOURCE2} %{buildroot}%{_unitdir}/mediacontroller.socket
+ln -s ../mediacontroller.socket %{buildroot}%{_unitdir}/sockets.target.wants/mediacontroller.socket
 
 #Create DB
 install -m 0775 %{SOURCE1001} %{buildroot}%{_bindir}/media-controller_create_db.sh
-#mkdir -p %{buildroot}/opt/usr/dbspace
-#sqlite3 %{buildroot}/opt/usr/dbspace/.media_controller.db 'PRAGMA journal_mode = PERSIST; PRAGMA user_version=1;'
+mkdir -p %{buildroot}%{TZ_SYS_DB}
+sqlite3 %{buildroot}%{TZ_SYS_DB}/.media_controller.db 'PRAGMA journal_mode = PERSIST; PRAGMA user_version=1;'
 
-mkdir -p %{buildroot}%{_libdir}/systemd/system/multi-user.target.wants
 mkdir -p %{buildroot}/usr/share/license
 cp LICENSE.APLv2.0 %{buildroot}/usr/share/license/%{name}
 
 %post -p /sbin/ldconfig
-chgrp %TZ_SYS_USER_GROUP %{_bindir}/media-controller_create_db.shchgrp -R %TZ_SYS_USER_GROUP %{TZ_SYS_DATA}/data-media
+chgrp %TZ_SYS_USER_GROUP %{_bindir}/media-controller_create_db.sh
 %postun -p /sbin/ldconfig
 
 %files
@@ -72,21 +82,21 @@ chgrp %TZ_SYS_USER_GROUP %{_bindir}/media-controller_create_db.shchgrp -R %TZ_SY
 %{_bindir}/media-controller_create_db.sh
 #%{_bindir}/*			//disable tests
 %manifest capi-media-controller.manifest
+%attr(660,system,app) %{TZ_SYS_DB}/.media_controller.db
+%attr(660,system,app) %{TZ_SYS_DB}/.media_controller.db-journal
+%config(noreplace) %{TZ_SYS_DB}/.media_controller.db
+%config(noreplace) %{TZ_SYS_DB}/.media_controller.db-journal
 /usr/share/license/%{name}
 
 %files -n mediacontroller
-%defattr(-,root,root,-)
+%defattr(-,system,system,-)
 %{_bindir}/mediacontroller
 %manifest media-controller-service.manifest
 %{_unitdir}/mediacontroller.service
-%{_unitdir}/multi-user.target.wants/mediacontroller.service
+%{_unitdir}/mediacontroller.socket
+%{_unitdir}/sockets.target.wants/mediacontroller.socket
 #change owner
-#chown 200:5000 /opt/usr/dbspace/.media_controller.db*
-#%attr(660,system,app) /opt/usr/dbspace/.media_controller.db
-#%attr(660,system,app) /opt/usr/dbspace/.media_controller.db-journal
-#%config(noreplace) /opt/usr/dbspace/.media_controller.db
-#%config(noreplace) /opt/usr/dbspace/.media_controller.db-journal
-/usr/share/license/%{name}
+#chown 200:5000 %{TZ_SYS_DB}/.media_controller.db*
 
 %files devel
 %defattr(-,root,root,-)
