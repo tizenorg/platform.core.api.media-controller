@@ -20,6 +20,7 @@
 #include <sys/un.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <tzplatform_config.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,8 +30,8 @@ extern "C" {
 #define MC_TIMEOUT_SEC_10					10		/**< Response from Server time out */
 #define MAX_MSG_SIZE				4096*2
 #define MC_SOCK_NOT_ALLOCATE 		-1
-#define MC_SOCK_ACTIVATION_PATH		"/var/run/mediacontroller/media_sa_controller"
-#define MC_IPC_PATH		"/var/run/mediacontroller/media_ipc_controller"
+//#define MC_SOCK_ACTIVATION_PATH		"/var/run/media-controller/media_sa_controller"
+#define MC_IPC_PATH					"/var/run/media-controller/media_ipc_controller"
 #define MC_SERVER_CONNECTION_MSG			"Connect"
 #define MC_SERVER_DISCONNECTION_MSG		"Disonnect"
 
@@ -56,6 +57,7 @@ typedef struct {
 typedef struct {
 	mc_msg_type_e msg_type;
 	int pid;
+	uid_t uid;
 	int result;
 	size_t msg_size; /*this is size of message below and this does not include the terminationg null byte ('\0'). */
 	char msg[MAX_MSG_SIZE];

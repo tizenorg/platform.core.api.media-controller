@@ -118,10 +118,8 @@ int mc_ipc_create_server_socket(mc_msg_port_type_e port, int *sock_fd)
 	mc_debug("Listening...");
 
 	/*change permission of sock file*/
-	if (chmod(MC_IPC_PATH, 0660) < 0)
+	if (chmod(MC_IPC_PATH, 0666) < 0)
 		mc_stderror("chmod failed");
-	if (chown(MC_IPC_PATH, 200, 5000) < 0)
-		mc_stderror("chown failed");
 
 	*sock_fd = sock;
 

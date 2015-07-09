@@ -2,11 +2,8 @@
 Description=Media controller
 
 [Service]
-User=system
-Group=system
-SmackProcessLabel=mediacontroller
 ExecStart=/usr/bin/mediacontroller
 Type=simple
 
 [Install]
-WantedBy=multi-user.target
+Also=mediacontroller.socket

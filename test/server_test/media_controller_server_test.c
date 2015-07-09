@@ -13,82 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#if 0
-#include <glib.h>
-#include <dlog.h>
-#include <media_controller_server.h>
 
-#define PACKAGE "MC_SERVER_TEST"
-
-/*===========================================================================================
-|                                             |
-|  LOCAL DEFINITIONS AND DECLARATIONS FOR MODULE                      |
-|                                               |
-========================================================================================== */
-/*---------------------------------------------------------------------------
-|    GLOBAL VARIABLE DEFINITIONS:                     |
----------------------------------------------------------------------------*/
-
-GMainLoop *g_loop;
-
-/*---------------------------------------------------------------------------
-|    LOCAL CONSTANT DEFINITIONS:                      |
----------------------------------------------------------------------------*/
-
-/*---------------------------------------------------------------------------
-|    LOCAL VARIABLE DEFINITIONS:                      |
----------------------------------------------------------------------------*/
-
-static unsigned long long  duration = 0;
-/*---------------------------------------------------------------------------
-|    LOCAL FUNCTION PROTOTYPES:                       |
----------------------------------------------------------------------------*/
-
-void quit_program(void *mc_server)
-{
-	mc_server_destroy(mc_server);
-	mc_server = NULL;
-	g_main_loop_quit(g_loop);
-}
-
-static gboolean __func1(void *mc_server)
-{
-	int i = MEDIA_TITLE;
-
-	mc_server_set_playback_state(mc_server, MEDIA_PLAYBACK_STATE_PLAYING);
-	mc_server_set_playback_position(mc_server, duration);
-	mc_server_update_playback_info(mc_server);
-
-	for (; i <= MEDIA_PICTURE; ++i) {
-		mc_server_set_metadata(mc_server, (mc_meta_e)i, "META_VALUE");
-	}
-	mc_server_update_metadata(mc_server);
-	mc_server_update_shuffle_mode(mc_server, SHUFFLE_MODE_OFF);
-	mc_server_update_repeat_mode(mc_server, REPEAT_MODE_OFF);
-	g_usleep(4000);
-	duration += 4000;
-	return TRUE;
-}
-
-int main(int argc, char *argv[])
-{
-	mc_server_h mc_server = NULL;
-	int error = MEDIA_CONTROLLER_ERROR_NONE;
-
-	error = mc_server_create(&mc_server);
-	if (MEDIA_CONTROLLER_ERROR_NONE == error && mc_server != NULL) {
-		g_timeout_add_seconds(5, __func1, (void *)mc_server);
-
-		g_loop = g_main_loop_new(NULL, FALSE);
-		g_main_loop_run(g_loop);
-		quit_program(mc_server);
-	} else {
-		dlog_print(DLOG_INFO, PACKAGE, "mc_server_create: error %d ", error);
-	}
-
-	return error;
-}
-#else
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -627,5 +552,3 @@ int main(int argc, char **argv)
 
 	return 0;
 }
-
-#endif
