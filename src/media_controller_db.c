@@ -13,14 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-#include <grp.h>
-#include <pwd.h>
-#include <stdio.h>
 #include <tzplatform_config.h>
-#include <sys/stat.h>
 
 #include "media_controller_private.h"
 #include "media_controller_db.h"
@@ -45,9 +38,6 @@ typedef enum {
 	MC_SERVER_FIELD_SHUFFLE_MODE,
 	MC_SERVER_FIELD_REPEAT_MODE,
 } server_table_field_e;
-
-#define FAT_FILEPATH_LEN_MAX		4096	/* inc null */
-#define MC_FILE_PATH_LEN_MAX		FAT_FILEPATH_LEN_MAX		 /**< File path max length (include file name) on file system */
 
 static int __mc_db_busy_handler(void *pData, int count)
 {
@@ -177,74 +167,15 @@ static int __mc_db_get_ulong_value_of_key(void *handle, const char *server_name,
 	return MEDIA_CONTROLLER_ERROR_NONE;
 }
 
-static char* __mc_get_db_name(uid_t uid)
-{
-	char result_psswd[MC_FILE_PATH_LEN_MAX];
-	char *result_psswd_rtn = NULL;
-	struct group *grpinfo = NULL;
-	char * dir = NULL;
-
-	memset(result_psswd, 0, sizeof(result_psswd));
-	if(uid == getuid())
-	{
-		strncpy(result_psswd, MC_DB_NAME, sizeof(result_psswd));
-		grpinfo = getgrnam("users");
-		if(grpinfo == NULL) {
-			mc_error("getgrnam(users) returns NULL !");
-			return NULL;
-		}
-	}
-	else
-	{
-		struct passwd *userinfo = getpwuid(uid);
-		if(userinfo == NULL) {
-			mc_error("getpwuid(%d) returns NULL !", uid);
-			return NULL;
-		}
-		grpinfo = getgrnam("users");
-		if(grpinfo == NULL) {
-			mc_error("getgrnam(users) returns NULL !");
-			return NULL;
-		}
-		// Compare git_t type and not group name
-		if (grpinfo->gr_gid != userinfo->pw_gid) {
-			mc_error("UID [%d] does not belong to 'users' group!", uid);
-			return NULL;
-		}
-		snprintf(result_psswd, sizeof(result_psswd), "%s/.applications/dbspace/.media_controller.db", userinfo->pw_dir);
-	}
-
-	dir = strrchr(result_psswd, '/');
-	if(!dir)
-		return strdup(result_psswd);
-
-	//Control if db exist create otherwise
-	if(access(dir + 1, F_OK)) {
-		int ret;
-		mkdir(dir + 1, S_IRWXU | S_IRGRP | S_IXGRP | S_IXOTH);
-		ret = chown(dir + 1, uid, grpinfo->gr_gid);
-		if (ret == -1) {
-			mc_debug("FAIL : chown %s %d.%d ", dir + 1, uid, grpinfo->gr_gid);
-			mc_stderror("FAIL : chown");
-		}
-	}
-
-	result_psswd_rtn = strdup(result_psswd);
-
-	return result_psswd_rtn;
-}
-
 int mc_db_connect(void **handle)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	sqlite3 *db_handle = NULL;
 
-	mc_debug("mc_db_connect");
-
 	mc_retvm_if(handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 
 	/*Connect DB*/
-	ret = db_util_open(__mc_get_db_name(tzplatform_getuid(TZ_USER_NAME)), &db_handle, DB_UTIL_REGISTER_HOOK_METHOD);
+	ret = db_util_open(tzplatform_mkstr(TZ_USER_DB, MC_DB_NAME), &db_handle, DB_UTIL_REGISTER_HOOK_METHOD);
 	if (SQLITE_OK != ret) {
 		mc_error("error when db open");
 		*handle = NULL;
