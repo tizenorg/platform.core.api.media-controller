@@ -185,34 +185,22 @@ static char* __mc_get_db_name(uid_t uid)
 	char * dir = NULL;
 
 	memset(result_psswd, 0, sizeof(result_psswd));
-	if(uid == getuid())
-	{
-		strncpy(result_psswd, MC_DB_NAME, sizeof(result_psswd));
-		grpinfo = getgrnam("users");
-		if(grpinfo == NULL) {
-			mc_error("getgrnam(users) returns NULL !");
-			return NULL;
-		}
+	struct passwd *userinfo = getpwuid(uid);
+	if(userinfo == NULL) {
+		mc_error("getpwuid(%d) returns NULL !", uid);
+		return NULL;
 	}
-	else
-	{
-		struct passwd *userinfo = getpwuid(uid);
-		if(userinfo == NULL) {
-			mc_error("getpwuid(%d) returns NULL !", uid);
-			return NULL;
-		}
-		grpinfo = getgrnam("users");
-		if(grpinfo == NULL) {
-			mc_error("getgrnam(users) returns NULL !");
-			return NULL;
-		}
-		// Compare git_t type and not group name
-		if (grpinfo->gr_gid != userinfo->pw_gid) {
-			mc_error("UID [%d] does not belong to 'users' group!", uid);
-			return NULL;
-		}
-		snprintf(result_psswd, sizeof(result_psswd), "%s/.applications/dbspace/.media_controller.db", userinfo->pw_dir);
+	grpinfo = getgrnam("users");
+	if(grpinfo == NULL) {
+		mc_error("getgrnam(users) returns NULL !");
+		return NULL;
 	}
+	// Compare git_t type and not group name
+	if (grpinfo->gr_gid != userinfo->pw_gid) {
+		mc_error("UID [%d] does not belong to 'users' group!", uid);
+		return NULL;
+	}
+	snprintf(result_psswd, sizeof(result_psswd), "%s/.applications/dbspace/.media_controller.db", userinfo->pw_dir);
 
 	dir = strrchr(result_psswd, '/');
 	if(!dir)
