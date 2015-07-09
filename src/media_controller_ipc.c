@@ -14,11 +14,84 @@
 * limitations under the License.
 */
 
+#include <stdio.h>
+#include <glib.h>
 #include <tzplatform_config.h>
 
 #include "media_controller_private.h"
 
 #define MAX_RETRY_COUNT 3
+#define MAX_WAIT_COUNT 3
+#define MC_SVC_NAME "mediacontroller"
+
+GMainLoop *g_wait_mainloop = NULL;
+
+static gboolean __timeout_func(gpointer data)
+{
+    mc_debug("Timeout!");
+    g_main_loop_quit((GMainLoop *) data);
+    return FALSE;
+}
+
+static void __wait_for_activate()
+{
+    int timeout_id = 0;
+    g_wait_mainloop = g_main_loop_new(NULL, FALSE);
+
+    timeout_id = g_timeout_add(500, __timeout_func, g_wait_mainloop);
+    g_main_loop_run(g_wait_mainloop);
+    g_source_remove(timeout_id);
+	g_main_loop_unref(g_wait_mainloop);
+	g_wait_mainloop = NULL;
+}
+
+/* This checks if service daemon is running */
+static gboolean __is_service_activated()
+{
+	gboolean ret = FALSE;
+	DIR *pdir;
+	struct dirent pinfo;
+	struct dirent *result = NULL;
+
+	pdir = opendir("/proc");
+	if (pdir == NULL) {
+		mc_error("err: NO_DIR");
+		return FALSE;
+	}
+
+	while (!readdir_r(pdir, &pinfo, &result)) {
+		if (result == NULL)
+			break;
+
+		if (pinfo.d_type != 4 || pinfo.d_name[0] == '.'
+		    || pinfo.d_name[0] > 57)
+			continue;
+
+		FILE *fp;
+		char buff[128];
+		char path[128];
+
+		snprintf(path, sizeof(path), "/proc/%s/status", pinfo.d_name);
+		fp = fopen(path, "rt");
+		if (fp) {
+			if (fgets(buff, 128, fp) == NULL)
+				mc_error("fgets failed");
+			fclose(fp);
+
+			if (strstr(buff, MC_SVC_NAME)) {
+				mc_error("%s proc is already running", buff);
+				ret = TRUE;
+				break;
+			}
+		} else {
+			mc_error("Can't read file [%s]", path);
+		}
+	}
+
+	closedir(pdir);
+
+	return ret;
+}
 
 static char *__make_key_for_map(const char *main_key, const char *sub_key)
 {
@@ -364,6 +437,7 @@ int mc_ipc_service_connect(void)
 	int sockfd = -1;
 	mc_sock_info_s sock_info;
 	struct sockaddr_un serv_addr;
+	unsigned int retry = 0;
 
 	/*Create Socket*/
 	ret = mc_ipc_create_client_socket(MC_TIMEOUT_SEC_10, &sock_info);
@@ -373,7 +447,7 @@ int mc_ipc_service_connect(void)
 	/*Set server Address*/
 	memset(&serv_addr, 0, sizeof(serv_addr));
 	serv_addr.sun_family = AF_UNIX;
-	strncpy(serv_addr.sun_path, MC_SOCK_ACTIVATION_PATH, sizeof(serv_addr.sun_path) - 1);
+	strncpy(serv_addr.sun_path, MC_IPC_PATH, sizeof(serv_addr.sun_path) - 1);
 
 	/* Connecting to the media db server */
 	if (connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
@@ -385,5 +459,10 @@ int mc_ipc_service_connect(void)
 	mc_debug("CONNECT OK");
 
 	mc_ipc_delete_client_socket(&sock_info);
+
+	do {
+		__wait_for_activate();
+	} while((__is_service_activated() == FALSE) && (retry++ < MAX_WAIT_COUNT));
+
 	return ret;
 }
