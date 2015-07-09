@@ -92,6 +92,11 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 	}
 
 	if (recv_msg.msg_type == MC_MSG_DB_UPDATE) {
+		/* Connect media controller DB*/
+		if(mc_db_util_connect(&(mc_svc_data->db_handle), recv_msg.uid) != MEDIA_CONTROLLER_ERROR_NONE) {
+			mc_error("Failed to connect DB");
+			goto ERROR;
+		}
 		sql_query = strndup(recv_msg.msg, recv_msg.msg_size);
 		if (sql_query != NULL) {
 			ret = mc_db_util_update_db(mc_svc_data->db_handle, sql_query);
@@ -102,6 +107,10 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 			MC_SAFE_FREE(sql_query);
 		} else {
 			send_msg = MEDIA_CONTROLLER_ERROR_OUT_OF_MEMORY;
+		}
+		/* Disconnect DB*/
+		if(mc_db_util_disconnect(mc_svc_data->db_handle) != MEDIA_CONTROLLER_ERROR_NONE) {
+			mc_error("Failed to disconnect DB");
 		}
 	} else if (recv_msg.msg_type == MC_MSG_CLIENT_SET) {
 		/* check privileage */
@@ -220,13 +229,6 @@ gboolean mc_svc_thread(void *data)
 		return FALSE;
 	}
 
-	/* Connect Media DB*/
-	if (mc_db_util_connect(&(mc_svc_data->db_handle)) != MEDIA_CONTROLLER_ERROR_NONE) {
-		mc_error("Failed to connect DB");
-		close(sockfd);
-		return FALSE;
-	}
-
 	/* Create list for command*/
 	mc_svc_data->mc_svc_list = g_list_alloc();
 	if (mc_svc_data->mc_svc_list == NULL) {
@@ -266,8 +268,6 @@ gboolean mc_svc_thread(void *data)
 	g_io_channel_shutdown(channel,  FALSE, NULL);
 	g_io_channel_unref(channel);
 
-	/* Disconnect DB*/
-	mc_db_util_disconnect(mc_svc_data->db_handle);
 
 	if (mc_svc_data->mc_svc_list != NULL) {
 		int i = 0;

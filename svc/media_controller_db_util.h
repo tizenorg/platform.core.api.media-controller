@@ -21,12 +21,12 @@
 #include <sqlite3.h>
 #include <tzplatform_config.h>
 
-#define MC_DB_NAME tzplatform_mkpath(TZ_SYS_DB, ".media_controller.db")
+#define MC_DB_NAME ".media_controller.db"
 
 #define SQLITE3_SAFE_FREE(sql_string) 	{if(sql_string) { sqlite3_free(sql_string); sql_string = NULL;}}
 #define SQLITE3_FINALIZE(x)	{if(x != NULL) {sqlite3_finalize(x);}}
 
-int mc_db_util_connect(void **handle);
+int mc_db_util_connect(void **handle, uid_t uid);
 int mc_db_util_update_db(void *handle, const char *sql_str);
 int mc_db_util_disconnect(void *handle);
 
