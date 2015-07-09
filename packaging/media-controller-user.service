@@ -1,0 +1,12 @@
+[Unit]
+Description=Media controller user
+
+[Service]
+Type=idle
+CPUAccounting=true
+CPUQuota=5%
+ExecStartPre=/usr/bin/sleep 5
+ExecStart=/usr/bin/sh -c "/usr/bin/media-controller_create_db.sh"
+
+[Install]
+WantedBy=default.target

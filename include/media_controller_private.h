@@ -47,11 +47,11 @@ extern "C" {
 #define FONT_COLOR_GRAY     "\033[37m"
 
 #define mc_debug(fmt, arg...) do { \
-		LOGD(FONT_COLOR_RESET""fmt"", ##arg);     \
+		LOGE(FONT_COLOR_RESET""fmt"", ##arg);     \
 	} while (0)
 
 #define mc_info(fmt, arg...) do { \
-		LOGI(FONT_COLOR_GREEN""fmt"", ##arg);     \
+		LOGE(FONT_COLOR_GREEN""fmt"", ##arg);     \
 	} while (0)
 
 #define mc_error(fmt, arg...) do { \
@@ -59,11 +59,11 @@ extern "C" {
 	} while (0)
 
 #define mc_debug_fenter() do { \
-		LOGD(FONT_COLOR_RESET"<Enter>");     \
+		LOGE(FONT_COLOR_RESET"<Enter>");     \
 	} while (0)
 
 #define mc_debug_fleave() do { \
-		LOGD(FONT_COLOR_RESET"<Leave>");     \
+		LOGE(FONT_COLOR_RESET"<Leave>");     \
 	} while (0)
 
 #define mc_retm_if(expr, fmt, arg...) do { \
@@ -218,6 +218,7 @@ int mc_ipc_unregister_all_listener(GList *manage_list, GDBusConnection *connecti
 int mc_ipc_send_message(GDBusConnection *connection, const char *dbus_name, const char *interface_name, const char* signal_name, const char* message, int flags);
 int mc_ipc_send_message_to_server(mc_msg_type_e msg_type, const char *request_msg);
 int mc_ipc_service_connect(void);
+int mc_ipc_service_disconnect(void);
 
 #ifdef __cplusplus
 }

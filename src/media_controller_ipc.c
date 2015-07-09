@@ -14,6 +14,8 @@
 * limitations under the License.
 */
 
+#include <tzplatform_config.h>
+
 #include "media_controller_private.h"
 
 #define MAX_RETRY_COUNT 3
@@ -290,6 +292,7 @@ int mc_ipc_send_message_to_server(mc_msg_type_e msg_type, const char *request_ms
 	memset((void *)&send_msg, 0, sizeof(mc_comm_msg_s));
 
 	send_msg.msg_type = msg_type;
+	send_msg.uid = tzplatform_getuid(TZ_USER_NAME);
 	send_msg.msg_size = request_msg_size;
 	strncpy(send_msg.msg, request_msg, sizeof(send_msg.msg) - 1);
 
@@ -370,7 +373,7 @@ int mc_ipc_service_connect(void)
 	/*Set server Address*/
 	memset(&serv_addr, 0, sizeof(serv_addr));
 	serv_addr.sun_family = AF_UNIX;
-	strncpy(serv_addr.sun_path, MC_SOCK_ACTIVATION_PATH, sizeof(serv_addr.sun_path) - 1);
+	strncpy(serv_addr.sun_path, MC_IPC_PATH, sizeof(serv_addr.sun_path) - 1);
 
 	/* Connecting to the media db server */
 	if (connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {

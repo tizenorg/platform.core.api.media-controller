@@ -1,15 +1,16 @@
 Name:       capi-media-controller
 Summary:    Multimedia Controller for player application
-Version:    0.0.3
+Version:    0.0.4
 Release:    1
 Group:      System/Libraries
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
 Source1:    mediacontroller.service
 Source2:    mediacontroller.socket
+Source3:    media-controller-user.service
 Source1001: media-controller_create_db.sh
-Requires(post):  /sbin/ldconfig
-Requires(postun):  /sbin/ldconfig
+#Requires(post):  /sbin/ldconfig
+#Requires(postun):  /sbin/ldconfig
 BuildRequires:  cmake
 BuildRequires:  sqlite
 BuildRequires:  pkgconfig(capi-base-common)
@@ -63,29 +64,28 @@ install -m 644 %{SOURCE1} %{buildroot}%{_unitdir}/mediacontroller.service
 install -m 644 %{SOURCE2} %{buildroot}%{_unitdir}/mediacontroller.socket
 ln -s ../mediacontroller.socket %{buildroot}%{_unitdir}/sockets.target.wants/mediacontroller.socket
 
-#Create DB
+# Setup DB creation in user session
+mkdir -p %{buildroot}%{_unitdir_user}/default.target.wants/
+install -m 644 %{SOURCE3} %{buildroot}%{_unitdir_user}/media-controller-user.service
+ln -sf ../media-controller-user.service %{buildroot}%{_unitdir_user}/default.target.wants/media-controller-user.service
+
+# Create DB for multi-user
 mkdir -p %{buildroot}%{_bindir}
 install -m 0775 %{SOURCE1001} %{buildroot}%{_bindir}/media-controller_create_db.sh
-mkdir -p %{buildroot}%{TZ_SYS_DB}
-sqlite3 %{buildroot}%{TZ_SYS_DB}/.media_controller.db 'PRAGMA journal_mode = PERSIST; PRAGMA user_version=1;'
 
 mkdir -p %{buildroot}/usr/share/license
 cp LICENSE.APLv2.0 %{buildroot}/usr/share/license/%{name}
 
-%post -p /sbin/ldconfig
+%post
 chgrp %TZ_SYS_USER_GROUP %{_bindir}/media-controller_create_db.sh
-%postun -p /sbin/ldconfig
+%postun
 
 %files
 %defattr(-,root,root,-)
 %{_libdir}/*.so.*
 %{_bindir}/media-controller_create_db.sh
 #%{_bindir}/*			//disable tests
-%manifest capi-media-controller.manifest
-%attr(660,system,app) %{TZ_SYS_DB}/.media_controller.db
-%attr(660,system,app) %{TZ_SYS_DB}/.media_controller.db-journal
-%config(noreplace) %{TZ_SYS_DB}/.media_controller.db
-%config(noreplace) %{TZ_SYS_DB}/.media_controller.db-journal
+%manifest %{name}.manifest
 /usr/share/license/%{name}
 
 %files -n mediacontroller
@@ -95,8 +95,8 @@ chgrp %TZ_SYS_USER_GROUP %{_bindir}/media-controller_create_db.sh
 %{_unitdir}/mediacontroller.service
 %{_unitdir}/mediacontroller.socket
 %{_unitdir}/sockets.target.wants/mediacontroller.socket
-#change owner
-#chown 200:5000 %{TZ_SYS_DB}/.media_controller.db*
+%{_unitdir_user}/media-controller-user.service
+%{_unitdir_user}/default.target.wants/media-controller-user.service
 
 %files devel
 %defattr(-,root,root,-)

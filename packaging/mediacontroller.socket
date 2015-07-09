@@ -4,9 +4,7 @@ Description=MediaController Service socket
 [Socket]
 SocketUser=system
 SocketGroup=system
-ListenStream=/var/run/mediacontroller/media_sa_controller
-SmackLabelIPIn=mediacontroller
-SmackLabelIPOut=mediacontroller
+ListenStream=/var/run/media-controller/media_ipc_controller
 Service=mediacontroller.service
 
 [Install]

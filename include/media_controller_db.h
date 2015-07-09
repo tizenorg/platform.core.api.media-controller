@@ -21,7 +21,8 @@
 #include <sqlite3.h>
 #include <tzplatform_config.h>
 
-#define MC_DB_NAME tzplatform_mkpath(TZ_SYS_DB, ".media_controller.db")
+//#define MC_DB_NAME tzplatform_mkpath(TZ_SYS_DB, ".media_controller.db")
+#define MC_DB_NAME ".media_controller.db"
 
 #define MC_DB_TABLE_SERVER_LIST		"server_list"
 #define MC_DB_TABLE_LATEST_SERVER		"latest_server"
