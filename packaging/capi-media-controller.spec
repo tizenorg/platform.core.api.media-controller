@@ -1,6 +1,6 @@
 Name:       capi-media-controller
 Summary:    Multimedia Controller for player application
-Version:    0.0.4
+Version:    0.0.5
 Release:    1
 Group:      System/Libraries
 License:    Apache-2.0
@@ -9,8 +9,6 @@ Source1:    mediacontroller.service
 Source2:    mediacontroller.socket
 Source3:    media-controller-user.service
 Source1001: media-controller_create_db.sh
-#Requires(post):  /sbin/ldconfig
-#Requires(postun):  /sbin/ldconfig
 BuildRequires:  cmake
 BuildRequires:  sqlite
 BuildRequires:  pkgconfig(capi-base-common)
