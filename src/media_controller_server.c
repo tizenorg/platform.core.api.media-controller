@@ -17,21 +17,19 @@
 #include "media_controller_private.h"
 #include "media_controller_db.h"
 
-static int __mc_server_create(media_controller_server_s **mc_server, const char *server_name)
+static int __mc_server_create(media_controller_server_s **mc_server)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	media_controller_server_s *_server = NULL;
 
 	mc_retvm_if(mc_server == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
-	mc_retvm_if(server_name == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "service_name is NULL");
 
 	_server = (media_controller_server_s *)calloc(1, sizeof(media_controller_server_s));
 	mc_retvm_if(_server == NULL, MEDIA_CONTROLLER_ERROR_OUT_OF_MEMORY, "Error allocation memory");
 
-	_server->server_name = strdup(server_name);
-	if (_server->server_name == NULL) {
-		mc_error("Error allocation memory");
-		ret = MEDIA_CONTROLLER_ERROR_OUT_OF_MEMORY;
+	ret = mc_util_get_own_name(&(_server->server_name));
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+		mc_error("Failed to get server_name [%d]", ret);
 		goto ERROR;
 	}
 
@@ -54,6 +52,13 @@ static int __mc_server_create(media_controller_server_s **mc_server, const char 
 		goto ERROR;
 	}
 
+	_server->listeners = g_list_alloc();
+	if (_server->listeners == NULL) {
+		ret = MEDIA_CONTROLLER_ERROR_OUT_OF_MEMORY;
+		mc_error("Error allocation list %d", ret);
+		goto ERROR;
+	}
+
 	*mc_server = _server;
 
 	return MEDIA_CONTROLLER_ERROR_NONE;
@@ -64,6 +69,9 @@ ERROR:
 
 	if (_server->db_handle)
 		mc_db_disconnect(_server->db_handle);
+
+	if (_server->listeners)
+		g_list_free(_server->listeners);
 
 	MC_SAFE_FREE(_server->server_name);
 	MC_SAFE_FREE(_server->metadata);
@@ -88,6 +96,10 @@ static int __mc_server_destoy(media_controller_server_s *mc_server)
 		ret = mc_db_disconnect(mc_server->db_handle);
 		if (ret != MEDIA_CONTROLLER_ERROR_NONE)
 			mc_error("fail to mc_db_disconnect");
+	}
+
+	if (mc_server->listeners != NULL) {
+		g_list_free(mc_server->listeners);
 	}
 
 	MC_SAFE_FREE(mc_server->server_name);
@@ -539,7 +551,6 @@ int mc_server_send_command_reply(mc_server_h server, const char *client_name, in
 int mc_server_create(mc_server_h *server)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
-	char *server_name = NULL;
 	media_controller_server_s *mc_server = NULL;
 	bool table_exist = FALSE;
 
@@ -547,42 +558,16 @@ int mc_server_create(mc_server_h *server)
 
 	mc_retvm_if(server == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is null");
 
-	mc_server = (media_controller_server_s *)calloc(1, sizeof(media_controller_server_s));
-	mc_retvm_if(mc_server == NULL, MEDIA_CONTROLLER_ERROR_OUT_OF_MEMORY, "Error allocation memory");
-
 	/*Try Socket Activation by systemd*/
 	ret = mc_ipc_service_connect();
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("Failed to get mc_ipc_service_connect [%d]", ret);
-	}
-
-	/*Send Connection Msg to Server*/
-	ret = mc_ipc_send_message_to_server(MC_MSG_SERVER_CONNECTION, MC_SERVER_CONNECTION_MSG);
-	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-		mc_error("Failed to mc_ipc_send_message_to_server [%d]", ret);
 		return ret;
 	}
 
-	ret = mc_util_get_own_name(&server_name);
-	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-		mc_error("Failed to get server_name [%d]", ret);
-		return ret;
-	}
-
-	ret = __mc_server_create(&mc_server, server_name);
+	ret = __mc_server_create(&mc_server);
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("fail __mc_server_create [%d]", ret);
-		MC_SAFE_FREE(server_name);
-		__mc_server_destoy(mc_server);
-		return ret;
-	}
-
-	MC_SAFE_FREE(server_name);
-
-	mc_server->listeners = g_list_alloc();
-	if (mc_server->listeners == NULL) {
-		ret = MEDIA_CONTROLLER_ERROR_OUT_OF_MEMORY;
-		mc_error("Error allocation list %d", ret);
 		__mc_server_destoy(mc_server);
 		return ret;
 	}
@@ -661,10 +646,6 @@ int mc_server_destroy(mc_server_h server)
 	ret = mc_ipc_unregister_all_listener(mc_server->listeners, mc_server->dconn);
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("fail mc_ipc_unregister_all_listener [%d]", ret);
-	}
-
-	if (mc_server->listeners != NULL) {
-		g_list_free(mc_server->listeners);
 	}
 
 	ret = mc_db_delete_server_address_from_table(mc_server->db_handle, MC_DB_TABLE_SERVER_LIST, mc_server->server_name);

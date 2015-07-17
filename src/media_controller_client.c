@@ -152,6 +152,60 @@ static void __client_reply_cb(const char *interface_name, const char *signal_nam
 	g_strfreev(params);
 }
 
+static int __mc_client_create(media_controller_client_s **mc_client)
+{
+	int ret = MEDIA_CONTROLLER_ERROR_NONE;
+	media_controller_client_s *_client = NULL;
+
+	mc_retvm_if(mc_client == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
+
+	_client = (media_controller_client_s *)calloc(1, sizeof(media_controller_client_s));
+	mc_retvm_if(_client == NULL, MEDIA_CONTROLLER_ERROR_OUT_OF_MEMORY, "Error allocation memory");
+
+	ret = mc_util_get_own_name(&(_client->client_name));
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+		mc_error("Filed to get client name %d", ret);
+		goto Error;
+	}
+
+	ret = mc_ipc_get_dbus_connection(&(_client->dconn), &(_client->dref_count));
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+		mc_error("error in client init %d", ret);
+		goto Error;
+	}
+
+	ret = mc_db_connect(&_client->db_handle);
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+		mc_error("error in connecting to DB %d", ret);
+		goto Error;
+	}
+
+	_client->listeners = g_list_alloc();
+	if (_client->listeners == NULL) {
+		ret = MEDIA_CONTROLLER_ERROR_OUT_OF_MEMORY;
+		mc_error("Error allocation list %d", ret);
+		goto Error;
+	}
+
+	*mc_client = _client;
+
+	return MEDIA_CONTROLLER_ERROR_NONE;
+Error:
+	if (_client->dconn)
+		mc_ipc_unref_dbus_connection(_client->dconn, &_client->dref_count);
+
+	if (_client->db_handle)
+		mc_db_disconnect(_client->db_handle);
+
+	if (_client->listeners)
+		g_list_free(_client->listeners);
+
+	MC_SAFE_FREE(_client->client_name);
+	MC_SAFE_FREE(_client);
+
+	return ret;
+}
+
 static int __mc_client_destroy(media_controller_client_s *mc_client)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
@@ -170,6 +224,10 @@ static int __mc_client_destroy(media_controller_client_s *mc_client)
 			mc_error("fail to mc_db_disconnect");
 	}
 
+	if (mc_client->listeners != NULL) {
+		g_list_free(mc_client->listeners);
+	}
+
 	MC_SAFE_FREE(mc_client->client_name);
 	MC_SAFE_FREE(mc_client);
 
@@ -184,48 +242,16 @@ int mc_client_create(mc_client_h *client)
 
 	mc_retvm_if(client == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 
-	mc_client = (media_controller_client_s *)calloc(1, sizeof(media_controller_client_s));
-	mc_retvm_if(mc_client == NULL, MEDIA_CONTROLLER_ERROR_OUT_OF_MEMORY, "Error allocation memory");
-
-	mc_client->listeners = g_list_alloc();
-	if (mc_client->listeners == NULL) {
-		ret = MEDIA_CONTROLLER_ERROR_OUT_OF_MEMORY;
-		mc_error("Error allocation list %d", ret);
-		__mc_client_destroy(mc_client);
-		return ret;
-	}
-
 	/*Try Socket Activation by systemd*/
 	ret = mc_ipc_service_connect();
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("Failed to get mc_ipc_service_connect [%d]", ret);
-	}
-
-	/*Send Connection Msg to Server*/
-	ret = mc_ipc_send_message_to_server(MC_MSG_SERVER_CONNECTION, MC_SERVER_CONNECTION_MSG);
-	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-		mc_error("Failed to mc_ipc_send_message_to_server [%d]", ret);
 		return ret;
 	}
 
-	ret = mc_util_get_own_name(&(mc_client->client_name));
+	ret = __mc_client_create(&mc_client);
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-		mc_error("Filed to get client name %d", ret);
-		__mc_client_destroy(mc_client);
-		return ret;
-	}
-
-	ret = mc_ipc_get_dbus_connection(&(mc_client->dconn), &(mc_client->dref_count));
-	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-		mc_error("error in client init %d", ret);
-		__mc_client_destroy(mc_client);
-		return ret;
-	}
-
-	ret = mc_db_connect(&mc_client->db_handle);
-	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-		mc_error("error in connecting to DB %d", ret);
-		__mc_client_destroy(mc_client);
+		mc_error("Failed __mc_server_create [%d]", ret);
 		return ret;
 	}
 
@@ -723,10 +749,6 @@ int mc_client_destroy(mc_client_h client)
 	ret = mc_ipc_unregister_all_listener(mc_client->listeners, mc_client->dconn);
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("Error mc_ipc_unregister_all_listener [%d]", ret);
-	}
-
-	if (mc_client->listeners != NULL) {
-		g_list_free(mc_client->listeners);
 	}
 
 	/*Send Disconnection Msg to Server*/
