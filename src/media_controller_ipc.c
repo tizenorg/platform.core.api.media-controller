@@ -309,7 +309,7 @@ int mc_ipc_send_message_to_server(mc_msg_type_e msg_type, const char *request_ms
 	memset((void *)&send_msg, 0, sizeof(mc_comm_msg_s));
 
 	send_msg.msg_type = msg_type;
-	send_msg.uid = tzplatform_getuid(TZ_USER_NAME);
+	send_msg.uid = getuid();
 	send_msg.msg_size = request_msg_size;
 	strncpy(send_msg.msg, request_msg, sizeof(send_msg.msg) - 1);
 
@@ -409,10 +409,16 @@ int mc_ipc_service_connect(void)
 
 	while((__is_service_activated() == FALSE) && (retrycount++ < MAX_WAIT_COUNT)) {
 		usleep(200000);
-		mc_error("retry count: %d", retrycount);
+		mc_error("[No-Error] retry count [%d]", retrycount);
 	}
 
-	mc_debug("CONNECT OK");
+	if (retrycount < MAX_WAIT_COUNT) {
+		mc_debug("CONNECT OK");
+		ret = MEDIA_CONTROLLER_ERROR_NONE;
+	} else {
+		mc_error("CONNECT FAIL");
+		ret = MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+	}
 
 	return ret;
 }

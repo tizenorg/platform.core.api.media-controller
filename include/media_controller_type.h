@@ -36,35 +36,30 @@ extern "C" {
  */
 
 /**
- * @ingroup CAPI_MEDIA_CONTROLLER_MODULE
  * @brief The structure type for the media server handle.
  * @since_tizen 2.4
  */
 typedef void *mc_server_h;
 
 /**
- * @ingroup CAPI_MEDIA_CONTROLLER_MODULE
  * @brief The structure type for the media client handle.
  * @since_tizen 2.4
  */
 typedef void *mc_client_h;
 
 /**
- * @ingroup CAPI_MEDIA_CONTROLLER_MODULE
  * @brief The structure type for the media controller playback handle.
  * @since_tizen 2.4
  */
 typedef void *mc_playback_h;
 
 /**
- * @ingroup CAPI_MEDIA_CONTROLLER_MODULE
  * @brief The structure type for the media controller metadata handle.
  * @since_tizen 2.4
  */
 typedef void *mc_metadata_h;
 
 /**
- * @ingroup CAPI_MEDIA_CONTROLLER_MODULE
  * @brief Enumeration for the media controller error.
  * @since_tizen 2.4
  */
@@ -78,7 +73,6 @@ typedef enum {
 } mc_error_e;
 
 /**
- * @ingroup CAPI_MEDIA_CONTROLLER_MODULE
  * @brief Enumeration for the media controller server state.
  * @since_tizen 2.4
  */
@@ -89,58 +83,54 @@ typedef enum {
 } mc_server_state_e;
 
 /**
- * @ingroup CAPI_MEDIA_CONTROLLER_MODULE
  * @brief Enumeration for the media meta info.
  * @since_tizen 2.4
  */
 typedef enum {
-	MEDIA_TITLE = 0,					/** < Title */
-	MEDIA_ARTIST,						/** < Artist */
-	MEDIA_ALBUM,						/** < Album */
-	MEDIA_AUTHOR,						/** < Author */
-	MEDIA_GENRE,						/** < Genre */
-	MEDIA_DURATION,						/** < Duration */
-	MEDIA_DATE,							/** < Date */
-	MEDIA_COPYRIGHT,					/** < Copyright */
-	MEDIA_DESCRIPTION,					/** < Description */
-	MEDIA_TRACK_NUM,					/** < Track Number */
-	MEDIA_PICTURE,						/** < Picture. Album Art */
+	MEDIA_TITLE = 0,					/**< Title */
+	MEDIA_ARTIST,						/**< Artist */
+	MEDIA_ALBUM,						/**< Album */
+	MEDIA_AUTHOR,						/**< Author */
+	MEDIA_GENRE,						/**< Genre */
+	MEDIA_DURATION,						/**< Duration */
+	MEDIA_DATE,							/**< Date */
+	MEDIA_COPYRIGHT,					/**< Copyright */
+	MEDIA_DESCRIPTION,					/**< Description */
+	MEDIA_TRACK_NUM,					/**< Track Number */
+	MEDIA_PICTURE,						/**< Picture. Album Art */
 } mc_meta_e;
 
 /**
- * @ingroup CAPI_MEDIA_CONTROLLER_MODULE
  * @brief Enumeration for the media playback state.
  * @since_tizen 2.4
  */
 typedef enum {
-	MEDIA_PLAYBACK_STATE_NONE = 0,				/** < None */
-	MEDIA_PLAYBACK_STATE_PLAYING,				/** < Play */
-	MEDIA_PLAYBACK_STATE_PAUSED,				/** < Pause */
-	MEDIA_PLAYBACK_STATE_STOPPED,				/** < Stop */
-	MEDIA_PLAYBACK_STATE_NEXT_FILE,			/** < Next file */
-	MEDIA_PLAYBACK_STATE_PREV_FILE,			/** < Previous file */
-	MEDIA_PLAYBACK_STATE_FAST_FORWARD,		/** < Fast forward */
-	MEDIA_PLAYBACK_STATE_REWIND,				/** < Rewind */
+	MEDIA_PLAYBACK_STATE_NONE = 0,				/**< None */
+	MEDIA_PLAYBACK_STATE_PLAYING,				/**< Play */
+	MEDIA_PLAYBACK_STATE_PAUSED,				/**< Pause */
+	MEDIA_PLAYBACK_STATE_STOPPED,				/**< Stop */
+	MEDIA_PLAYBACK_STATE_NEXT_FILE,			/**< Next file */
+	MEDIA_PLAYBACK_STATE_PREV_FILE,			/**< Previous file */
+	MEDIA_PLAYBACK_STATE_FAST_FORWARD,		/**< Fast forward */
+	MEDIA_PLAYBACK_STATE_REWIND,				/**< Rewind */
 } mc_playback_states_e;
 
 /**
- * @ingroup CAPI_MEDIA_CONTROLLER_MODULE
  * @brief Enumeration for the shuffle mode.
  * @since_tizen 2.4
  */
 typedef enum {
-	SHUFFLE_MODE_ON = 0,				/** < Shuffle mode on */
-	SHUFFLE_MODE_OFF,					/** < Shuffle mode off */
+	SHUFFLE_MODE_ON = 0,				/**< Shuffle mode on */
+	SHUFFLE_MODE_OFF,					/**< Shuffle mode off */
 } mc_shuffle_mode_e;
 
 /**
- * @ingroup CAPI_MEDIA_CONTROLLER_MODULE
  * @brief Enumeration for the repeat mode.
  * @since_tizen 2.4
  */
 typedef enum {
-	REPEAT_MODE_ON = 0,					/** < Repeat mode on */
-	REPEAT_MODE_OFF,					/** < Repeat mode off */
+	REPEAT_MODE_ON = 0,					/**< Repeat mode on */
+	REPEAT_MODE_OFF,					/**< Repeat mode off */
 } mc_repeat_mode_e;
 
 /**
