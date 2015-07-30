@@ -156,7 +156,7 @@ int mc_ipc_receive_message_tcp(int client_sock, mc_comm_msg_s *recv_msg)
 		}
 	}
 
-	mc_debug("receive msg from [%d] %d, %s", recv_msg->pid, recv_msg->msg_type, recv_msg->msg);
+	mc_debug("receive msg from [%d(%d)] %d, %s", recv_msg->pid, recv_msg->uid, recv_msg->msg_type, recv_msg->msg);
 
 	return MEDIA_CONTROLLER_ERROR_NONE;
 }

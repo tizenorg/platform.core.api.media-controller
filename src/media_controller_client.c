@@ -591,7 +591,7 @@ int mc_client_get_server_playback_info(mc_client_h client, const char *server_na
 	media_controller_client_s *mc_client = (media_controller_client_s *)client;
 
 	mc_retvm_if(mc_client == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
-	mc_retvm_if(server_name == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "server_name is NULL");
+	mc_retvm_if(!MC_STRING_VALID(server_name), MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid server_name");
 	mc_retvm_if(playback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "playback Handle is NULL");
 
 	ret = mc_db_get_playback_info(mc_client->db_handle, server_name, playback);
@@ -606,7 +606,7 @@ int mc_client_get_server_metadata(mc_client_h client, const char *server_name, m
 	media_controller_client_s *mc_client = (media_controller_client_s *)client;
 
 	mc_retvm_if(mc_client == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
-	mc_retvm_if(server_name == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "server_name is NULL");
+	mc_retvm_if(!MC_STRING_VALID(server_name), MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid server_name");
 	mc_retvm_if(metadata == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "metadata Handle is NULL");
 
 	ret = mc_db_get_metadata_info(mc_client->db_handle, server_name, metadata);
@@ -621,7 +621,7 @@ int mc_client_get_server_shuffle_mode(mc_client_h client, const char *server_nam
 	media_controller_client_s *mc_client = (media_controller_client_s *)client;
 
 	mc_retvm_if(mc_client == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
-	mc_retvm_if(server_name == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "server_name is NULL");
+	mc_retvm_if(!MC_STRING_VALID(server_name), MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid server_name");
 	mc_retvm_if(mode == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "mode is NULL");
 
 	ret = mc_db_get_shuffle_mode(mc_client->db_handle, server_name, mode);
@@ -635,7 +635,7 @@ int mc_client_get_server_repeat_mode(mc_client_h client, const char *server_name
 	media_controller_client_s *mc_client = (media_controller_client_s *)client;
 
 	mc_retvm_if(mc_client == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
-	mc_retvm_if(server_name == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "server_name is NULL");
+	mc_retvm_if(!MC_STRING_VALID(server_name), MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid server_name");
 	mc_retvm_if(mode == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "mode is NULL");
 
 	ret = mc_db_get_repeat_mode(mc_client->db_handle, server_name, mode);
@@ -663,7 +663,7 @@ int mc_client_send_playback_state_command(mc_client_h client, const char *server
 	media_controller_client_s *mc_client = (media_controller_client_s *)client;
 
 	mc_retvm_if(mc_client == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
-	mc_retvm_if(server_name == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "server_name is NULL");
+	mc_retvm_if(!MC_STRING_VALID(server_name), MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid server_name");
 	mc_retvm_if(((state < MEDIA_PLAYBACK_STATE_PLAYING) || (state > MEDIA_PLAYBACK_STATE_REWIND)), MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "state is invalid");
 
 	message = g_strdup_printf("%s%s%d", mc_client->client_name, MC_STRING_DELIMITER, state);
@@ -696,7 +696,7 @@ int mc_client_send_custom_command(mc_client_h client, const char *server_name, c
 	media_controller_client_s *mc_client = (media_controller_client_s *)client;
 
 	mc_retvm_if(mc_client == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
-	mc_retvm_if(server_name == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "server_name is NULL");
+	mc_retvm_if(!MC_STRING_VALID(server_name), MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid server_name");
 
 	ret = mc_util_set_command_availabe(mc_client->client_name, MC_COMMAND_CUSTOM, command);
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
