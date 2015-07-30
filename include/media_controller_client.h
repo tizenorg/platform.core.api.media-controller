@@ -121,7 +121,6 @@ typedef void (*mc_repeat_mode_changed_cb)(const char *server_name, mc_repeat_mod
 typedef bool (*mc_activated_server_cb)(const char *server_name, void *user_data);
 
 /**
- * @ingroup CAPI_MEDIA_CONTROLLER_MODULE
  * @brief Called when receiving the command processing result from the server.
  * @since_tizen 2.4
  *
