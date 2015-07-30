@@ -44,10 +44,7 @@ static void _mc_util_check_valid_name(const char *name, char **new_name)
 		    (old_word[i] == '.' && i != 0)) {
 			new_word[i] = old_word[i];
 		} else {
-			if (i - 1 > 1 && new_word[i - 1] != '.')
-				new_word[i] = '_';
-			else
-				new_word[i] = 'x';
+			new_word[i] = 'x';
 		}
 	}
 

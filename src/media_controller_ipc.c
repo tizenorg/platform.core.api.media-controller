@@ -409,10 +409,16 @@ int mc_ipc_service_connect(void)
 
 	while((__is_service_activated() == FALSE) && (retrycount++ < MAX_WAIT_COUNT)) {
 		usleep(200000);
-		mc_error("retry count: %d", retrycount);
+		mc_error("[No-Error] retry count [%d]", retrycount);
 	}
 
-	mc_debug("CONNECT OK");
+	if (retrycount < MAX_WAIT_COUNT) {
+		mc_debug("CONNECT OK");
+		ret = MEDIA_CONTROLLER_ERROR_NONE;
+	} else {
+		mc_error("CONNECT FAIL");
+		ret = MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+	}
 
 	return ret;
 }
