@@ -128,7 +128,8 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 			}
 		}
 		if (!is_duplicated) {
-			mc_svc_data->mc_svc_list = g_list_append(mc_svc_data->mc_svc_list, recv_msg.msg);
+			char *input_data = strdup(recv_msg.msg);
+			mc_svc_data->mc_svc_list = g_list_append(mc_svc_data->mc_svc_list, input_data);
 		}
 	} else if (recv_msg.msg_type == MC_MSG_CLIENT_GET) {
 		/* check privileage */
@@ -284,6 +285,7 @@ gboolean mc_svc_thread(void *data)
 	close(sockfd);
 
 	g_main_loop_unref(g_mc_svc_mainloop);
+	g_mc_svc_mainloop = NULL;
 
 	return FALSE;
 }

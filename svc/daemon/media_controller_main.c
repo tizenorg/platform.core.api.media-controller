@@ -21,7 +21,7 @@
 GMainLoop *g_mc_mainloop = NULL;
 static int g_mc_timer_id = 0;
 
-#define MC_MAIN_TIMEOUT_SEC_60	60
+#define MC_MAIN_TIMEOUT_SEC_60	600
 
 
 void __mc_main_create_timer(int timer_id);
@@ -85,6 +85,7 @@ int main(int argc, char **argv)
 
 	g_thread_join(svc_thread);
 	g_main_loop_unref(g_mc_mainloop);
+	g_mc_mainloop = NULL;
 
 	mc_debug("*** Media Controller Daemon is stopped ***");
 
