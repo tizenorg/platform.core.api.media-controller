@@ -273,8 +273,8 @@ gboolean mc_svc_thread(void *data)
 		int i = 0;
 		for (i = g_list_length(mc_svc_data->mc_svc_list) - 1; i >= 0; i--) {
 			char *nth_data = (char *)g_list_nth_data(mc_svc_data->mc_svc_list, i);
-			mc_svc_data->mc_svc_list = g_list_remove(mc_svc_data->mc_svc_list, nth_data);
 			MC_SAFE_FREE(nth_data);
+			mc_svc_data->mc_svc_list = g_list_remove(mc_svc_data->mc_svc_list, nth_data);
 		}
 		g_list_free(mc_svc_data->mc_svc_list);
 	}
