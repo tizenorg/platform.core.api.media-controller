@@ -93,7 +93,7 @@ static char* __mc_get_db_name(uid_t uid)
 	return result_psswd_rtn;
 }
 
-int mc_db_util_connect(void **handle, uid_t uid)
+int mc_db_util_connect(void **handle, uid_t uid, bool needWrite)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	sqlite3 *db_handle = NULL;
@@ -101,7 +101,11 @@ int mc_db_util_connect(void **handle, uid_t uid)
 	mc_retvm_if(handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 
 	/*Connect DB*/
-	ret = db_util_open(__mc_get_db_name(uid), &db_handle, DB_UTIL_REGISTER_HOOK_METHOD);
+	if(needWrite) {
+		ret = db_util_open_with_options(__mc_get_db_name(uid), &db_handle, SQLITE_OPEN_READWRITE, NULL);
+	} else {
+		ret = db_util_open_with_options(__mc_get_db_name(uid), &db_handle, SQLITE_OPEN_READONLY, NULL);
+	}
 	if (SQLITE_OK != ret) {
 		mc_error("error when db open");
 		*handle = NULL;

@@ -93,7 +93,7 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 
 	if (recv_msg.msg_type == MC_MSG_DB_UPDATE) {
 		/* Connect media controller DB*/
-		if(mc_db_util_connect(&(mc_svc_data->db_handle), recv_msg.uid) != MEDIA_CONTROLLER_ERROR_NONE) {
+		if(mc_db_util_connect(&(mc_svc_data->db_handle), recv_msg.uid, true) != MEDIA_CONTROLLER_ERROR_NONE) {
 			mc_error("Failed to connect DB");
 			goto ERROR;
 		}

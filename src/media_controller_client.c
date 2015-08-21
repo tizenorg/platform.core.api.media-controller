@@ -174,7 +174,7 @@ static int __mc_client_create(media_controller_client_s **mc_client)
 		goto Error;
 	}
 
-	ret = mc_db_connect(&_client->db_handle);
+	ret = mc_db_connect(&_client->db_handle, false);
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("error in connecting to DB %d", ret);
 		goto Error;
