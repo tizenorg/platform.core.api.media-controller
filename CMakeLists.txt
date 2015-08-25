@@ -24,7 +24,7 @@ SET(service "media")
 SET(submodule "controller")
 
 # for package file
-SET(dependents "capi-base-common glib-2.0 gio-2.0 dlog sqlite3 db-util aul bundle libtzplatform-config")
+SET(dependents "capi-base-common glib-2.0 gio-2.0 dlog sqlite3 db-util aul bundle libtzplatform-config cynara-client cynara-session cynara-creds-socket")
 SET(fw_name "${project_prefix}-${service}-${submodule}")
 
 PROJECT(${fw_name})

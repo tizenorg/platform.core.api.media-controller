@@ -21,6 +21,8 @@ BuildRequires:  pkgconfig(aul)
 BuildRequires:  pkgconfig(bundle)
 BuildRequires:  pkgconfig(libsystemd-daemon)
 BuildRequires:  pkgconfig(libtzplatform-config)
+BuildRequires:  pkgconfig(cynara-client)
+BuildRequires:  pkgconfig(cynara-session)
 
 %description
 A media controller library in SLP C API
@@ -74,6 +76,9 @@ install -m 0775 %{SOURCE1001} %{buildroot}%{_bindir}/media-controller_create_db.
 mkdir -p %{buildroot}/usr/share/license
 cp LICENSE.APLv2.0 %{buildroot}/usr/share/license/%{name}
 
+mkdir -p %{buildroot}%{_sysconfdir}/dbus-1/system.d
+install -m 0644 dbus/media-controller.conf %{buildroot}%{_sysconfdir}/dbus-1/system.d/
+
 %post
 chgrp %TZ_SYS_USER_GROUP %{_bindir}/media-controller_create_db.sh
 %postun
@@ -82,6 +87,7 @@ chgrp %TZ_SYS_USER_GROUP %{_bindir}/media-controller_create_db.sh
 %defattr(-,root,root,-)
 %{_libdir}/*.so.*
 %{_bindir}/media-controller_create_db.sh
+%config %{_sysconfdir}/dbus-1/system.d/media-controller.conf
 #%{_bindir}/*			//disable tests
 %manifest %{name}.manifest
 /usr/share/license/%{name}
