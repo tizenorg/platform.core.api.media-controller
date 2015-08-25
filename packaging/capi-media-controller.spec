@@ -21,6 +21,8 @@ BuildRequires:  pkgconfig(aul)
 BuildRequires:  pkgconfig(bundle)
 BuildRequires:  pkgconfig(libsystemd-daemon)
 BuildRequires:  pkgconfig(libtzplatform-config)
+BuildRequires:  pkgconfig(cynara-client)
+BuildRequires:  pkgconfig(cynara-session)
 
 %description
 A media controller library in SLP C API
