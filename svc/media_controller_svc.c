@@ -21,24 +21,10 @@
 #include "media_controller_private.h"
 #include "media_controller_socket.h"
 #include "media_controller_db_util.h"
+#include "media_controller_cynara.h"
 
 static GMainLoop *g_mc_svc_mainloop = NULL;
 static int g_connection_cnt = -1;
-
-static int __mc_privilege_ask(int client_sockfd, const char *type, const char *privilege_object)
-{
-	int ret = MEDIA_CONTROLLER_ERROR_NONE;
-#if 0
-	ret = security_server_check_privilege_by_sockfd(client_sockfd, type, privilege_object);
-	if (ret == SECURITY_SERVER_API_ERROR_ACCESS_DENIED) {
-		mc_error("You do not have permission for this operation.");
-		ret = MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED;
-	} else {
-		mc_debug("PERMISSION OK");
-	}
-#endif
-	return ret;
-}
 
 static int __create_socket_activation(void)
 {
@@ -69,6 +55,7 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 	bool is_duplicated = FALSE;
 	unsigned int i = 0;
 	mc_svc_data_t *mc_svc_data = (mc_svc_data_t*)data;
+	mc_peer_creds creds = {0, };
 
 	mc_debug("mc_read_service_request_tcp_socket is called!!!!!");
 
@@ -84,7 +71,9 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 		return TRUE;
 	}
 
-	ret = mc_ipc_receive_message_tcp(client_sock, &recv_msg);
+	memset(&creds, 0, sizeof(mc_peer_creds));
+
+	ret = mc_cynara_receive_untrusted_message(client_sock, &recv_msg, &creds);
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("mc_ipc_receive_message_tcp failed [%d]", ret);
 		send_msg = ret;
@@ -114,12 +103,15 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 		}
 	} else if (recv_msg.msg_type == MC_MSG_CLIENT_SET) {
 		/* check privileage */
-		ret = __mc_privilege_ask(client_sock, "mediacontroller::svc", "w");
-		if (ret == MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED) {
-			mc_error("permission is denied!");
+		ret = mc_cynara_check(&creds, MC_CLIENT_PRIVILEGE);
+		if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+			mc_error("permission is denied![%d]", ret);
 			send_msg = MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED;
 			goto ERROR;
 		}
+
+		MC_SAFE_FREE(creds.uid);
+		MC_SAFE_FREE(creds.smack);
 
 		for (i = 0; i < g_list_length(mc_svc_data->mc_svc_list); i++) {
 			char *nth_data = (char *)g_list_nth_data(mc_svc_data->mc_svc_list, i);
@@ -132,12 +124,15 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 		}
 	} else if (recv_msg.msg_type == MC_MSG_CLIENT_GET) {
 		/* check privileage */
-		ret = __mc_privilege_ask(client_sock, "mediacontroller::svc", "r");
-		if (ret == MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED) {
-			mc_error("permission is denied!");
+		ret = mc_cynara_check(&creds, MC_SERVER_PRIVILEGE);
+		if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+			mc_error("permission is denied![%d]", ret);
 			send_msg = MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED;
 			goto ERROR;
 		}
+
+		MC_SAFE_FREE(creds.uid);
+		MC_SAFE_FREE(creds.smack);
 
 		for (i = 0; i < g_list_length(mc_svc_data->mc_svc_list); i++) {
 			send_msg = MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED;
@@ -196,6 +191,8 @@ ERROR:
 	if (close(client_sock) < 0) {
 		mc_stderror("close failed");
 	}
+	MC_SAFE_FREE(creds.uid);
+	MC_SAFE_FREE(creds.smack);
 
 	return TRUE;
 }
@@ -226,6 +223,12 @@ gboolean mc_svc_thread(void *data)
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		/* Disconnect DB*/
 		mc_error("Failed to create socket");
+		return FALSE;
+	}
+
+	ret = mc_cynara_enable_credentials_passing(sockfd);
+	if(ret != MEDIA_CONTROLLER_ERROR_NONE) {
+		mc_error("Failed to append socket options");
 		return FALSE;
 	}
 
