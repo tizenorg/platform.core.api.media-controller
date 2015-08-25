@@ -17,6 +17,7 @@
 #include "media_controller_private.h"
 #include "../media_controller_socket.h"
 #include "../media_controller_svc.h"
+#include "media_controller_cynara.h"
 
 GMainLoop *g_mc_mainloop = NULL;
 static int g_mc_timer_id = 0;
@@ -68,6 +69,11 @@ int main(int argc, char **argv)
 	/*Init main loop*/
 	g_mc_mainloop = g_main_loop_new(NULL, FALSE);
 
+	if(mc_cynara_initialize() != MEDIA_CONTROLLER_ERROR_NONE) {
+		mc_error("Failed to initialize cynara");
+		return -1;
+	}
+
 	fd = mc_create_socket_activation();
 	if (fd < 0) {
 		mc_error("Failed to socekt creation");
@@ -85,6 +91,8 @@ int main(int argc, char **argv)
 
 	g_thread_join(svc_thread);
 	g_main_loop_unref(g_mc_mainloop);
+
+	mc_cynara_finish();
 
 	mc_debug("*** Media Controller Daemon is stopped ***");
 
