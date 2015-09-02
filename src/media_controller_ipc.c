@@ -309,12 +309,13 @@ int mc_ipc_send_message_to_server(mc_msg_type_e msg_type, const char *request_ms
 	memset((void *)&send_msg, 0, sizeof(mc_comm_msg_s));
 
 	send_msg.msg_type = msg_type;
+	send_msg.pid = getpid();
 	send_msg.uid = getuid();
 	send_msg.msg_size = request_msg_size;
 	strncpy(send_msg.msg, request_msg, sizeof(send_msg.msg) - 1);
 
 	/*Create Socket*/
-	ret = mc_ipc_create_client_socket(MC_TIMEOUT_SEC_10, &sock_info);
+	ret = mc_ipc_create_client_socket(MC_TIMEOUT_SEC_5, &sock_info);
 	sockfd = sock_info.sock_fd;
 	mc_retvm_if(ret != MEDIA_CONTROLLER_ERROR_NONE, ret, "socket is not created properly");
 
@@ -389,7 +390,7 @@ int mc_ipc_service_connect(void)
 	}
 
 	/*Create Socket*/
-	ret = mc_ipc_create_client_socket(MC_TIMEOUT_SEC_10, &sock_info);
+	ret = mc_ipc_create_client_socket(MC_TIMEOUT_SEC_5, &sock_info);
 	sockfd = sock_info.sock_fd;
 	mc_retvm_if(ret != MEDIA_CONTROLLER_ERROR_NONE, ret, "socket is not created properly");
 
@@ -398,7 +399,7 @@ int mc_ipc_service_connect(void)
 	serv_addr.sun_family = AF_UNIX;
 	strncpy(serv_addr.sun_path, MC_IPC_PATH, sizeof(serv_addr.sun_path) - 1);
 
-	/* Connecting to the media db server */
+	/* Connecting to the media controller service */
 	if (connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
 		mc_stderror("connect error");
 		mc_ipc_delete_client_socket(&sock_info);

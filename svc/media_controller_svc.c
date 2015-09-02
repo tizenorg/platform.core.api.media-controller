@@ -52,7 +52,6 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 	mc_comm_msg_s recv_msg;
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	int send_msg = MEDIA_CONTROLLER_ERROR_NONE;
-	bool is_duplicated = FALSE;
 	unsigned int i = 0;
 	mc_svc_data_t *mc_svc_data = (mc_svc_data_t*)data;
 	mc_peer_creds creds = {0, };
@@ -113,15 +112,10 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 		MC_SAFE_FREE(creds.uid);
 		MC_SAFE_FREE(creds.smack);
 
-		for (i = 0; i < g_list_length(mc_svc_data->mc_svc_list); i++) {
-			char *nth_data = (char *)g_list_nth_data(mc_svc_data->mc_svc_list, i);
-			if (nth_data != NULL && strcmp(nth_data, recv_msg.msg) == 0) {
-				is_duplicated = TRUE;
-			}
-		}
-		if (!is_duplicated) {
-			mc_svc_data->mc_svc_list = g_list_append(mc_svc_data->mc_svc_list, recv_msg.msg);
-		}
+		mc_svc_list_t *set_data = (mc_svc_list_t *)malloc(sizeof(mc_svc_list_t));
+		set_data->pid = recv_msg.pid;
+		set_data->data = strdup(recv_msg.msg);
+		mc_svc_data->mc_svc_list = g_list_append(mc_svc_data->mc_svc_list, set_data);
 	} else if (recv_msg.msg_type == MC_MSG_CLIENT_GET) {
 		/* check privileage */
 		ret = mc_cynara_check(&creds, MC_SERVER_PRIVILEGE);
@@ -134,11 +128,14 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 		MC_SAFE_FREE(creds.uid);
 		MC_SAFE_FREE(creds.smack);
 
+		mc_svc_list_t *set_data = NULL;
 		for (i = 0; i < g_list_length(mc_svc_data->mc_svc_list); i++) {
 			send_msg = MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED;
-			char *nth_data = (char *)g_list_nth_data(mc_svc_data->mc_svc_list, i);
-			if (nth_data != NULL && strcmp(nth_data, recv_msg.msg) == 0) {
-				mc_svc_data->mc_svc_list = g_list_remove(mc_svc_data->mc_svc_list, nth_data);
+			set_data = (mc_svc_list_t *)g_list_nth_data(mc_svc_data->mc_svc_list, i);
+			if (set_data != NULL && set_data->data != NULL && strcmp(set_data->data, recv_msg.msg) == 0) {
+				mc_svc_data->mc_svc_list = g_list_remove(mc_svc_data->mc_svc_list, set_data);
+				MC_SAFE_FREE(set_data->data);
+				MC_SAFE_FREE(set_data);
 				send_msg = MEDIA_CONTROLLER_ERROR_NONE;
 			}
 		}
@@ -166,6 +163,17 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 			if (strncmp(recv_msg.msg, MC_SERVER_DISCONNECTION_MSG, recv_msg.msg_size) == 0) {
 				g_connection_cnt--;
 				mc_error("[No-error] decreased connection count [%d]", g_connection_cnt);
+
+				// remove resource for disconnected process
+				mc_svc_list_t *set_data = NULL;
+				for (i = 0; i < g_list_length(mc_svc_data->mc_svc_list); i++) {
+					set_data = (mc_svc_list_t *)g_list_nth_data(mc_svc_data->mc_svc_list, i);
+					if ((set_data != NULL) && (set_data->pid == recv_msg.pid)) {
+						mc_svc_data->mc_svc_list = g_list_remove(mc_svc_data->mc_svc_list, set_data);
+						MC_SAFE_FREE(set_data->data);
+						MC_SAFE_FREE(set_data);
+					}
+				}
 
 				send_msg = MEDIA_CONTROLLER_ERROR_NONE;
 			} else {
@@ -250,7 +258,7 @@ gboolean mc_svc_thread(void *data)
 	/*Init main loop*/
 	g_mc_svc_mainloop = g_main_loop_new(context, FALSE);
 
-	/* Create new channel to watch UDP socket */
+	/* Create new channel to watch TCP socket */
 	channel = g_io_channel_unix_new(sockfd);
 	source = g_io_create_watch(channel, G_IO_IN);
 
