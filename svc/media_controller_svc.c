@@ -52,7 +52,6 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 	mc_comm_msg_s recv_msg;
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	int send_msg = MEDIA_CONTROLLER_ERROR_NONE;
-	bool is_duplicated = FALSE;
 	unsigned int i = 0;
 	mc_svc_data_t *mc_svc_data = (mc_svc_data_t*)data;
 	mc_peer_creds creds = {0, };
@@ -113,15 +112,7 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 		MC_SAFE_FREE(creds.uid);
 		MC_SAFE_FREE(creds.smack);
 
-		for (i = 0; i < g_list_length(mc_svc_data->mc_svc_list); i++) {
-			char *nth_data = (char *)g_list_nth_data(mc_svc_data->mc_svc_list, i);
-			if (nth_data != NULL && strcmp(nth_data, recv_msg.msg) == 0) {
-				is_duplicated = TRUE;
-			}
-		}
-		if (!is_duplicated) {
-			mc_svc_data->mc_svc_list = g_list_append(mc_svc_data->mc_svc_list, recv_msg.msg);
-		}
+		mc_svc_data->mc_svc_list = g_list_append(mc_svc_data->mc_svc_list, recv_msg.msg);
 	} else if (recv_msg.msg_type == MC_MSG_CLIENT_GET) {
 		/* check privileage */
 		ret = mc_cynara_check(&creds, MC_SERVER_PRIVILEGE);

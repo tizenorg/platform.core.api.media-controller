@@ -27,7 +27,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 #define SERVER_IP			"127.0.0.1"
-#define MC_TIMEOUT_SEC_10					10		/**< Response from Server time out */
+#define MC_TIMEOUT_SEC_5					5		/**< Response from Server time out */
+//#define MC_TIMEOUT_SEC_10					10		/**< Response from Server time out */
 #define MAX_MSG_SIZE				4096*2
 #define MC_SOCK_NOT_ALLOCATE 		-1
 //#define MC_SOCK_ACTIVATION_PATH		"/var/run/media-controller/media_sa_controller"

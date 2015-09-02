@@ -24,6 +24,11 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct {
+	int pid;
+	char *data;
+} mc_svc_list_t;
+
+typedef struct {
 	void *db_handle;
 	void *mc_svc_list;
 } mc_svc_data_t;
