@@ -128,7 +128,14 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 		MC_SAFE_FREE(creds.uid);
 		MC_SAFE_FREE(creds.smack);
 
+		if (mc_svc_data->mc_svc_list == NULL) {
+			mc_error("No List");
+			send_msg = MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED;
+			goto ERROR;
+		}
+
 		mc_svc_list_t *set_data = NULL;
+
 		for (i = 0; i < g_list_length(mc_svc_data->mc_svc_list); i++) {
 			send_msg = MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED;
 			set_data = (mc_svc_list_t *)g_list_nth_data(mc_svc_data->mc_svc_list, i);
@@ -137,6 +144,7 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 				MC_SAFE_FREE(set_data->data);
 				MC_SAFE_FREE(set_data);
 				send_msg = MEDIA_CONTROLLER_ERROR_NONE;
+				break;
 			}
 		}
 	} else if (recv_msg.msg_type == MC_MSG_SERVER_CONNECTION) {
@@ -164,17 +172,18 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 				g_connection_cnt--;
 				mc_error("[No-error] decreased connection count [%d]", g_connection_cnt);
 
-				// remove resource for disconnected process
-				mc_svc_list_t *set_data = NULL;
-				for (i = 0; i < g_list_length(mc_svc_data->mc_svc_list); i++) {
-					set_data = (mc_svc_list_t *)g_list_nth_data(mc_svc_data->mc_svc_list, i);
-					if ((set_data != NULL) && (set_data->pid == recv_msg.pid)) {
-						mc_svc_data->mc_svc_list = g_list_remove(mc_svc_data->mc_svc_list, set_data);
-						MC_SAFE_FREE(set_data->data);
-						MC_SAFE_FREE(set_data);
+				if (mc_svc_data->mc_svc_list == NULL) {
+					// remove resource for disconnected process
+					mc_svc_list_t *set_data = NULL;
+					for (i = 0; i < g_list_length(mc_svc_data->mc_svc_list); i++) {
+						set_data = (mc_svc_list_t *)g_list_nth_data(mc_svc_data->mc_svc_list, i);
+						if ((set_data != NULL) && (set_data->pid == recv_msg.pid)) {
+							mc_svc_data->mc_svc_list = g_list_remove(mc_svc_data->mc_svc_list, set_data);
+							MC_SAFE_FREE(set_data->data);
+							MC_SAFE_FREE(set_data);
+						}
 					}
 				}
-
 				send_msg = MEDIA_CONTROLLER_ERROR_NONE;
 			} else {
 				mc_error("Wrong message!");
@@ -237,14 +246,6 @@ gboolean mc_svc_thread(void *data)
 	ret = mc_cynara_enable_credentials_passing(sockfd);
 	if(ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("Failed to append socket options");
-		return FALSE;
-	}
-
-	/* Create list for command*/
-	mc_svc_data->mc_svc_list = g_list_alloc();
-	if (mc_svc_data->mc_svc_list == NULL) {
-		mc_error("Failed to allocate list");
-		close(sockfd);
 		return FALSE;
 	}
 
