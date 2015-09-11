@@ -240,14 +240,6 @@ gboolean mc_svc_thread(void *data)
 		return FALSE;
 	}
 
-	/* Create list for command*/
-	mc_svc_data->mc_svc_list = g_list_alloc();
-	if (mc_svc_data->mc_svc_list == NULL) {
-		mc_error("Failed to allocate list");
-		close(sockfd);
-		return FALSE;
-	}
-
 	context = g_main_context_new();
 	if (context == NULL) {
 		mc_error("g_main_context_new failed");
