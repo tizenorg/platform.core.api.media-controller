@@ -49,6 +49,8 @@
 
 #define DB_SELECT_LATEST_SERVER_NAME		"SELECT server_name FROM "MC_DB_TABLE_LATEST_SERVER";"
 #define DB_SELECT_ALL_SERVER_LIST			"SELECT server_name FROM "MC_DB_TABLE_SERVER_LIST";"
+#define DB_SELECT_SERVER_COUNT			"SELECT COUNT(*) FROM "MC_DB_TABLE_SERVER_LIST" WHERE server_name='%q' "
+
 
 
 #define DB_COLUMN_SERVER_NAME			"server_name"
@@ -86,6 +88,6 @@ int mc_db_delete_server_address_from_table(void *db_handle, const char *table_na
 int mc_db_foreach_server_list(void *handle, mc_activated_server_cb callback, void *user_data);
 int mc_db_update_server_state(void *handle, const char *server_name, mc_server_state_e server_state);
 int mc_db_update_latest_server_table(void *handle, const char *server_name);
-
+int mc_db_check_server_registerd(void *handle, const char *server_name, bool *exist);
 
 #endif /*__MEDIA_CONTROL_DB_H__*/

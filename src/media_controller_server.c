@@ -572,6 +572,13 @@ int mc_server_create(mc_server_h *server)
 		return ret;
 	}
 
+	ret = mc_db_check_server_registerd(mc_server->db_handle, mc_server->server_name, &table_exist);
+	if (table_exist == TRUE) {
+		mc_error("Already registered server");
+		__mc_server_destoy(mc_server);
+		return ret;
+	}
+
 	ret = mc_db_create_tables(mc_server->db_handle);
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("mc_db_create_tables failed [%d]", ret);
