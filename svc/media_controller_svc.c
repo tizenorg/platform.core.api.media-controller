@@ -73,6 +73,7 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 	memset(&creds, 0, sizeof(mc_peer_creds));
 
 	ret = mc_cynara_receive_untrusted_message(client_sock, &recv_msg, &creds);
+
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("mc_ipc_receive_message_tcp failed [%d]", ret);
 		send_msg = ret;
@@ -129,7 +130,7 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 		MC_SAFE_FREE(creds.smack);
 
 		mc_svc_list_t *set_data = NULL;
-		for (i = 0; i < g_list_length(mc_svc_data->mc_svc_list); i++) {
+		for (i = 1; i <= g_list_length(mc_svc_data->mc_svc_list); i++) {
 			send_msg = MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED;
 			set_data = (mc_svc_list_t *)g_list_nth_data(mc_svc_data->mc_svc_list, i);
 			if (set_data != NULL && set_data->data != NULL && strcmp(set_data->data, recv_msg.msg) == 0) {
@@ -137,6 +138,7 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 				MC_SAFE_FREE(set_data->data);
 				MC_SAFE_FREE(set_data);
 				send_msg = MEDIA_CONTROLLER_ERROR_NONE;
+				break;
 			}
 		}
 	} else if (recv_msg.msg_type == MC_MSG_SERVER_CONNECTION) {
