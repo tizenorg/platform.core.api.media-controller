@@ -73,6 +73,7 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 	memset(&creds, 0, sizeof(mc_peer_creds));
 
 	ret = mc_cynara_receive_untrusted_message(client_sock, &recv_msg, &creds);
+
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("mc_ipc_receive_message_tcp failed [%d]", ret);
 		send_msg = ret;
@@ -166,12 +167,13 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 
 				// remove resource for disconnected process
 				mc_svc_list_t *set_data = NULL;
-				for (i = 0; i < g_list_length(mc_svc_data->mc_svc_list); i++) {
+				for (i = 0; i <= g_list_length(mc_svc_data->mc_svc_list); i++) {
 					set_data = (mc_svc_list_t *)g_list_nth_data(mc_svc_data->mc_svc_list, i);
 					if ((set_data != NULL) && (set_data->pid == recv_msg.pid)) {
 						mc_svc_data->mc_svc_list = g_list_remove(mc_svc_data->mc_svc_list, set_data);
 						MC_SAFE_FREE(set_data->data);
 						MC_SAFE_FREE(set_data);
+						break;
 					}
 				}
 
