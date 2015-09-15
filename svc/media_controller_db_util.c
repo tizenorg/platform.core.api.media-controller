@@ -93,6 +93,121 @@ static char* __mc_get_db_name(uid_t uid)
 	return result_psswd_rtn;
 }
 
+static int __mc_foreach_server_list(void *handle, void *user_data)
+{
+	int ret = MEDIA_CONTROLLER_ERROR_NONE;
+	sqlite3 *db_handle = (sqlite3 *)handle;
+	char *sql_str = NULL;
+	sqlite3_stmt *stmt = NULL;
+	GList **list = (GList **)(user_data);
+
+	mc_retvm_if(db_handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
+
+	sql_str = sqlite3_mprintf(DB_SELECT_ALL_SERVER_LIST);
+	ret = sqlite3_prepare_v2(db_handle, sql_str, strlen(sql_str), &stmt, NULL);
+	if (SQLITE_OK != ret) {
+		mc_error("prepare error [%s]\n", sqlite3_errmsg(db_handle));
+		SQLITE3_SAFE_FREE(sql_str);
+		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+	}
+
+	ret = sqlite3_step(stmt);
+	if (SQLITE_ROW != ret) {
+		mc_error("end of row [%s]\n", sqlite3_errmsg(db_handle));
+		SQLITE3_FINALIZE(stmt);
+		SQLITE3_SAFE_FREE(sql_str);
+		return MEDIA_CONTROLLER_ERROR_NONE;
+	}
+
+	while (SQLITE_ROW == ret) {
+		char *server_name = NULL;
+		server_name = strdup((char *)sqlite3_column_text(stmt, 0));
+		(*list) = g_list_append((*list), server_name);
+		MC_SAFE_FREE(server_name);
+
+		ret = sqlite3_step(stmt);
+	}
+
+	SQLITE3_FINALIZE(stmt);
+	SQLITE3_SAFE_FREE(sql_str);
+
+	return MEDIA_CONTROLLER_ERROR_NONE;
+}
+
+static int __mc_get_latest_server_name(void *handle, char **latest_server_name)
+{
+	int ret = MEDIA_CONTROLLER_ERROR_NONE;
+	char *sql_str = NULL;
+	sqlite3_stmt *stmt = NULL;
+	sqlite3 *db_handle = (sqlite3 *)handle;
+	char *server_name = NULL;
+
+	mc_retvm_if(handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
+
+	*latest_server_name = NULL;
+
+	sql_str = sqlite3_mprintf(DB_SELECT_LATEST_SERVER_NAME);
+
+	ret = sqlite3_prepare_v2(db_handle, sql_str, strlen(sql_str), &stmt, NULL);
+	if (SQLITE_OK != ret) {
+		mc_error("prepare error [%s]\n", sqlite3_errmsg(db_handle));
+		SQLITE3_SAFE_FREE(sql_str);
+		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+	}
+
+	ret = sqlite3_step(stmt);
+	if (SQLITE_ROW != ret) {
+		mc_error("end of row [%s]\n", sqlite3_errmsg(db_handle));
+		SQLITE3_FINALIZE(stmt);
+		SQLITE3_SAFE_FREE(sql_str);
+		return MEDIA_CONTROLLER_ERROR_NONE;	/*There is no activated server yet. */
+	}
+
+	while (SQLITE_ROW == ret) {
+		MC_SAFE_FREE(server_name);
+		server_name = strdup((char *)sqlite3_column_text(stmt, 0));
+		ret = sqlite3_step(stmt);
+	}
+
+	if (server_name)
+		*latest_server_name = server_name;
+
+	SQLITE3_FINALIZE(stmt);
+	SQLITE3_SAFE_FREE(sql_str);
+
+	return MEDIA_CONTROLLER_ERROR_NONE;
+}
+
+static void __mc_delete_server_table_cb(gpointer data, gpointer user_data)
+{
+	int ret = MEDIA_CONTROLLER_ERROR_NONE;
+	char *server_name = (char*)data;
+	void *handle = (void*)user_data;
+	char *latest_server_name = NULL;
+
+	ret = __mc_get_latest_server_name(handle, &latest_server_name);
+	if (MEDIA_CONTROLLER_ERROR_NONE != ret) {
+		mc_error("Error __mc_delete_server_table_cb %d", ret);
+		return;
+	}
+
+	mc_debug("Server name: %s, latest: %s", server_name, latest_server_name);
+
+	if (strcmp(latest_server_name, server_name) != 0) {
+		ret = mc_db_util_delete_server_table (handle, server_name);
+		if (MEDIA_CONTROLLER_ERROR_NONE != ret) {
+			mc_error("Error __mc_delete_server_table_cb %d", ret);
+		}
+	}
+	MC_SAFE_FREE(latest_server_name);
+}
+
+static void __mc_destroy_server_list_cb(gpointer data)
+{
+	char *server_name = (char*)data;
+	MC_SAFE_FREE(server_name);
+}
+
 int mc_db_util_connect(void **handle, uid_t uid, bool need_write)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
@@ -151,6 +266,55 @@ int mc_db_util_update_db(void *handle, const char *sql_str)
 	}
 
 	return MEDIA_CONTROLLER_ERROR_NONE;
+}
+
+int mc_db_util_delete_server_table(void *handle, const char *server_name)
+{
+	int ret = MEDIA_CONTROLLER_ERROR_NONE;
+	char *sql_str = NULL;
+
+	mc_retvm_if(handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
+	mc_retvm_if(server_name == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "server_name is NULL");
+
+	sql_str = sqlite3_mprintf("DROP TABLE IF EXISTS '%q'", server_name);
+
+	mc_debug("sql_str: %s", sql_str);
+
+	ret = mc_db_util_update_db(handle, sql_str);
+	if (MEDIA_CONTROLLER_ERROR_NONE != ret) {
+		mc_error("Error mc_db_util_update_db %d", ret);
+	}
+
+	SQLITE3_SAFE_FREE(sql_str);
+
+	return ret;
+}
+
+int mc_db_util_delete_whole_server_tables(void *handle)
+{
+	int ret = MEDIA_CONTROLLER_ERROR_NONE;
+	GList *server_list = NULL;
+
+	mc_retvm_if(handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
+
+	ret = __mc_foreach_server_list(handle, &server_list);
+	if (MEDIA_CONTROLLER_ERROR_NONE != ret) {
+		mc_error("Error __mc_foreach_server_list %d", ret);
+		return ret;
+	}
+
+	if (server_list == NULL) {
+		mc_debug("No server list");
+		return ret;
+	}
+
+	mc_debug("Server list: %p, length: %d", server_list, g_list_length(server_list));
+
+	g_list_foreach(server_list, __mc_delete_server_table_cb, handle);
+
+	g_list_free_full(server_list, __mc_destroy_server_list_cb);
+
+	return ret;
 }
 
 int mc_db_util_disconnect(void *handle)

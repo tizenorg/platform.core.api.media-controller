@@ -182,7 +182,7 @@ int mc_db_connect(void **handle, bool need_write)
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	sqlite3 *db_handle = NULL;
 
-	mc_error("mc_db_connect");
+	mc_debug("mc_db_connect");
 
 	mc_retvm_if(handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 
