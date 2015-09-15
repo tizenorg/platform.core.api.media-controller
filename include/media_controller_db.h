@@ -50,7 +50,6 @@
 #define DB_SELECT_LATEST_SERVER_NAME		"SELECT server_name FROM "MC_DB_TABLE_LATEST_SERVER";"
 #define DB_SELECT_ALL_SERVER_LIST			"SELECT server_name FROM "MC_DB_TABLE_SERVER_LIST";"
 
-
 #define DB_COLUMN_SERVER_NAME			"server_name"
 #define DB_COLUMN_SERVER_STATE			"server_state"
 #define DB_COLUMN_PLAYBACK_STATE			"playback_state"

@@ -594,7 +594,7 @@ int mc_server_create(mc_server_h *server)
 
 		ret = mc_db_delete_server_address_from_table(mc_server->db_handle, MC_DB_TABLE_SERVER_LIST, mc_server->server_name);
 		if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-			mc_error("mc_db_delete_server_table failed [%d]", ret);
+			mc_error("mc_db_delete_server_address_from_table failed [%d]", ret);
 			__mc_server_destoy(mc_server);
 			return ret;
 		}
