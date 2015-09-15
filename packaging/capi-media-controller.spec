@@ -1,6 +1,6 @@
 Name:       capi-media-controller
 Summary:    Multimedia Controller for player application
-Version:    0.0.8
+Version:    0.0.9
 Release:    1
 Group:      System/Libraries
 License:    Apache-2.0
@@ -12,6 +12,7 @@ Source1001: media-controller_create_db.sh
 BuildRequires:  cmake
 BuildRequires:  sqlite
 BuildRequires:  pkgconfig(capi-base-common)
+BuildRequires:  pkgconfig(dbus-glib-1)
 BuildRequires:  pkgconfig(dlog)
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(gio-2.0)
@@ -84,7 +85,7 @@ chgrp %TZ_SYS_USER_GROUP %{_bindir}/media-controller_create_db.sh
 %defattr(-,root,root,-)
 %{_libdir}/*.so.*
 %{_bindir}/media-controller_create_db.sh
-#%{_bindir}/*			//disable tests
+%{_bindir}/*			//disable tests
 %manifest %{name}.manifest
 /usr/share/license/%{name}
 

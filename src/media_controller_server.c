@@ -553,6 +553,7 @@ int mc_server_create(mc_server_h *server)
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	media_controller_server_s *mc_server = NULL;
 	bool table_exist = FALSE;
+	bool server_registerd = FALSE;
 
 	mc_debug_fenter();
 
@@ -577,6 +578,19 @@ int mc_server_create(mc_server_h *server)
 		mc_error("mc_db_create_tables failed [%d]", ret);
 	}
 
+	ret = mc_db_check_server_registerd(mc_server->db_handle, mc_server->server_name, &server_registerd);
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+		mc_error("mc_db_check_server_table_exist failed [%d]", ret);
+		__mc_server_destoy(mc_server);
+		return ret;
+	}
+
+	if (server_registerd) {
+		mc_error("Already registered server");
+		__mc_server_destoy(mc_server);
+		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+	}
+
 	ret = mc_db_check_server_table_exist(mc_server->db_handle, mc_server->server_name, &table_exist);
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("mc_db_check_server_table_exist failed [%d]", ret);
@@ -594,7 +608,7 @@ int mc_server_create(mc_server_h *server)
 
 		ret = mc_db_delete_server_address_from_table(mc_server->db_handle, MC_DB_TABLE_SERVER_LIST, mc_server->server_name);
 		if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-			mc_error("mc_db_delete_server_table failed [%d]", ret);
+			mc_error("mc_db_delete_server_address_from_table failed [%d]", ret);
 			__mc_server_destoy(mc_server);
 			return ret;
 		}

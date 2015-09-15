@@ -182,7 +182,7 @@ int mc_db_connect(void **handle, bool need_write)
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	sqlite3 *db_handle = NULL;
 
-	mc_error("mc_db_connect");
+	mc_debug("mc_db_connect");
 
 	mc_retvm_if(handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 
@@ -608,6 +608,48 @@ int mc_db_check_server_table_exist(void *handle, const char *server_name, bool *
 	count = sqlite3_column_int(stmt, 0);
 
 	mc_debug("table count [%d]", count);
+
+	if (count > 0)
+		*exist = TRUE;
+	else
+		*exist = FALSE;
+
+	SQLITE3_FINALIZE(stmt);
+	SQLITE3_SAFE_FREE(sql_str);
+
+	return MEDIA_CONTROLLER_ERROR_NONE;
+}
+
+int mc_db_check_server_registerd(void *handle, const char *server_name, bool *exist)
+{
+	int ret = MEDIA_CONTROLLER_ERROR_NONE;
+	char *sql_str = NULL;
+	sqlite3_stmt *stmt = NULL;
+	int count = 0;
+
+	mc_retvm_if(handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
+	mc_retvm_if(server_name == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "server_name is NULL");
+
+	sql_str = sqlite3_mprintf(DB_SELECT_SERVER_COUNT, server_name);
+
+	ret = sqlite3_prepare_v2(handle, sql_str, strlen(sql_str), &stmt, NULL);
+	if (SQLITE_OK != ret) {
+		mc_error("prepare error [%s]\n", sqlite3_errmsg(handle));
+		SQLITE3_SAFE_FREE(sql_str);
+		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+	}
+
+	ret = sqlite3_step(stmt);
+	if (SQLITE_ROW != ret) {
+		mc_error("end of row [%s]\n", sqlite3_errmsg(handle));
+		SQLITE3_FINALIZE(stmt);
+		SQLITE3_SAFE_FREE(sql_str);
+		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+	}
+
+	count = sqlite3_column_int(stmt, 0);
+
+	mc_debug("server count [%d]", count);
 
 	if (count > 0)
 		*exist = TRUE;
