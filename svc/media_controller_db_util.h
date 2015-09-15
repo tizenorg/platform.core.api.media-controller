@@ -23,11 +23,20 @@
 
 #define MC_DB_NAME ".media_controller.db"
 
+#define MC_DB_TABLE_SERVER_LIST		"server_list"
+#define MC_DB_TABLE_LATEST_SERVER		"latest_server"
+
+#define DB_SELECT_ALL_SERVER_LIST			"SELECT server_name FROM "MC_DB_TABLE_SERVER_LIST";"
+#define DB_SELECT_LATEST_SERVER_NAME		"SELECT server_name FROM "MC_DB_TABLE_LATEST_SERVER";"
+
 #define SQLITE3_SAFE_FREE(sql_string) 	{if(sql_string) { sqlite3_free(sql_string); sql_string = NULL;}}
 #define SQLITE3_FINALIZE(x)	{if(x != NULL) {sqlite3_finalize(x);}}
 
 int mc_db_util_connect(void **handle, uid_t uid, bool need_write);
 int mc_db_util_update_db(void *handle, const char *sql_str);
+int mc_db_util_delete_server_table(void *handle, const char *server_name);
+int mc_db_util_delete_whole_server_tables(void *handle);
 int mc_db_util_disconnect(void *handle);
+int mc_db_util_create_tables(void *handle);
 
 #endif /*__TIZEN_MEDIA_CONTROLLER_DB_UTIL_H__*/

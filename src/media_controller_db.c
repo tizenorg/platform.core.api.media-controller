@@ -72,35 +72,6 @@ static int __mc_db_update_db(void *handle, const char *sql_str)
 	return ret;
 }
 
-static int __mc_db_create_latest_server_table(sqlite3 *handle)
-{
-	int ret = MEDIA_CONTROLLER_ERROR_NONE;
-	char *sql_str = NULL;
-
-	sql_str = sqlite3_mprintf("CREATE TABLE IF NOT EXISTS %q (server_name   TEXT PRIMARY KEY);", MC_DB_TABLE_LATEST_SERVER);
-
-	ret = __mc_db_update_db(handle, sql_str);
-
-	SQLITE3_SAFE_FREE(sql_str);
-
-	return ret;
-}
-
-static int __mc_db_create_server_list_table(sqlite3 *handle)
-{
-	int ret = MEDIA_CONTROLLER_ERROR_NONE;
-	char *sql_str = NULL;
-
-	sql_str = sqlite3_mprintf("CREATE TABLE IF NOT EXISTS %s (\
-				server_name   TEXT PRIMARY KEY);",
-	                          MC_DB_TABLE_SERVER_LIST);
-
-	ret = __mc_db_update_db(handle, sql_str);
-
-	SQLITE3_SAFE_FREE(sql_str);
-	return ret;
-}
-
 static int __mc_db_get_int_value_of_key(void *handle, const char *server_name, const char *key, int *value)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
@@ -182,7 +153,7 @@ int mc_db_connect(void **handle, bool need_write)
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	sqlite3 *db_handle = NULL;
 
-	mc_error("mc_db_connect");
+	mc_debug("mc_db_connect");
 
 	mc_retvm_if(handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 
@@ -505,22 +476,6 @@ int mc_db_disconnect(void *handle)
 
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}
-
-	return MEDIA_CONTROLLER_ERROR_NONE;
-}
-
-int mc_db_create_tables(void *handle)
-{
-	int ret = MEDIA_CONTROLLER_ERROR_NONE;
-	sqlite3 *db_handle = (sqlite3 *)handle;
-
-	mc_retvm_if(db_handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
-
-	ret = __mc_db_create_latest_server_table(db_handle);
-	mc_retvm_if(ret != MEDIA_CONTROLLER_ERROR_NONE, ret, "create latest_server table failed!err= [%d]", ret);
-
-	ret = __mc_db_create_server_list_table(db_handle);
-	mc_retvm_if(ret != MEDIA_CONTROLLER_ERROR_NONE, ret, "create server_list table failed!err= [%d]", ret);
 
 	return MEDIA_CONTROLLER_ERROR_NONE;
 }
