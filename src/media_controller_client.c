@@ -255,13 +255,6 @@ int mc_client_create(mc_client_h *client)
 		return ret;
 	}
 
-	ret = mc_db_create_tables(mc_client->db_handle);
-	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-		mc_error("mc_db_create_tables failed %d", ret);
-		__mc_client_destroy(mc_client);
-		return ret;
-	}
-
 	*client = (mc_client_h)mc_client;
 
 	return MEDIA_CONTROLLER_ERROR_NONE;
