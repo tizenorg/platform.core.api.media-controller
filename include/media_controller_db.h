@@ -61,7 +61,6 @@
 
 int mc_db_connect(void **db_handle, bool need_write);
 int mc_db_disconnect(void *db_handle);
-int mc_db_create_tables(void *handle);
 int mc_db_create_server_table(void *handle, const char *server_name);
 int mc_db_delete_server_table(void *handle, const char *server_name);
 int mc_db_check_server_table_exist(void *handle, const char *server_name, bool *exist);
