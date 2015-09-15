@@ -17,4 +17,4 @@ FOREACH(src ${sources})
     TARGET_LINK_LIBRARIES(${fw_test} ${fw_name} ${${fw_test}_LDFLAGS})
 ENDFOREACH()
 
-#INSTALL(TARGETS ${fw_test} DESTINATION bin)
+INSTALL(TARGETS ${fw_test} DESTINATION bin)
