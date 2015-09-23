@@ -49,6 +49,7 @@ static void _mc_util_check_valid_name(const char *name, char **new_name)
 	}
 
 	(*new_name) = strdup(new_word);
+
 	mc_retm_if((*new_name) == NULL, "Error allocation memory.");
 }
 
@@ -62,10 +63,13 @@ int mc_util_get_own_name(char **name)
 	pid = getpid();
 	if (pid == -1) {
 		mc_error("Error failed to get pid!");
+		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}
 	if (AUL_R_OK != aul_app_get_appid_bypid(pid, temp, sizeof(temp))) {
 		mc_error("Error failed to get appid!");
+		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}
+
 	_mc_util_check_valid_name(temp, name);
 
 	return MEDIA_CONTROLLER_ERROR_NONE;
@@ -84,6 +88,27 @@ char *mc_util_get_interface_name(const char *type, const char *name)
 	_mc_util_check_valid_name(temp, &interface_name);
 	MC_SAFE_FREE(temp);
 	return interface_name;
+}
+
+int mc_util_make_filter_interface_name(const char *prefix, const char *filter, char **interface_name)
+{
+	char *temp = NULL;
+
+	mc_retvm_if(prefix == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "prefix is NULL");
+	mc_retvm_if(filter == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "filter is NULL");
+
+	temp = g_strdup_printf("%s.%s", prefix, filter);
+
+	if (temp == NULL) {
+		mc_error("Fail to make interface_name");
+		return MEDIA_CONTROLLER_ERROR_OUT_OF_MEMORY;
+	}
+
+	_mc_util_check_valid_name(temp, interface_name);
+
+	MC_SAFE_FREE(temp);
+
+	return MEDIA_CONTROLLER_ERROR_NONE;
 }
 
 int mc_util_set_command_availabe(const char *name, const char *command_type, const char *command)

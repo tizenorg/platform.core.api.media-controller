@@ -80,7 +80,7 @@ void _mc_playback_updated_cb(const char *server_name, mc_playback_h playback, vo
 {
 	media_controller_client_s *_client = (media_controller_client_s *)g_mc_client;
 	unsigned long long position = 0;
-	mc_playback_states_e playback_state = MEDIA_PLAYBACK_STATE_NONE;
+	mc_playback_states_e playback_state = MC_PLAYBACK_STATE_NONE;
 
 	mc_client_get_playback_position(playback, &position);
 	mc_client_get_playback_state(playback, &playback_state);
@@ -96,7 +96,7 @@ void _mc_metadata_updated_cb(const char *server_name, mc_metadata_h metadata, vo
 	media_controller_client_s *_client = (media_controller_client_s *)g_mc_client;
 	mc_debug("[Client:%s] Metadata updated from server[%s] ", _client->client_name, server_name);
 
-	for (idx = 0; idx <= MEDIA_PICTURE; idx++) {
+	for (idx = 0; idx <= MC_META_MEDIA_PICTURE; idx++) {
 		ret = mc_client_get_metadata(metadata, idx, &str_val);
 		if (ret != MEDIA_CONTROLLER_ERROR_NONE)
 			mc_error("Fail to mc_client_get_metadata");
@@ -297,7 +297,7 @@ static gboolean _get_info(int type)
 				g_print("Fail to get metadata");
 				return FALSE;
 			}
-			ret = mc_client_get_metadata(metadata, MEDIA_TITLE, &metadata_value);
+			ret = mc_client_get_metadata(metadata, MC_META_MEDIA_TITLE, &metadata_value);
 			if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 				g_print("Fail to get infot");
 			}
@@ -341,17 +341,20 @@ static gboolean _send()
 	g_print("== send command to latest server \n");
 	int ret;
 
-	if (g_playback_state == MEDIA_PLAYBACK_STATE_PLAYING)
-		g_playback_state = MEDIA_PLAYBACK_STATE_STOPPED;
+	if (g_playback_state == MC_PLAYBACK_STATE_PLAYING)
+		g_playback_state = MC_PLAYBACK_STATE_STOPPED;
 	else
-		g_playback_state = MEDIA_PLAYBACK_STATE_PLAYING;
+		g_playback_state = MC_PLAYBACK_STATE_PLAYING;
 	ret = mc_client_send_playback_state_command(g_mc_client, g_server_name, g_playback_state);
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		g_print("Fail to send playback state command %d", ret);
 		return FALSE;
 	}
 
-	usleep(500000);
+	struct timespec reqtime;
+	reqtime.tv_sec = 0;
+	reqtime.tv_nsec = 500000000;
+	nanosleep(&reqtime, NULL);
 
 	bundle *bundle_data = bundle_create();
 	bundle_add_str(bundle_data, "key1", "val1");
@@ -546,13 +549,13 @@ int client_sequential_test(void)
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	char *server_name = NULL;
 	mc_server_state_e server_state = MC_SERVER_STATE_NONE;
-	mc_shuffle_mode_e shuffle_mode = SHUFFLE_MODE_OFF;
-	mc_repeat_mode_e repeat_mode = REPEAT_MODE_OFF;
+	mc_shuffle_mode_e shuffle_mode = MC_SHUFFLE_MODE_OFF;
+	mc_repeat_mode_e repeat_mode = MC_REPEAT_MODE_OFF;
 	mc_metadata_h metadata = NULL;
 	mc_playback_h playback = NULL;
 	char *str_val = NULL;
 	int idx = 0;
-	mc_playback_states_e playback_state = MEDIA_PLAYBACK_STATE_REWIND;
+	mc_playback_states_e playback_state = MC_PLAYBACK_STATE_REWIND;
 	unsigned long long playback_position = 0;
 
 	/*Create Client*/
@@ -603,7 +606,7 @@ int client_sequential_test(void)
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE)
 		g_print("Fail to mc_client_get_server_metadata\n");
 
-	for (idx = 0; idx <= MEDIA_PICTURE; idx++) {
+	for (idx = 0; idx <= MC_META_MEDIA_PICTURE; idx++) {
 		ret = mc_client_get_metadata(metadata, idx, &str_val);
 		if (ret != MEDIA_CONTROLLER_ERROR_NONE)
 			g_print("Fail to mc_client_get_metadata\n");
@@ -645,7 +648,7 @@ int main(int argc, char **argv)
 	g_io_channel_set_flags(stdin_channel, G_IO_FLAG_NONBLOCK, NULL);
 	g_io_add_watch(stdin_channel, G_IO_IN, (GIOFunc)input, NULL);
 
-	g_playback_state = MEDIA_PLAYBACK_STATE_PLAYING;
+	g_playback_state = MC_PLAYBACK_STATE_PLAYING;
 
 	mainloop = g_main_loop_new(NULL, FALSE);
 

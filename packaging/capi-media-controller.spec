@@ -1,6 +1,6 @@
 Name:       capi-media-controller
 Summary:    Multimedia Controller for player application
-Version:    0.0.8
+Version:    0.0.9
 Release:    1
 Group:      System/Libraries
 License:    Apache-2.0
@@ -13,6 +13,7 @@ BuildRequires:  cmake
 BuildRequires:  sqlite
 BuildRequires:  pkgconfig(capi-base-common)
 BuildRequires:  pkgconfig(dlog)
+BuildRequires:  pkgconfig(dbus-glib-1)
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(gio-2.0)
 BuildRequires:  pkgconfig(sqlite3)

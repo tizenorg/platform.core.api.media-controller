@@ -132,10 +132,26 @@ extern "C" {
 #define MC_COMMAND_PLAYBACKSTATE		"_playback_command_"
 #define MC_COMMAND_CUSTOM				"_custom_command_"
 
+#define MC_MILLISEC_SLEEP(msec) \
+	do { \
+		if(msec) { \
+			unsigned long sec_t = 0; \
+			unsigned long nsec_t = 0; \
+			unsigned long cal_time = msec * 1000000; \
+			sec_t = cal_time / 1000000000; \
+			nsec_t = cal_time % 1000000000; \
+			struct timespec reqtime; \
+			reqtime.tv_sec = sec_t; \
+			reqtime.tv_nsec = nsec_t; \
+			nanosleep(&reqtime, NULL); \
+		} \
+	} while (0)
+
 typedef struct {
 	void *callback;
 	void *user_data;
-}media_controller_reciever_s;
+	GList *filter_list;
+}media_controller_receiver_s;
 
 typedef struct {
 	mc_playback_states_e state;
@@ -169,8 +185,8 @@ typedef struct {
 	media_controller_playback_s playback;
 	media_controller_metadata_s *metadata;
 
-	media_controller_reciever_s playback_state_reciever;
-	media_controller_reciever_s custom_cmd_reciever;
+	media_controller_receiver_s playback_state_reciever;
+	media_controller_receiver_s custom_cmd_reciever;
 }media_controller_server_s;
 
 typedef struct {
@@ -182,12 +198,12 @@ typedef struct {
 
 	GList *listeners;
 
-	media_controller_reciever_s playback_cb;
-	media_controller_reciever_s metadata_cb;
-	media_controller_reciever_s server_state_cb;
-	media_controller_reciever_s shuffle_cb;
-	media_controller_reciever_s repeat_cb;
-	media_controller_reciever_s reply_cb;
+	media_controller_receiver_s playback_cb;
+	media_controller_receiver_s metadata_cb;
+	media_controller_receiver_s server_state_cb;
+	media_controller_receiver_s shuffle_cb;
+	media_controller_receiver_s repeat_cb;
+	media_controller_receiver_s reply_cb;
 }media_controller_client_s;
 
 /* formal callback to receive signal */
@@ -206,6 +222,7 @@ typedef struct {
 /* util */
 int mc_util_get_own_name(char **name);
 char* mc_util_get_interface_name(const char *type, const char *name);
+int mc_util_make_filter_interface_name(const char *prefix, const char *filter, char **interface_name);
 int mc_util_set_command_availabe(const char *name, const char *command_type, const char *command);
 int mc_util_get_command_availabe(const char *name, const char *command_type, const char *command);
 

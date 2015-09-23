@@ -97,7 +97,7 @@ int mc_ipc_create_server_socket(mc_msg_port_type_e port, int *sock_fd)
 			break;
 		}
 		mc_debug("%d", i);
-		usleep(250000);
+		MC_MILLISEC_SLEEP(250);
 	}
 
 	if (bind_success == false) {
