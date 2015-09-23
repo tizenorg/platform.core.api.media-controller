@@ -14,7 +14,11 @@
 * limitations under the License.
 */
 
+#include <dbus/dbus-glib.h>
+#include <dbus/dbus.h>
+#include <dbus/dbus-glib-lowlevel.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <systemd/sd-daemon.h>
 
 #include "media_controller_svc.h"
@@ -25,6 +29,82 @@
 
 static GMainLoop *g_mc_svc_mainloop = NULL;
 static int g_connection_cnt = -1;
+
+//////////////////////////////////////////////////////////////////////////////
+/// GET ACTIVATE USER ID
+//////////////////////////////////////////////////////////////////////////////
+#define UID_DBUS_NAME		 "org.freedesktop.login1"
+#define UID_DBUS_PATH		 "/org/freedesktop/login1"
+#define UID_DBUS_INTERFACE	 UID_DBUS_NAME".Manager"
+#define UID_DBUS_METHOD		 "ListUsers"
+
+static int __mc_dbus_get_uid(const char *dest, const char *path, const char *interface, const char *method, uid_t *uid)
+{
+	DBusConnection *conn = NULL;
+	DBusMessage *msg = NULL;
+	DBusMessage *reply = NULL;
+	DBusError err;
+	DBusMessageIter iiiter;
+	DBusMessageIter iter;
+	DBusMessageIter aiter, piter;
+	int result = 0;
+
+	int val_int = 0;
+	char *val_str = NULL;
+
+	conn = dbus_bus_get(DBUS_BUS_SYSTEM, NULL);
+	if (!conn) {
+		mc_error("dbus_bus_get error");
+		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+	}
+
+	msg = dbus_message_new_method_call(dest, path, interface, method);
+	if (!msg) {
+		mc_error("dbus_message_new_method_call(%s:%s-%s)",
+		path, interface, method);
+		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+	}
+
+	dbus_message_iter_init_append(msg, &iiiter);
+
+	dbus_error_init(&err);
+
+	reply = dbus_connection_send_with_reply_and_block(conn, msg, -1, &err);
+	dbus_message_unref(msg);
+	if (!reply) {
+		mc_error("dbus_connection_send error(%s:%s) %s %s:%s-%s",
+		err.name, err.message, dest, path, interface, method);
+		dbus_error_free(&err);
+		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+	}
+
+	dbus_message_iter_init(reply, &iter);
+	dbus_message_iter_recurse(&iter, &aiter);
+
+	result = 0;
+	while (dbus_message_iter_get_arg_type(&aiter) != DBUS_TYPE_INVALID) {
+		result++;
+		mc_debug("(%d)th block device information", result);
+
+		dbus_message_iter_recurse(&aiter, &piter);
+		dbus_message_iter_get_basic(&piter, &val_int);
+		mc_debug("\tType(%d)", val_int);
+
+		dbus_message_iter_next(&piter);
+		dbus_message_iter_get_basic(&piter, &val_str);
+		mc_debug("\tdevnode(%s)", val_str);
+
+		dbus_message_iter_next(&piter);
+		dbus_message_iter_get_basic(&piter, &val_str);
+		mc_debug("\tsyspath(%s)", val_str);
+
+		dbus_message_iter_next(&aiter);
+	}
+
+	*uid = (uid_t) val_int;
+
+	return result;
+}
 
 static int __create_socket_activation(void)
 {
@@ -52,7 +132,7 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 	mc_comm_msg_s recv_msg;
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	int send_msg = MEDIA_CONTROLLER_ERROR_NONE;
-	unsigned int i = 0;
+	int i = 0;
 	mc_svc_data_t *mc_svc_data = (mc_svc_data_t*)data;
 	mc_peer_creds creds = {0, };
 
@@ -80,11 +160,6 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 	}
 
 	if (recv_msg.msg_type == MC_MSG_DB_UPDATE) {
-		/* Connect media controller DB*/
-		if(mc_db_util_connect(&(mc_svc_data->db_handle), recv_msg.uid, true) != MEDIA_CONTROLLER_ERROR_NONE) {
-			mc_error("Failed to connect DB");
-			goto ERROR;
-		}
 		sql_query = strndup(recv_msg.msg, recv_msg.msg_size);
 		if (sql_query != NULL) {
 			ret = mc_db_util_update_db(mc_svc_data->db_handle, sql_query);
@@ -95,10 +170,6 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 			MC_SAFE_FREE(sql_query);
 		} else {
 			send_msg = MEDIA_CONTROLLER_ERROR_OUT_OF_MEMORY;
-		}
-		/* Disconnect DB*/
-		if(mc_db_util_disconnect(mc_svc_data->db_handle) != MEDIA_CONTROLLER_ERROR_NONE) {
-			mc_error("Failed to disconnect DB");
 		}
 	} else if (recv_msg.msg_type == MC_MSG_CLIENT_SET) {
 		/* check privileage */
@@ -117,11 +188,11 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 		set_data->data = strdup(recv_msg.msg);
 		mc_svc_data->mc_svc_list = g_list_append(mc_svc_data->mc_svc_list, set_data);
 	} else if (recv_msg.msg_type == MC_MSG_CLIENT_GET) {
+		send_msg = MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED;
 		/* check privileage */
 		ret = mc_cynara_check(&creds, MC_SERVER_PRIVILEGE);
 		if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 			mc_error("permission is denied![%d]", ret);
-			send_msg = MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED;
 			goto ERROR;
 		}
 
@@ -129,14 +200,14 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 		MC_SAFE_FREE(creds.smack);
 
 		mc_svc_list_t *set_data = NULL;
-		for (i = 0; i < g_list_length(mc_svc_data->mc_svc_list); i++) {
-			send_msg = MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED;
+		for (i = 0; i < (int)g_list_length(mc_svc_data->mc_svc_list); i++) {
 			set_data = (mc_svc_list_t *)g_list_nth_data(mc_svc_data->mc_svc_list, i);
 			if (set_data != NULL && set_data->data != NULL && strcmp(set_data->data, recv_msg.msg) == 0) {
 				mc_svc_data->mc_svc_list = g_list_remove(mc_svc_data->mc_svc_list, set_data);
 				MC_SAFE_FREE(set_data->data);
 				MC_SAFE_FREE(set_data);
 				send_msg = MEDIA_CONTROLLER_ERROR_NONE;
+				break;
 			}
 		}
 	} else if (recv_msg.msg_type == MC_MSG_SERVER_CONNECTION) {
@@ -166,7 +237,7 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 
 				// remove resource for disconnected process
 				mc_svc_list_t *set_data = NULL;
-				for (i = 0; i < g_list_length(mc_svc_data->mc_svc_list); i++) {
+				for (i = (int)(g_list_length(mc_svc_data->mc_svc_list)) - 1; i >= 0; i--) {
 					set_data = (mc_svc_list_t *)g_list_nth_data(mc_svc_data->mc_svc_list, i);
 					if ((set_data != NULL) && (set_data->pid == recv_msg.pid)) {
 						mc_svc_data->mc_svc_list = g_list_remove(mc_svc_data->mc_svc_list, set_data);
@@ -218,6 +289,7 @@ gboolean mc_svc_thread(void *data)
 	GIOChannel *channel = NULL;
 	GMainContext *context = NULL;
 	mc_svc_data_t *mc_svc_data = NULL;
+	uid_t uid = -1;
 
 	mc_svc_data = (mc_svc_data_t *)g_malloc(sizeof(mc_svc_data_t));
 	if (mc_svc_data == NULL) {
@@ -231,6 +303,31 @@ gboolean mc_svc_thread(void *data)
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		/* Disconnect DB*/
 		mc_error("Failed to create socket");
+		return FALSE;
+	}
+
+	ret = __mc_dbus_get_uid(UID_DBUS_NAME,UID_DBUS_PATH, UID_DBUS_INTERFACE, UID_DBUS_METHOD, &uid);
+	if (ret < 0) {
+		mc_debug("Failed to send dbus (%d)", ret);
+		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+	} else {
+		mc_debug("%d get UID[%d]", ret, uid);
+	}
+
+	/* Connect media controller DB*/
+	if(mc_db_util_connect(&(mc_svc_data->db_handle), uid, true) != MEDIA_CONTROLLER_ERROR_NONE) {
+		mc_error("Failed to connect DB");
+		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+	}
+
+	/* Destroy tables */
+	if (mc_db_util_delete_whole_server_tables(mc_svc_data->db_handle) != MEDIA_CONTROLLER_ERROR_NONE) {
+		mc_error("mc_db_util_delete_whole_server_tables failed [%d]", ret);
+	}
+
+	/* Create tables */
+	if (mc_db_util_create_tables(mc_svc_data->db_handle) != MEDIA_CONTROLLER_ERROR_NONE) {
+		mc_error("mc_db_util_create_tables failed [%d]", ret);
 		return FALSE;
 	}
 
@@ -273,15 +370,25 @@ gboolean mc_svc_thread(void *data)
 
 
 	if (mc_svc_data->mc_svc_list != NULL) {
-		int i = 0;
-		for (i = g_list_length(mc_svc_data->mc_svc_list) - 1; i >= 0; i--) {
-			char *nth_data = (char *)g_list_nth_data(mc_svc_data->mc_svc_list, i);
-			mc_svc_data->mc_svc_list = g_list_remove(mc_svc_data->mc_svc_list, nth_data);
-			MC_SAFE_FREE(nth_data);
+		unsigned int idx = 0;
+
+		for (idx = 0; idx < g_list_length(mc_svc_data->mc_svc_list); idx++) {
+			mc_svc_list_t *set_data = NULL;
+			set_data = (mc_svc_list_t *)g_list_nth_data(mc_svc_data->mc_svc_list, idx);
+			MC_SAFE_FREE(set_data->data);
+			MC_SAFE_FREE(set_data);
 		}
+
 		g_list_free(mc_svc_data->mc_svc_list);
 	}
+
 	MC_SAFE_FREE(mc_svc_data);
+
+	/* Disconnect media controller DB*/
+	if(mc_db_util_disconnect(mc_svc_data->db_handle) != MEDIA_CONTROLLER_ERROR_NONE) {
+		mc_error("Failed to connect DB");
+		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+	}
 
 	/*close socket*/
 	close(sockfd);

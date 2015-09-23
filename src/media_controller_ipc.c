@@ -183,7 +183,9 @@ int mc_ipc_register_listener(GList *listener_list, GDBusConnection *connection, 
 		MC_SAFE_FREE(key);
 		return MEDIA_CONTROLLER_ERROR_OUT_OF_MEMORY;
 	}
+
 	handler = _mc_ipc_signal_subscribe(connection, interface_name, signal_name, listener_list);
+
 	listener->dbus_conn = connection;
 	listener->interface_name = g_strdup(interface_name);
 	listener->signal_name = g_strdup(signal_name);
@@ -260,10 +262,10 @@ int mc_ipc_send_message(GDBusConnection *connection, const char *dbus_name, cons
 	GError *error = NULL;
 
 	mc_retvm_if(connection == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "connection is NULL");
-	mc_retvm_if(signal_name == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "signal_name is NULL");
-	mc_retvm_if(message == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "message is NULL");
+	mc_retvm_if(!MC_STRING_VALID(signal_name), MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid signal_name");
+	mc_retvm_if(!MC_STRING_VALID(message), MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid message");
 
-	mc_debug("emit signal - interface: %s, signal: %s", interface_name, signal_name);
+	mc_debug("emit signal - interface_name [%s], signal_name [%s]", interface_name, signal_name);
 
 	gboolean emmiting = g_dbus_connection_emit_signal(
 	                        connection,
@@ -409,7 +411,7 @@ int mc_ipc_service_connect(void)
 	mc_ipc_delete_client_socket(&sock_info);
 
 	while((__is_service_activated() == FALSE) && (retrycount++ < MAX_WAIT_COUNT)) {
-		usleep(200000);
+		MC_MILLISEC_SLEEP(200);
 		mc_error("[No-Error] retry count [%d]", retrycount);
 	}
 

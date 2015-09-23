@@ -87,17 +87,17 @@ typedef enum {
  * @since_tizen 2.4
  */
 typedef enum {
-	MEDIA_TITLE = 0,					/**< Title */
-	MEDIA_ARTIST,						/**< Artist */
-	MEDIA_ALBUM,						/**< Album */
-	MEDIA_AUTHOR,						/**< Author */
-	MEDIA_GENRE,						/**< Genre */
-	MEDIA_DURATION,						/**< Duration */
-	MEDIA_DATE,							/**< Date */
-	MEDIA_COPYRIGHT,					/**< Copyright */
-	MEDIA_DESCRIPTION,					/**< Description */
-	MEDIA_TRACK_NUM,					/**< Track Number */
-	MEDIA_PICTURE,						/**< Picture. Album Art */
+	MC_META_MEDIA_TITLE = 0,					/**< Title */
+	MC_META_MEDIA_ARTIST,						/**< Artist */
+	MC_META_MEDIA_ALBUM,						/**< Album */
+	MC_META_MEDIA_AUTHOR,						/**< Author */
+	MC_META_MEDIA_GENRE,						/**< Genre */
+	MC_META_MEDIA_DURATION,						/**< Duration */
+	MC_META_MEDIA_DATE,							/**< Date */
+	MC_META_MEDIA_COPYRIGHT,					/**< Copyright */
+	MC_META_MEDIA_DESCRIPTION,					/**< Description */
+	MC_META_MEDIA_TRACK_NUM,					/**< Track Number */
+	MC_META_MEDIA_PICTURE,						/**< Picture. Album Art */
 } mc_meta_e;
 
 /**
@@ -105,14 +105,14 @@ typedef enum {
  * @since_tizen 2.4
  */
 typedef enum {
-	MEDIA_PLAYBACK_STATE_NONE = 0,				/**< None */
-	MEDIA_PLAYBACK_STATE_PLAYING,				/**< Play */
-	MEDIA_PLAYBACK_STATE_PAUSED,				/**< Pause */
-	MEDIA_PLAYBACK_STATE_STOPPED,				/**< Stop */
-	MEDIA_PLAYBACK_STATE_NEXT_FILE,			/**< Next file */
-	MEDIA_PLAYBACK_STATE_PREV_FILE,			/**< Previous file */
-	MEDIA_PLAYBACK_STATE_FAST_FORWARD,		/**< Fast forward */
-	MEDIA_PLAYBACK_STATE_REWIND,				/**< Rewind */
+	MC_PLAYBACK_STATE_NONE = 0,				/**< None */
+	MC_PLAYBACK_STATE_PLAYING,				/**< Play */
+	MC_PLAYBACK_STATE_PAUSED,				/**< Pause */
+	MC_PLAYBACK_STATE_STOPPED,				/**< Stop */
+	MC_PLAYBACK_STATE_NEXT_FILE,			/**< Next file */
+	MC_PLAYBACK_STATE_PREV_FILE,			/**< Previous file */
+	MC_PLAYBACK_STATE_FAST_FORWARD,		/**< Fast forward */
+	MC_PLAYBACK_STATE_REWIND,				/**< Rewind */
 } mc_playback_states_e;
 
 /**
@@ -120,8 +120,8 @@ typedef enum {
  * @since_tizen 2.4
  */
 typedef enum {
-	SHUFFLE_MODE_ON = 0,				/**< Shuffle mode on */
-	SHUFFLE_MODE_OFF,					/**< Shuffle mode off */
+	MC_SHUFFLE_MODE_ON = 0,				/**< Shuffle mode on */
+	MC_SHUFFLE_MODE_OFF,					/**< Shuffle mode off */
 } mc_shuffle_mode_e;
 
 /**
@@ -129,9 +129,21 @@ typedef enum {
  * @since_tizen 2.4
  */
 typedef enum {
-	REPEAT_MODE_ON = 0,					/**< Repeat mode on */
-	REPEAT_MODE_OFF,					/**< Repeat mode off */
+	MC_REPEAT_MODE_ON = 0,					/**< Repeat mode on */
+	MC_REPEAT_MODE_OFF,					/**< Repeat mode off */
 } mc_repeat_mode_e;
+
+/**
+ * @brief Enumeration for the subscription type.
+ * @since_tizen 2.4
+ */
+typedef enum {
+	MC_SUBSCRIPTION_TYPE_SERVER_STATE = 0,					/**< Server state */
+	MC_SUBSCRIPTION_TYPE_PLAYBACK,						/**< Playback */
+	MC_SUBSCRIPTION_TYPE_METADATA,						/**< Metadata */
+	MC_SUBSCRIPTION_TYPE_SHUFFLE_MODE,					/**< Shuffle mode */
+	MC_SUBSCRIPTION_TYPE_REPEAT_MODE,					/**< Repeat mode */
+} mc_subscription_type_e;
 
 /**
  * @}

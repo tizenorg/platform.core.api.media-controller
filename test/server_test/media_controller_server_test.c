@@ -156,10 +156,10 @@ static gboolean _set_cb()
 static gboolean _set_info(int type, char *cmd)
 {
 	g_print("== get information \n");
-	int ret;
+	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	int playback_state = 0;
 	unsigned long long playback_position;
-	char *metadata;
+	char *metadata = NULL;
 
 	switch (type) {
 		case CURRENT_STATE_SET_PLAYBACK_STATE:
@@ -189,10 +189,13 @@ static gboolean _set_info(int type, char *cmd)
 			ret = mc_server_set_metadata(g_mc_server, g_metadata_type, metadata);
 			if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 				g_print("Fail to set metadata");
+				if(metadata != NULL)
+					free(metadata);
 				return FALSE;
 			}
 			g_print("set metadata value: %s", metadata);
-			free(metadata);
+			if(metadata != NULL)
+				free(metadata);
 			break;
 		default:
 			g_print(" == unknown type!\n");
@@ -225,10 +228,10 @@ static gboolean _update_info(int type)
 			}
 			break;
 		case 3:
-			if (g_shuffle_mode == SHUFFLE_MODE_OFF)
-				g_shuffle_mode = SHUFFLE_MODE_ON;
+			if (g_shuffle_mode == MC_SHUFFLE_MODE_OFF)
+				g_shuffle_mode = MC_SHUFFLE_MODE_ON;
 			else
-				g_shuffle_mode = SHUFFLE_MODE_OFF;
+				g_shuffle_mode = MC_SHUFFLE_MODE_OFF;
 			ret = mc_server_update_shuffle_mode(g_mc_server, g_shuffle_mode);
 			if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 				g_print("Fail to update shuffle mode err=%d", ret);
@@ -236,10 +239,10 @@ static gboolean _update_info(int type)
 			}
 			break;
 		case 4:
-			if (g_repeat_mode == REPEAT_MODE_OFF)
-				g_repeat_mode = REPEAT_MODE_ON;
+			if (g_repeat_mode == MC_REPEAT_MODE_OFF)
+				g_repeat_mode = MC_REPEAT_MODE_ON;
 			else
-				g_repeat_mode = REPEAT_MODE_OFF;
+				g_repeat_mode = MC_REPEAT_MODE_OFF;
 			ret = mc_server_update_repeat_mode(g_mc_server, g_repeat_mode);
 			if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 				g_print("Fail to update repeat mode err=%d", ret);
@@ -482,7 +485,7 @@ int server_sequential_test(void)
 		return ret;
 	}
 
-	ret = mc_server_set_playback_state(g_mc_server, MEDIA_PLAYBACK_STATE_PLAYING);
+	ret = mc_server_set_playback_state(g_mc_server, MC_PLAYBACK_STATE_PLAYING);
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		g_print("Fail to mc_server_set_playback_state\n");
 		return ret;
@@ -500,25 +503,25 @@ int server_sequential_test(void)
 		/*return ret; */
 	}
 
-	ret = mc_server_set_metadata(g_mc_server, MEDIA_TITLE, "media_title");
-	ret = mc_server_set_metadata(g_mc_server, MEDIA_ARTIST, "media_artist");
-	ret = mc_server_set_metadata(g_mc_server, MEDIA_ALBUM, "media_album");
-	ret = mc_server_set_metadata(g_mc_server, MEDIA_AUTHOR, "media_author");
-	ret = mc_server_set_metadata(g_mc_server, MEDIA_GENRE, "media_genre");
-	ret = mc_server_set_metadata(g_mc_server, MEDIA_DURATION, "200");
-	ret = mc_server_set_metadata(g_mc_server, MEDIA_DATE, "media_date");
-	ret = mc_server_set_metadata(g_mc_server, MEDIA_COPYRIGHT, "media_copyright");
-	ret = mc_server_set_metadata(g_mc_server, MEDIA_DESCRIPTION, "media_description");
-	ret = mc_server_set_metadata(g_mc_server, MEDIA_TRACK_NUM, "media_track_num 3/10");
-	ret = mc_server_set_metadata(g_mc_server, MEDIA_PICTURE, "media_picture_path");
+	ret = mc_server_set_metadata(g_mc_server, MC_META_MEDIA_TITLE, "media_title");
+	ret = mc_server_set_metadata(g_mc_server, MC_META_MEDIA_ARTIST, "media_artist");
+	ret = mc_server_set_metadata(g_mc_server, MC_META_MEDIA_ALBUM, "media_album");
+	ret = mc_server_set_metadata(g_mc_server, MC_META_MEDIA_AUTHOR, "media_author");
+	ret = mc_server_set_metadata(g_mc_server, MC_META_MEDIA_GENRE, "media_genre");
+	ret = mc_server_set_metadata(g_mc_server, MC_META_MEDIA_DURATION, "200");
+	ret = mc_server_set_metadata(g_mc_server, MC_META_MEDIA_DATE, "media_date");
+	ret = mc_server_set_metadata(g_mc_server, MC_META_MEDIA_COPYRIGHT, "media_copyright");
+	ret = mc_server_set_metadata(g_mc_server, MC_META_MEDIA_DESCRIPTION, "media_description");
+	ret = mc_server_set_metadata(g_mc_server, MC_META_MEDIA_TRACK_NUM, "media_track_num 3/10");
+	ret = mc_server_set_metadata(g_mc_server, MC_META_MEDIA_PICTURE, "media_picture_path");
 	ret = mc_server_update_metadata(g_mc_server);
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		g_print("Fail to mc_server_update_metadata\n");
 		/*return ret; */
 	}
 
-	ret = mc_server_update_shuffle_mode(g_mc_server, SHUFFLE_MODE_ON);
-	ret = mc_server_update_repeat_mode(g_mc_server, REPEAT_MODE_ON);
+	ret = mc_server_update_shuffle_mode(g_mc_server, MC_SHUFFLE_MODE_ON);
+	ret = mc_server_update_repeat_mode(g_mc_server, MC_REPEAT_MODE_ON);
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		g_print("Fail to mc_server_update_repeat_mode\n");
 		return ret;
@@ -540,8 +543,8 @@ int main(int argc, char **argv)
 	g_io_channel_set_flags(stdin_channel, G_IO_FLAG_NONBLOCK, NULL);
 	g_io_add_watch(stdin_channel, G_IO_IN, (GIOFunc)input, NULL);
 
-	g_shuffle_mode = SHUFFLE_MODE_OFF;
-	g_repeat_mode = REPEAT_MODE_OFF;
+	g_shuffle_mode = MC_SHUFFLE_MODE_OFF;
+	g_repeat_mode = MC_REPEAT_MODE_OFF;
 
 	mainloop = g_main_loop_new(NULL, FALSE);
 
