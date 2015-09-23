@@ -135,6 +135,21 @@ typedef bool (*mc_activated_server_cb)(const char *server_name, void *user_data)
  */
 typedef void (*mc_command_reply_received_cb)(const char *server_name, int result_code, bundle *data, void *user_data);
 
+/**
+ * @brief Called when requesting the list of subscribed servers.
+ * @since_tizen 2.4
+ *
+ * @param[in] server_name,    The app_id of the subscribed media controller server
+ * @param[in] user_data        The user data passed from the mc_client_foreach_server_subscribed() fuction
+ *
+ * @return @c true to continue with the next iteration of the loop,
+ *         otherwise @c false to break out of the loop
+ *
+ * @pre mc_client_foreach_server_subscribed()
+ *
+ * @see mc_client_foreach_server_subscribed()
+ */
+typedef bool (*mc_subscribed_server_cb)(const char *server_name, void *user_data);
 
 /**
  * @brief Creates a media controller client.
@@ -160,6 +175,7 @@ int mc_client_create(mc_client_h *client);
 /**
  * @brief Sets the callback for monitoring status of the media controller server.
  * @since_tizen 2.4
+ * @details If media controller client call this function, basically the media controller client recieve the callback from all media controller servers.
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.client
@@ -200,6 +216,7 @@ int mc_client_unset_server_update_cb(mc_client_h client);
 /**
  * @brief Sets the callback for monitoring playback status of the media controller server.
  * @since_tizen 2.4
+ * @details If media controller client call this function, basically the media controller client recieve the callback from all media controller servers. \n
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.client
@@ -240,6 +257,7 @@ int mc_client_unset_playback_update_cb(mc_client_h client);
 /**
  * @brief Sets the callback for monitoring metadata status of the media controller server.
  * @since_tizen 2.4
+ * @details If media controller client call this function, basically the media controller client recieve the callback from all media controller servers.
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.client
@@ -280,6 +298,7 @@ int mc_client_unset_metadata_update_cb(mc_client_h client);
 /**
  * @brief Sets the callback for monitoring shuffle mode of the media controller server.
  * @since_tizen 2.4
+ * @details If media controller client call this function, basically the media controller client recieve the callback from all media controller servers.
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.client
@@ -320,6 +339,7 @@ int mc_client_unset_shuffle_mode_update_cb(mc_client_h client);
 /**
  * @brief Sets the callback for monitoring repeat mode of the media controller server.
  * @since_tizen 2.4
+ * @details If media controller client call this function, basically the media controller client recieve the callback from all media controller servers.
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.client
@@ -356,6 +376,82 @@ int mc_client_set_repeat_mode_update_cb(mc_client_h client, mc_repeat_mode_chang
  * @see mc_client_destroy()
  */
 int mc_client_unset_repeat_mode_update_cb(mc_client_h client);
+
+/**
+ * @brief Subscribes media controller server for monitoring status.
+ * @since_tizen 2.4
+ * @details If media controller client subscribe media controller server, \n
+ *              the media controller client recieve callback from subscribed media controller server. \n
+ *              If media controller client subscribe media controller server one or more, \n
+ *              the media controller client can recieve callback from only subscribed media controller server. \n
+ *              If you want to subscribe for the all media controller server again, \n
+ *              unset mode update callback and set the callback for the monitoring status again. \n
+ *
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/mediacontroller.client
+ *
+ * @param [in] client    The handle to the media controller client
+ * @param [in] subscription_type    The subscription type
+ * @param [in] server_name    The app_id of the media controller server
+ * @return @c 0 on success,
+ *         otherwise a negative error value
+ * @retval #MEDIA_CONTROLLER_ERROR_NONE Successful
+ * @retval #MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER Invalid parameter
+ * @pre Create a media controller client handle by calling mc_client_create()
+ * @pre Set the callback for monitoring status of the media controller server
+ * @post Unsubscribe the media controller server for monitoring status by calling mc_client_unsubscribe()
+ * @see mc_client_create()
+ * @see mc_client_unsubscribe()
+ */
+int mc_client_subscribe(mc_client_h client, mc_subscription_type_e subscription_type, const char *server_name);
+
+/**
+ * @brief Unsubscribes media controller server for monitoring status.
+ * @since_tizen 2.4
+ * @details If media controller client unsubscribe media controller server, \n
+ *              the media controller client don't recieve callback from unsubscribed media controller server. \n
+ *              If media controller client unsubscribe all subscibed media controller server, \n
+ *              the media controller client don't recieve callback from all media controller server. \n
+ *              After unset and set update callback function is called again, the media controller client can recieve callback from all media controller servers. \n
+ *
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/mediacontroller.client
+ *
+ * @param [in] client    The handle to the media controller client
+ * @param [in] subscription_type    The subscription type
+ * @param [in] server_name    The app_id of the media controller server
+ * @return @c 0 on success,
+ *         otherwise a negative error value
+ * @retval #MEDIA_CONTROLLER_ERROR_NONE Successful
+ * @retval #MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER Invalid parameter
+ * @pre Create a media controller client handle by calling mc_client_create()
+ * @pre Subscribe the media controller server for monitoring status by calling mc_client_subscribe()
+ * @see mc_client_create()
+ * @see mc_client_subscribe()
+ */
+int mc_client_unsubscribe(mc_client_h client, mc_subscription_type_e subscription_type, const char *server_name);
+
+/**
+ * @brief Retrieves all subscribed Server.
+ * @since_tizen 2.4
+ *
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/mediacontroller.client
+ *
+ * @param [in] client    The handle to the media controller client
+ * @param [in] subscription_type    The subscription type
+ * @param [in] callback      The callback to be invoked when the list of the subscribed media controller server.
+ * @param [in] user_data   The user data to be passed to the callback function
+ * @return @c 0 on success,
+ *         otherwise a negative error value
+ * @retval #MEDIA_CONTROLLER_ERROR_NONE Successful
+ * @retval #MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER Invalid parameter
+ * @pre Create a media controller client handle by calling mc_client_create()
+ * @pre Subscribe the media controller server for monitoring status by calling mc_client_subscribe()
+ * @see mc_client_create()
+ * @see mc_client_subscribe()
+ */
+int mc_client_foreach_server_subscribed(mc_client_h client, mc_subscription_type_e subscription_type, mc_subscribed_server_cb callback, void *user_data);
 
 /**
  * @brief Gets the playback state.
@@ -412,6 +508,7 @@ int mc_client_destroy_playback(mc_playback_h playback);
  * @since_tizen 2.4
  *
  * @remarks You must release @a metadata using @c mc_client_destroy_metadata(). \n
+ *               And also You must release @a value using free().
  *                   If the attribute value of the metadata is empty, return value is NULL.
  *
  * @param [in] metadata    The handle to metadata
