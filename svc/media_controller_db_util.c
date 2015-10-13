@@ -127,7 +127,7 @@ static int __mc_create_server_list_table(sqlite3 *handle)
 
 static char* __mc_get_db_name(uid_t uid)
 {
-	char result_psswd[MC_FILE_PATH_LEN_MAX];
+	char result_psswd[MC_FILE_PATH_LEN_MAX] = {0, };
 	char *result_psswd_rtn = NULL;
 	struct group *grpinfo = NULL;
 	char * dir = NULL;
@@ -186,19 +186,29 @@ int mc_db_util_connect(void **handle, uid_t uid, bool need_write)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	sqlite3 *db_handle = NULL;
-
+	char * db_name = NULL;
 	mc_retvm_if(handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
+
+	*handle = NULL;
+
+	db_name = __mc_get_db_name(uid);
+
+	if (!MC_STRING_VALID(db_name)) {
+		mc_error("error when get db path");
+		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+	}
 
 	/*Connect DB*/
 	if(need_write) {
-		ret = db_util_open_with_options(__mc_get_db_name(uid), &db_handle, SQLITE_OPEN_READWRITE, NULL);
+		ret = db_util_open_with_options(db_name, &db_handle, SQLITE_OPEN_READWRITE, NULL);
 	} else {
-		ret = db_util_open_with_options(__mc_get_db_name(uid), &db_handle, SQLITE_OPEN_READONLY, NULL);
+		ret = db_util_open_with_options(db_name, &db_handle, SQLITE_OPEN_READONLY, NULL);
 	}
+
+	MC_SAFE_FREE(db_name);
+
 	if (SQLITE_OK != ret) {
 		mc_error("error when db open");
-		*handle = NULL;
-
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}
 
@@ -212,8 +222,6 @@ int mc_db_util_connect(void **handle, uid_t uid, bool need_write)
 	if (SQLITE_OK != ret) {
 		mc_error("error when register busy handler %s\n", sqlite3_errmsg(db_handle));
 		db_util_close(db_handle);
-		*handle = NULL;
-
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}
 
