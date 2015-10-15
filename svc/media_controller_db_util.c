@@ -193,7 +193,7 @@ int mc_db_util_connect(void **handle, uid_t uid, bool need_write)
 
 	db_name = __mc_get_db_name(uid);
 
-	if (!MC_STRING_VALID(db_name)) {
+	if (db_name == NULL) {
 		mc_error("error when get db path");
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}
