@@ -43,12 +43,12 @@ static char *__make_key_for_map(const char *main_key, const char *sub_key)
 }
 
 static void __mc_ipc_signal_cb(GDBusConnection *connection,
-                               const gchar *sender_name,
-                               const gchar *object_path,
-                               const gchar *interface_name,
-                               const gchar *signal_name,
-                               GVariant *parameters,
-                               gpointer user_data)
+									const gchar *sender_name,
+									const gchar *object_path,
+									const gchar *interface_name,
+									const gchar *signal_name,
+									GVariant *parameters,
+									gpointer user_data)
 {
 	char *key = __make_key_for_map(interface_name, signal_name);
 	GList *listener_list = (GList *)user_data;
@@ -87,16 +87,16 @@ static gboolean _mc_ipc_is_listener_duplicated(GList *listener_list, const char 
 static guint _mc_ipc_signal_subscribe(GDBusConnection *connection, const char *interface_name, const char *signal_name, void *user_data)
 {
 	guint ret = g_dbus_connection_signal_subscribe(
-	                connection,
-	                NULL,
-	                interface_name,
-	                signal_name,
-	                MC_DBUS_PATH,
-	                NULL,
-	                G_DBUS_SIGNAL_FLAGS_NONE,
-	                __mc_ipc_signal_cb,
-	                user_data,
-	                NULL);
+				connection,
+				NULL,
+				interface_name,
+				signal_name,
+				MC_DBUS_PATH,
+				NULL,
+				G_DBUS_SIGNAL_FLAGS_NONE,
+				__mc_ipc_signal_cb,
+				user_data,
+				NULL);
 
 	return ret;
 }
@@ -268,13 +268,13 @@ int mc_ipc_send_message(GDBusConnection *connection, const char *dbus_name, cons
 	mc_debug("emit signal - interface_name [%s], signal_name [%s]", interface_name, signal_name);
 
 	gboolean emmiting = g_dbus_connection_emit_signal(
-	                        connection,
-	                        dbus_name,
-	                        MC_DBUS_PATH,
-	                        interface_name,
-	                        signal_name,
-	                        g_variant_new("(is)", 0, message),
-	                        &error);
+						connection,
+						dbus_name,
+						MC_DBUS_PATH,
+						interface_name,
+						signal_name,
+						g_variant_new("(is)", 0, message),
+						&error);
 	if (!emmiting) {
 		mc_error("g_dbus_connection_emit_signal failed : %s", error ? error->message : "none");
 		if (error) {
@@ -410,7 +410,7 @@ int mc_ipc_service_connect(void)
 
 	mc_ipc_delete_client_socket(&sock_info);
 
-	while((__is_service_activated() == FALSE) && (retrycount++ < MAX_WAIT_COUNT)) {
+	while ((__is_service_activated() == FALSE) && (retrycount++ < MAX_WAIT_COUNT)) {
 		MC_MILLISEC_SLEEP(200);
 		mc_error("[No-Error] retry count [%d]", retrycount);
 	}

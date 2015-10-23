@@ -1,6 +1,6 @@
 Name:       capi-media-controller
 Summary:    Multimedia Controller for player application
-Version:    0.0.10
+Version:    0.0.11
 Release:    1
 Group:      System/Libraries
 License:    Apache-2.0

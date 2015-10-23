@@ -13,6 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
@@ -155,7 +156,7 @@ int mc_db_connect(void **handle, bool need_write)
 	mc_retvm_if(handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 
 	/*Connect DB*/
-	if(need_write) {
+	if (need_write) {
 		ret = db_util_open_with_options(tzplatform_mkpath(TZ_USER_DB, MC_DB_NAME), &db_handle, SQLITE_OPEN_READWRITE, NULL);
 	} else {
 		ret = db_util_open_with_options(tzplatform_mkpath(TZ_USER_DB, MC_DB_NAME), &db_handle, SQLITE_OPEN_READONLY, NULL);
@@ -205,8 +206,8 @@ int mc_db_update_playback_info(void *handle, const char *server_name, int playba
 }
 
 int mc_db_update_whole_metadata(void *handle, const char *server_name,
-                                const char *title, const char *artist, const char *album, const char *author, const char *genre, const char *duration, const char *date,
-                                const char *copyright, const char *description, const char *track_num, const char *picture)
+					const char *title, const char *artist, const char *album, const char *author, const char *genre, const char *duration, const char *date,
+					const char *copyright, const char *description, const char *track_num, const char *picture)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	char *sql_str = NULL;
@@ -215,7 +216,7 @@ int mc_db_update_whole_metadata(void *handle, const char *server_name,
 	mc_retvm_if(server_name == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "server_name is NULL");
 
 	sql_str = sqlite3_mprintf(DB_UPDATE_METADATA_INFO_INFO_SERVER_TABLE, server_name,
-	                          title, artist, album, author, genre, duration, date, copyright, description, track_num, picture);
+						title, artist, album, author, genre, duration, date, copyright, description, track_num, picture);
 
 	ret = __mc_db_update_db(handle, sql_str);
 
@@ -504,7 +505,7 @@ int mc_db_create_server_table(void *handle, const char *server_name)
 				shuffle_mode		INTEGER DEFAULT 1, \
 				repeat_mode			INTEGER DEFAULT 1 \
 				);",
-	                          server_name);
+				server_name);
 
 	ret = __mc_db_update_db(handle, sql_str);
 

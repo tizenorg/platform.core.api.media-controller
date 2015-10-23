@@ -30,9 +30,6 @@
 static GMainLoop *g_mc_svc_mainloop = NULL;
 static int g_connection_cnt = -1;
 
-//////////////////////////////////////////////////////////////////////////////
-/// GET ACTIVATE USER ID
-//////////////////////////////////////////////////////////////////////////////
 #define UID_DBUS_NAME		 "org.freedesktop.login1"
 #define UID_DBUS_PATH		 "/org/freedesktop/login1"
 #define UID_DBUS_INTERFACE	 UID_DBUS_NAME".Manager"
@@ -146,9 +143,8 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 
 	/* get client socket fd */
 	ret = mc_ipc_accept_client_tcp(sock, &client_sock);
-	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE)
 		return TRUE;
-	}
 
 	memset(&creds, 0, sizeof(mc_peer_creds));
 
@@ -211,9 +207,9 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 			}
 		}
 	} else if (recv_msg.msg_type == MC_MSG_SERVER_CONNECTION) {
-		if((recv_msg.msg_size > 0) && (recv_msg.msg != NULL)) {
+		if ((recv_msg.msg_size > 0) && (recv_msg.msg != NULL)) {
 			if (strncmp(recv_msg.msg, MC_SERVER_CONNECTION_MSG, recv_msg.msg_size) == 0) {
-				if(g_connection_cnt == -1)
+				if (g_connection_cnt == -1)
 					g_connection_cnt = 1;
 				else
 					g_connection_cnt++;
@@ -230,12 +226,12 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 			send_msg = MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 		}
 	} else if (recv_msg.msg_type == MC_MSG_SERVER_DISCONNECTION) {
-		if((recv_msg.msg_size > 0) && (recv_msg.msg != NULL)) {
+		if ((recv_msg.msg_size > 0) && (recv_msg.msg != NULL)) {
 			if (strncmp(recv_msg.msg, MC_SERVER_DISCONNECTION_MSG, recv_msg.msg_size) == 0) {
 				g_connection_cnt--;
 				mc_error("[No-error] decreased connection count [%d]", g_connection_cnt);
 
-				// remove resource for disconnected process
+				/* remove resource for disconnected process */
 				mc_svc_list_t *set_data = NULL;
 				for (i = (int)(g_list_length(mc_svc_data->mc_svc_list)) - 1; i >= 0; i--) {
 					set_data = (mc_svc_list_t *)g_list_nth_data(mc_svc_data->mc_svc_list, i);
@@ -261,15 +257,14 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 	}
 
 ERROR:
-	if (write(client_sock, &send_msg, sizeof(send_msg)) != sizeof(send_msg)) {
+	if (write(client_sock, &send_msg, sizeof(send_msg)) != sizeof(send_msg))
 		mc_stderror("send failed");
-	} else {
+	else
 		mc_debug("Sent successfully");
-	}
 
-	if (close(client_sock) < 0) {
+	if (close(client_sock) < 0)
 		mc_stderror("close failed");
-	}
+
 	MC_SAFE_FREE(creds.uid);
 	MC_SAFE_FREE(creds.smack);
 
@@ -306,7 +301,7 @@ gboolean mc_svc_thread(void *data)
 		return FALSE;
 	}
 
-	ret = __mc_dbus_get_uid(UID_DBUS_NAME,UID_DBUS_PATH, UID_DBUS_INTERFACE, UID_DBUS_METHOD, &uid);
+	ret = __mc_dbus_get_uid(UID_DBUS_NAME, UID_DBUS_PATH, UID_DBUS_INTERFACE, UID_DBUS_METHOD, &uid);
 	if (ret < 0) {
 		mc_debug("Failed to send dbus (%d)", ret);
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
@@ -315,15 +310,14 @@ gboolean mc_svc_thread(void *data)
 	}
 
 	/* Connect media controller DB*/
-	if(mc_db_util_connect(&(mc_svc_data->db_handle), uid, true) != MEDIA_CONTROLLER_ERROR_NONE) {
+	if (mc_db_util_connect(&(mc_svc_data->db_handle), uid, true) != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("Failed to connect DB");
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}
 
 	/* Destroy tables */
-	if (mc_db_util_delete_whole_server_tables(mc_svc_data->db_handle) != MEDIA_CONTROLLER_ERROR_NONE) {
+	if (mc_db_util_delete_whole_server_tables(mc_svc_data->db_handle) != MEDIA_CONTROLLER_ERROR_NONE)
 		mc_error("mc_db_util_delete_whole_server_tables failed [%d]", ret);
-	}
 
 	/* Create tables */
 	if (mc_db_util_create_tables(mc_svc_data->db_handle) != MEDIA_CONTROLLER_ERROR_NONE) {
@@ -332,17 +326,16 @@ gboolean mc_svc_thread(void *data)
 	}
 
 	ret = mc_cynara_enable_credentials_passing(sockfd);
-	if(ret != MEDIA_CONTROLLER_ERROR_NONE) {
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("Failed to append socket options");
 		return FALSE;
 	}
 
 	context = g_main_context_new();
-	if (context == NULL) {
+	if (context == NULL)
 		mc_error("g_main_context_new failed");
-	} else {
+	else
 		mc_debug("g_main_context_new success");
-	}
 
 	/*Init main loop*/
 	g_mc_svc_mainloop = g_main_loop_new(context, FALSE);
@@ -385,7 +378,7 @@ gboolean mc_svc_thread(void *data)
 	MC_SAFE_FREE(mc_svc_data);
 
 	/* Disconnect media controller DB*/
-	if(mc_db_util_disconnect(mc_svc_data->db_handle) != MEDIA_CONTROLLER_ERROR_NONE) {
+	if (mc_db_util_disconnect(mc_svc_data->db_handle) != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("Failed to connect DB");
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}

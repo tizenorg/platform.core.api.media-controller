@@ -224,9 +224,8 @@ static int __mc_client_destroy(media_controller_client_s *mc_client)
 			mc_error("fail to mc_db_disconnect");
 	}
 
-	if (mc_client->listeners != NULL) {
+	if (mc_client->listeners != NULL)
 		g_list_free(mc_client->listeners);
-	}
 
 	MC_SAFE_FREE(mc_client->client_name);
 	MC_SAFE_FREE(mc_client);
@@ -286,7 +285,7 @@ static int __mc_client_unregister_filter_listener(media_controller_client_s *mc_
 		}
 
 		/*Remove from  filter_list*/
-		for(idx = 0; idx < filter_cnt; idx++) {
+		for (idx = 0; idx < filter_cnt; idx++) {
 			char * interface_name = NULL;
 			interface_name = g_list_nth_data(*filter_list, idx);
 
@@ -303,7 +302,7 @@ static int __mc_client_unregister_filter_listener(media_controller_client_s *mc_
 	} else {
 
 		/*Remove All filter listener*/
-		for(idx = 0; idx < filter_cnt; idx++) {
+		for (idx = 0; idx < filter_cnt; idx++) {
 			char * interface_name = NULL;
 			interface_name = g_list_nth_data(*filter_list, idx);
 
@@ -312,7 +311,7 @@ static int __mc_client_unregister_filter_listener(media_controller_client_s *mc_
 
 				/*Unregister listener*/
 				ret = mc_ipc_unregister_listener(mc_client->listeners, mc_client->dconn, interface_name, signal_name);
-				if(ret != MEDIA_CONTROLLER_ERROR_NONE)
+				if (ret != MEDIA_CONTROLLER_ERROR_NONE)
 					mc_error("Fail mc_ipc_unregister_listener");
 
 				/*Remove from  filter_list*/
@@ -379,7 +378,7 @@ int mc_client_set_server_update_cb(mc_client_h client, mc_server_state_updated_c
 	mc_client->server_state_cb.user_data = user_data;
 
 	ret = mc_ipc_register_listener(mc_client->listeners, mc_client->dconn, MC_DBUS_UPDATE_INTERFACE, MC_DBUS_SIGNAL_NAME_SERVER_STATE,
-	                               __client_server_cb, (void *)&(mc_client->server_state_cb));
+						__client_server_cb, (void *)&(mc_client->server_state_cb));
 
 	return ret;
 }
@@ -415,7 +414,7 @@ int mc_client_set_playback_update_cb(mc_client_h client, mc_playback_updated_cb 
 	mc_client->playback_cb.user_data = user_data;
 
 	ret = mc_ipc_register_listener(mc_client->listeners, mc_client->dconn, MC_DBUS_UPDATE_INTERFACE, MC_DBUS_SIGNAL_NAME_PLAY_BACK,
-	                               __client_playback_cb, (void *)&(mc_client->playback_cb));
+							__client_playback_cb, (void *)&(mc_client->playback_cb));
 
 	return ret;
 }
@@ -451,7 +450,7 @@ int mc_client_set_metadata_update_cb(mc_client_h client, mc_metadata_updated_cb 
 	mc_client->metadata_cb.user_data = user_data;
 
 	ret = mc_ipc_register_listener(mc_client->listeners, mc_client->dconn, MC_DBUS_UPDATE_INTERFACE, MC_DBUS_SIGNAL_NAME_METADATA,
-	                               __client_metadata_cb, (void *)(mc_client));
+							__client_metadata_cb, (void *)(mc_client));
 
 	return ret;
 }
@@ -487,7 +486,7 @@ int mc_client_set_shuffle_mode_update_cb(mc_client_h client, mc_shuffle_mode_cha
 	mc_client->shuffle_cb.user_data = user_data;
 
 	ret = mc_ipc_register_listener(mc_client->listeners, mc_client->dconn, MC_DBUS_UPDATE_INTERFACE, MC_DBUS_SIGNAL_NAME_PLAYBACK_SHUFFLE,
-	                               __client_shuffle_cb, (void *)&(mc_client->shuffle_cb));
+							__client_shuffle_cb, (void *)&(mc_client->shuffle_cb));
 
 	return ret;
 }
@@ -524,7 +523,7 @@ int mc_client_set_repeat_mode_update_cb(mc_client_h client, mc_repeat_mode_chang
 	mc_client->repeat_cb.user_data = user_data;
 
 	ret = mc_ipc_register_listener(mc_client->listeners, mc_client->dconn, MC_DBUS_UPDATE_INTERFACE, MC_DBUS_SIGNAL_NAME_PLAYBACK_REPEAT,
-	                               __client_repeat_cb, (void *)&(mc_client->repeat_cb));
+							__client_repeat_cb, (void *)&(mc_client->repeat_cb));
 
 	return ret;
 }
@@ -555,7 +554,7 @@ int mc_client_subscribe(mc_client_h client, const mc_subscription_type_e subscri
 	mc_retvm_if(mc_client == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 	mc_retvm_if(!MC_STRING_VALID(server_name), MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid server_name");
 
-	switch(subscription_type) {
+	switch (subscription_type) {
 		case MC_SUBSCRIPTION_TYPE_SERVER_STATE:
 			mc_retvm_if(mc_client->server_state_cb.callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid callback");
 
@@ -607,7 +606,7 @@ int mc_client_unsubscribe(mc_client_h client, const mc_subscription_type_e subsc
 	mc_retvm_if(mc_client == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 	mc_retvm_if(!MC_STRING_VALID(server_name), MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid server_name");
 
-	switch(subscription_type) {
+	switch (subscription_type) {
 		case MC_SUBSCRIPTION_TYPE_SERVER_STATE:
 			mc_retvm_if(mc_client->server_state_cb.callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid callback. No list to unsubscribe");
 			mc_retvm_if(mc_client->server_state_cb.filter_list == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid filter_list. No list to unsubscribe");
@@ -659,7 +658,7 @@ int mc_client_foreach_server_subscribed(mc_client_h client, const mc_subscriptio
 	mc_retvm_if(mc_client == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 	mc_retvm_if(callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "callback is NULL");
 
-	switch(subscription_type) {
+	switch (subscription_type) {
 		case MC_SUBSCRIPTION_TYPE_SERVER_STATE:
 			filter_list = mc_client->server_state_cb.filter_list;
 			break;
@@ -687,7 +686,7 @@ int mc_client_foreach_server_subscribed(mc_client_h client, const mc_subscriptio
 
 	filter_cnt = g_list_length(filter_list);
 
-	for(idx = 0; idx < filter_cnt; idx++) {
+	for (idx = 0; idx < filter_cnt; idx++) {
 		filter_data = (char*)g_list_nth_data(filter_list, idx);
 		ret = __mc_parse_server_name(filter_data, &server_name);
 		mc_retvm_if(ret != MEDIA_CONTROLLER_ERROR_NONE, ret, "fail __mc_parse_server_name");
@@ -955,9 +954,8 @@ int mc_client_send_playback_state_command(mc_client_h client, const char *server
 
 	char *interface_name = mc_util_get_interface_name(MC_SERVER, server_name);
 	ret = mc_ipc_send_message(mc_client->dconn, NULL, interface_name, MC_DBUS_SIGNAL_NAME_PLAYBACK_STATE_CMD, message, 0);
-	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE)
 		mc_error("Error mc_ipc_send_message [%d]", ret);
-	}
 
 	MC_SAFE_FREE(message);
 	MC_SAFE_FREE(interface_name);
@@ -986,8 +984,7 @@ int mc_client_send_custom_command(mc_client_h client, const char *server_name, c
 		char *interface_name_for_reply = mc_util_get_interface_name(MC_CLIENT, mc_client->client_name);
 		mc_client->reply_cb.callback = callback;
 		mc_client->reply_cb.user_data = user_data;
-		mc_ipc_register_listener(mc_client->listeners, mc_client->dconn, interface_name_for_reply,
-		                         MC_DBUS_SIGNAL_NAME_CMD_REPLY, __client_reply_cb, (void *)&(mc_client->reply_cb));
+		mc_ipc_register_listener(mc_client->listeners, mc_client->dconn, interface_name_for_reply, MC_DBUS_SIGNAL_NAME_CMD_REPLY, __client_reply_cb, (void *)&(mc_client->reply_cb));
 		MC_SAFE_FREE(interface_name_for_reply);
 	}
 
@@ -996,11 +993,11 @@ int mc_client_send_custom_command(mc_client_h client, const char *server_name, c
 		mc_retvm_if(ret != MEDIA_CONTROLLER_ERROR_NONE, ret, "fail while encoding bundle [%d]", ret);
 	}
 
-	if ((size_r == 0)  || (raw_data == NULL)) {
+	if ((size_r == 0)  || (raw_data == NULL))
 		message = g_strdup_printf("%s%s%s%s%d", mc_client->client_name, MC_STRING_DELIMITER, command, MC_STRING_DELIMITER, size_r);
-	} else {
+	else
 		message = g_strdup_printf("%s%s%s%s%d%s%s", mc_client->client_name, MC_STRING_DELIMITER, command, MC_STRING_DELIMITER, size_r, MC_STRING_DELIMITER, (unsigned char *)raw_data);
-	}
+
 	if (message == NULL) {
 		mc_error("Error when making message");
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
@@ -1035,15 +1032,13 @@ int mc_client_destroy(mc_client_h client)
 
 	/*Unregister all listener*/
 	ret = mc_ipc_unregister_all_listener(mc_client->listeners, mc_client->dconn);
-	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE)
 		mc_error("Error mc_ipc_unregister_all_listener [%d]", ret);
-	}
 
 	/*Send Disconnection Msg to Server*/
 	ret = mc_ipc_send_message_to_server(MC_MSG_SERVER_DISCONNECTION, MC_SERVER_DISCONNECTION_MSG);
-	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE)
 		mc_error("Failed to mc_ipc_send_message_to_server [%d]", ret);
-	}
 
 	ret = __mc_client_destroy(mc_client);
 

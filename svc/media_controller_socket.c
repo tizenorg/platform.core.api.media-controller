@@ -62,9 +62,9 @@ int mc_ipc_delete_client_socket(mc_sock_info_s *sock_info)
 	mc_debug("sockfd %d close", sock_info->sock_fd);
 	if (sock_info->sock_path != NULL) {
 		ret = unlink(sock_info->sock_path);
-		if (ret < 0) {
+		if (ret < 0)
 			mc_stderror("unlink failed");
-		}
+
 		free(sock_info->sock_path);
 	}
 

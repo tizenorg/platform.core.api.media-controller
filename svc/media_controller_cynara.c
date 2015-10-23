@@ -47,11 +47,10 @@ static void mc_cynara_dbg_err(const char *prefix, int error_code)
 	error_buffer[0] = '\0';
 
 	err = cynara_strerror(error_code, error_buffer, sizeof(error_buffer));
-	if (err == CYNARA_API_SUCCESS) {
+	if (err == CYNARA_API_SUCCESS)
 		mc_error("%s: %s", prefix, error_buffer);
-	} else {
+	else
 		mc_error("%s: error code %i", prefix, error_code);
-	}
 }
 
 int mc_cynara_initialize(void)
@@ -75,7 +74,7 @@ int mc_cynara_receive_untrusted_message(int sockfd, mc_comm_msg_s *recv_msg, mc_
 	int ret = 0;
 	int recv_msg_size = 0;
 
-	if (!recv_msg ||!credentials)
+	if (!recv_msg || !credentials)
 		return MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER;
 
 	if ((recv_msg_size = read(sockfd, recv_msg, sizeof(mc_comm_msg_s))) < 0) {
@@ -91,19 +90,19 @@ int mc_cynara_receive_untrusted_message(int sockfd, mc_comm_msg_s *recv_msg, mc_
 /*	mc_debug("receive msg[%d] from [%d(%d)] %d, %s", recv_msg_size, recv_msg->pid, recv_msg->uid, recv_msg->msg_type, recv_msg->msg); */
 
 	ret = cynara_creds_socket_get_pid(sockfd, &(credentials->pid));
-	if(ret < 0) {
+	if (ret < 0) {
 		mc_error("cynara_creds_socket_get_pid failed");
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}
 
 	ret = cynara_creds_socket_get_user(sockfd, USER_METHOD_UID, &(credentials->uid));
-	if(ret < 0) {
+	if (ret < 0) {
 		mc_error("cynara_creds_socket_get_user failed");
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}
 
 	ret = cynara_creds_socket_get_client(sockfd, CLIENT_METHOD_SMACK, &(credentials->smack));
-	if(ret < 0) {
+	if (ret < 0) {
 		mc_error("cynara_creds_socket_get_client failed");
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}
@@ -135,7 +134,7 @@ int mc_cynara_check(const mc_peer_creds *creds, const char *privilege)
 		mc_cynara_dbg_err("cynara_check", result);
 
 	MC_SAFE_FREE(session);
-	return result == CYNARA_API_ACCESS_ALLOWED ? MEDIA_CONTROLLER_ERROR_NONE: MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED;
+	return result == CYNARA_API_ACCESS_ALLOWED ? MEDIA_CONTROLLER_ERROR_NONE : MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED;
 }
 
 int mc_cynara_enable_credentials_passing(int sockfd)

@@ -41,9 +41,8 @@ gboolean __mc_main_check_connection(gpointer user_data)
 
 		/*Quit Controller Thread*/
 		GMainLoop *mc_svc_mainloop = mc_svc_get_main_loop();
-		if (mc_svc_mainloop && g_main_is_running(mc_svc_mainloop)) {
+		if (mc_svc_mainloop && g_main_is_running(mc_svc_mainloop))
 			g_main_loop_quit(mc_svc_mainloop);
-		}
 
 		g_main_loop_quit(g_mc_mainloop);
 	}
@@ -57,8 +56,8 @@ void __mc_main_create_timer(int timer_id)
 		g_source_destroy(g_main_context_find_source_by_id(g_main_context_get_thread_default(), timer_id));
 
 	GSource *timer_src = g_timeout_source_new_seconds(MC_MAIN_TIMEOUT_SEC_60);
-	g_source_set_callback (timer_src, __mc_main_check_connection, NULL, NULL);
-	g_mc_timer_id = g_source_attach (timer_src, g_main_context_get_thread_default());
+	g_source_set_callback(timer_src, __mc_main_check_connection, NULL, NULL);
+	g_mc_timer_id = g_source_attach(timer_src, g_main_context_get_thread_default());
 }
 
 int main(int argc, char **argv)
@@ -69,15 +68,14 @@ int main(int argc, char **argv)
 	/*Init main loop*/
 	g_mc_mainloop = g_main_loop_new(NULL, FALSE);
 
-	if(mc_cynara_initialize() != MEDIA_CONTROLLER_ERROR_NONE) {
+	if (mc_cynara_initialize() != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("Failed to initialize cynara");
 		return -1;
 	}
 
 	fd = mc_create_socket_activation();
-	if (fd < 0) {
+	if (fd < 0)
 		mc_error("Failed to socekt creation");
-	}
 
 	/*create each threads*/
 	svc_thread  = g_thread_new("mc_svc_thread", (GThreadFunc)mc_svc_thread, NULL);

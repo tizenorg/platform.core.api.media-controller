@@ -62,9 +62,8 @@ static int __mc_foreach_table_list(void *handle, GList **list)
 			table_name = strdup((const char *)sqlite3_column_text(stmt, 0));
 			mc_debug("table_name: %s", table_name);
 
-			if (MC_STRING_VALID(table_name)) {
+			if (MC_STRING_VALID(table_name))
 				(*list) = g_list_append((*list), table_name);
-			}
 		}
 
 		ret = sqlite3_step(stmt);
@@ -87,9 +86,8 @@ static int __mc_db_util_delete_server_table(void *handle, const char *server_nam
 	sql_str = sqlite3_mprintf("DROP TABLE IF EXISTS '%q'", server_name);
 
 	ret = mc_db_util_update_db(handle, sql_str);
-	if (MEDIA_CONTROLLER_ERROR_NONE != ret) {
+	if (MEDIA_CONTROLLER_ERROR_NONE != ret)
 		mc_error("Error mc_db_util_update_db %d", ret);
-	}
 
 	SQLITE3_SAFE_FREE(sql_str);
 
@@ -117,7 +115,7 @@ static int __mc_create_server_list_table(sqlite3 *handle)
 
 	sql_str = sqlite3_mprintf("CREATE TABLE IF NOT EXISTS %s (\
 				server_name   TEXT PRIMARY KEY);",
-	                          MC_DB_TABLE_SERVER_LIST);
+				MC_DB_TABLE_SERVER_LIST);
 
 	ret = mc_db_util_update_db(handle, sql_str);
 
@@ -133,28 +131,25 @@ static char* __mc_get_db_name(uid_t uid)
 	char * dir = NULL;
 
 	memset(result_psswd, 0, sizeof(result_psswd));
-	if(uid == getuid())
-	{
+	if (uid == getuid()) {
 		strncpy(result_psswd, MC_DB_NAME, sizeof(result_psswd));
 		grpinfo = getgrnam("users");
-		if(grpinfo == NULL) {
+		if (grpinfo == NULL) {
 			mc_error("getgrnam(users) returns NULL !");
 			return NULL;
 		}
-	}
-	else
-	{
+	} else {
 		struct passwd *userinfo = getpwuid(uid);
-		if(userinfo == NULL) {
+		if (userinfo == NULL) {
 			mc_error("getpwuid(%d) returns NULL !", uid);
 			return NULL;
 		}
 		grpinfo = getgrnam("users");
-		if(grpinfo == NULL) {
+		if (grpinfo == NULL) {
 			mc_error("getgrnam(users) returns NULL !");
 			return NULL;
 		}
-		// Compare git_t type and not group name
+		/* Compare git_t type and not group name */
 		if (grpinfo->gr_gid != userinfo->pw_gid) {
 			mc_error("UID [%d] does not belong to 'users' group!", uid);
 			return NULL;
@@ -163,11 +158,11 @@ static char* __mc_get_db_name(uid_t uid)
 	}
 
 	dir = strrchr(result_psswd, '/');
-	if(!dir)
+	if (!dir)
 		return strdup(result_psswd);
 
-	//Control if db exist create otherwise
-	if(access(dir + 1, F_OK)) {
+	/* Control if db exist create otherwise */
+	if (access(dir + 1, F_OK)) {
 		int ret;
 		mkdir(dir + 1, S_IRWXU | S_IRGRP | S_IXGRP | S_IXOTH);
 		ret = chown(dir + 1, uid, grpinfo->gr_gid);
@@ -199,11 +194,10 @@ int mc_db_util_connect(void **handle, uid_t uid, bool need_write)
 	}
 
 	/*Connect DB*/
-	if(need_write) {
+	if (need_write)
 		ret = db_util_open_with_options(db_name, &db_handle, SQLITE_OPEN_READWRITE, NULL);
-	} else {
+	else
 		ret = db_util_open_with_options(db_name, &db_handle, SQLITE_OPEN_READONLY, NULL);
-	}
 
 	MC_SAFE_FREE(db_name);
 
@@ -295,7 +289,7 @@ int mc_db_util_delete_whole_server_tables(void *handle)
 	mc_retvm_if(handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 
 	ret = __mc_foreach_table_list(handle, &table_list);
-	if ( ret != MEDIA_CONTROLLER_ERROR_NONE) {
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("Error __mc_foreach_table_list %d", ret);
 		return ret;
 	}

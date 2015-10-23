@@ -189,12 +189,12 @@ static gboolean _set_info(int type, char *cmd)
 			ret = mc_server_set_metadata(g_mc_server, g_metadata_type, metadata);
 			if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 				g_print("Fail to set metadata");
-				if(metadata != NULL)
+				if (metadata != NULL)
 					free(metadata);
 				return FALSE;
 			}
 			g_print("set metadata value: %s", metadata);
-			if(metadata != NULL)
+			if (metadata != NULL)
 				free(metadata);
 			break;
 		default:

@@ -276,13 +276,13 @@ static gboolean _get_info(int type)
 				return FALSE;
 			}
 			ret = mc_client_get_playback_state(playback, &playback_state);
-			if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+			if (ret != MEDIA_CONTROLLER_ERROR_NONE)
 				g_print("Fail to get playback state");
-			}
+
 			ret = mc_client_get_playback_position(playback, &playback_position);
-			if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+			if (ret != MEDIA_CONTROLLER_ERROR_NONE)
 				g_print("Fail to get playback position");
-			}
+
 			g_print("playback state: %d, position: %lld", playback_state, playback_position);
 
 			ret = mc_client_destroy_playback(playback);
@@ -298,9 +298,9 @@ static gboolean _get_info(int type)
 				return FALSE;
 			}
 			ret = mc_client_get_metadata(metadata, MC_META_MEDIA_TITLE, &metadata_value);
-			if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+			if (ret != MEDIA_CONTROLLER_ERROR_NONE)
 				g_print("Fail to get infot");
-			}
+
 			g_print("metadata title: %s", metadata_value);
 
 			ret = mc_client_destroy_metadata(metadata);
@@ -453,13 +453,12 @@ static void display_main_menu(void)
 
 static void display_menu(void)
 {
-	if (g_menu_state == CURRENT_STATE_MAIN_MENU) {
+	if (g_menu_state == CURRENT_STATE_MAIN_MENU)
 		display_main_menu();
-	} else if (g_menu_state == CURRENT_STATE_INFORMATION_GET_MENU) {
+	else if (g_menu_state == CURRENT_STATE_INFORMATION_GET_MENU)
 		display_information_menu();
-	} else {
+	else
 		g_print("*** Unknown status.\n");
-	}
 }
 
 void _interpret_information_menu(char *cmd)

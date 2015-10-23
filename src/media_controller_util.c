@@ -30,11 +30,10 @@ static void _mc_util_check_valid_name(const char *name, char **new_name)
 	memset(old_word, 0, MAX_NAME_LENGTH);
 	memset(new_word, 0, MAX_NAME_LENGTH);
 
-	if (strlen(name) > MAX_NAME_LENGTH) {
+	if (strlen(name) > MAX_NAME_LENGTH)
 		memcpy(old_word, name, MAX_NAME_LENGTH);
-	} else {
+	else
 		memcpy(old_word, name, strlen(name));
-	}
 
 	/* only 0~9, a~z, A~Z, '.', '_' will be used */
 	for (i = 0; i < strlen(old_word); i++) {
