@@ -293,18 +293,11 @@ gboolean mc_svc_thread(void *data)
 	}
 	memset(mc_svc_data, 0, sizeof(mc_svc_data_t));
 
-	/* Create TCP Socket*/
-	ret = mc_ipc_create_server_socket(MC_DB_UPDATE_PORT, &sockfd);
-	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-		/* Disconnect DB*/
-		mc_error("Failed to create socket");
-		return FALSE;
-	}
-
 	ret = __mc_dbus_get_uid(UID_DBUS_NAME, UID_DBUS_PATH, UID_DBUS_INTERFACE, UID_DBUS_METHOD, &uid);
 	if (ret < 0) {
 		mc_debug("Failed to send dbus (%d)", ret);
-		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+		MC_SAFE_FREE(mc_svc_data);
+		return FALSE;
 	} else {
 		mc_debug("%d get UID[%d]", ret, uid);
 	}
@@ -312,7 +305,8 @@ gboolean mc_svc_thread(void *data)
 	/* Connect media controller DB*/
 	if (mc_db_util_connect(&(mc_svc_data->db_handle), uid, true) != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("Failed to connect DB");
-		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+		MC_SAFE_FREE(mc_svc_data);
+		return FALSE;
 	}
 
 	/* Destroy tables */
@@ -322,12 +316,24 @@ gboolean mc_svc_thread(void *data)
 	/* Create tables */
 	if (mc_db_util_create_tables(mc_svc_data->db_handle) != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("mc_db_util_create_tables failed [%d]", ret);
+		MC_SAFE_FREE(mc_svc_data);
+		return FALSE;
+	}
+
+	/* Create TCP Socket*/
+	ret = mc_ipc_create_server_socket(MC_DB_UPDATE_PORT, &sockfd);
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+		/* Disconnect DB*/
+		mc_error("Failed to create socket");
+		MC_SAFE_FREE(mc_svc_data);
 		return FALSE;
 	}
 
 	ret = mc_cynara_enable_credentials_passing(sockfd);
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("Failed to append socket options");
+		MC_SAFE_FREE(mc_svc_data);
+		close(sockfd);
 		return FALSE;
 	}
 
@@ -380,7 +386,6 @@ gboolean mc_svc_thread(void *data)
 	/* Disconnect media controller DB*/
 	if (mc_db_util_disconnect(mc_svc_data->db_handle) != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("Failed to connect DB");
-		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}
 
 	/*close socket*/

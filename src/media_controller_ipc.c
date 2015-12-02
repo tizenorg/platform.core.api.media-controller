@@ -70,6 +70,7 @@ static void __mc_ipc_signal_cb(GDBusConnection *connection,
 			listener->callback(listener->interface_name, listener->signal_name, message, 0, listener->user_data);
 		}
 	}
+	MC_SAFE_FREE(key);
 }
 
 static gboolean _mc_ipc_is_listener_duplicated(GList *listener_list, const char *key)

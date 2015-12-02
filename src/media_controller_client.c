@@ -56,12 +56,18 @@ static void __client_playback_cb(const char *interface_name, const char *signal_
 	mc_retm_if(playback == NULL, "Error allocation memory");
 
 	params = g_strsplit(message, MC_STRING_DELIMITER, 0);
-	mc_retm_if(params == NULL, "invalid playback data");
+	if (params == NULL) {
+		mc_error("invalid playback data");
+		MC_SAFE_FREE(playback);
+		return;
+	}
 
 	playback->state = atoi(params[1]);
 	playback->position = atol(params[2]);
 
 	callback(params[0], (mc_playback_h) playback, reciever->user_data);
+
+	MC_SAFE_FREE(playback);
 
 	g_strfreev(params);
 }
@@ -949,6 +955,7 @@ int mc_client_send_playback_state_command(mc_client_h client, const char *server
 	ret = mc_util_set_command_availabe(mc_client->client_name, MC_COMMAND_PLAYBACKSTATE, NULL);
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("Error mc_util_set_command_availabe [%d]", ret);
+		MC_SAFE_FREE(message);
 		return ret;
 	}
 
