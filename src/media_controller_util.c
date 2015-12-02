@@ -127,6 +127,8 @@ int mc_util_set_command_availabe(const char *name, const char *command_type, con
 
 	ret = mc_ipc_send_message_to_server(MC_MSG_CLIENT_SET, message);
 
+	MC_SAFE_FREE(message);
+
 	return ret;
 }
 
@@ -146,6 +148,8 @@ int mc_util_get_command_availabe(const char *name, const char *command_type, con
 		message = g_strdup_printf("%s%s%s", name, command_type, command);
 
 	ret = mc_ipc_send_message_to_server(MC_MSG_CLIENT_GET, message);
+
+	MC_SAFE_FREE(message);
 
 	return ret;
 }
