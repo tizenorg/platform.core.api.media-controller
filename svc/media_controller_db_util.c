@@ -161,17 +161,6 @@ static char* __mc_get_db_name(uid_t uid)
 	if (!dir)
 		return strdup(result_psswd);
 
-	/* Control if db exist create otherwise */
-	if (access(dir + 1, F_OK)) {
-		int ret;
-		mkdir(dir + 1, S_IRWXU | S_IRGRP | S_IXGRP | S_IXOTH);
-		ret = chown(dir + 1, uid, grpinfo->gr_gid);
-		if (ret == -1) {
-			mc_debug("FAIL : chown %s %d.%d ", dir + 1, uid, grpinfo->gr_gid);
-			mc_stderror("FAIL : chown");
-		}
-	}
-
 	result_psswd_rtn = strdup(result_psswd);
 
 	return result_psswd_rtn;

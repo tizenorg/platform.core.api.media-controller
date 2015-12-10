@@ -121,6 +121,15 @@ static int __create_socket_activation(void)
 	}
 }
 
+static void _mc_svc_destroy_data(gpointer data)
+{
+	mc_svc_list_t *set_data = (mc_svc_list_t *)data;
+
+	MC_SAFE_FREE(set_data->data);
+	MC_SAFE_FREE(set_data);
+	set_data = NULL;
+}
+
 gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condition, gpointer data)
 {
 	int sock = -1;
@@ -207,7 +216,7 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 			}
 		}
 	} else if (recv_msg.msg_type == MC_MSG_SERVER_CONNECTION) {
-		if ((recv_msg.msg_size > 0) && (recv_msg.msg != NULL)) {
+		if (recv_msg.msg_size > 0) {
 			if (strncmp(recv_msg.msg, MC_SERVER_CONNECTION_MSG, recv_msg.msg_size) == 0) {
 				if (g_connection_cnt == -1)
 					g_connection_cnt = 1;
@@ -226,7 +235,7 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 			send_msg = MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 		}
 	} else if (recv_msg.msg_type == MC_MSG_SERVER_DISCONNECTION) {
-		if ((recv_msg.msg_size > 0) && (recv_msg.msg != NULL)) {
+		if (recv_msg.msg_size > 0) {
 			if (strncmp(recv_msg.msg, MC_SERVER_DISCONNECTION_MSG, recv_msg.msg_size) == 0) {
 				g_connection_cnt--;
 				mc_error("[No-error] decreased connection count [%d]", g_connection_cnt);
@@ -367,26 +376,15 @@ gboolean mc_svc_thread(void *data)
 	g_io_channel_shutdown(channel,  FALSE, NULL);
 	g_io_channel_unref(channel);
 
-
-	if (mc_svc_data->mc_svc_list != NULL) {
-		unsigned int idx = 0;
-
-		for (idx = 0; idx < g_list_length(mc_svc_data->mc_svc_list); idx++) {
-			mc_svc_list_t *set_data = NULL;
-			set_data = (mc_svc_list_t *)g_list_nth_data(mc_svc_data->mc_svc_list, idx);
-			MC_SAFE_FREE(set_data->data);
-			MC_SAFE_FREE(set_data);
-		}
-
-		g_list_free(mc_svc_data->mc_svc_list);
-	}
-
-	MC_SAFE_FREE(mc_svc_data);
+	if (mc_svc_data->mc_svc_list != NULL)
+		g_list_free_full(mc_svc_data->mc_svc_list, _mc_svc_destroy_data);
 
 	/* Disconnect media controller DB*/
 	if (mc_db_util_disconnect(mc_svc_data->db_handle) != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("Failed to connect DB");
 	}
+
+	MC_SAFE_FREE(mc_svc_data);
 
 	/*close socket*/
 	close(sockfd);

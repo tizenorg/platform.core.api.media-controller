@@ -172,7 +172,7 @@ static gboolean _set_info(int type, char *cmd)
 			g_print("set state: %d", playback_state);
 			break;
 		case CURRENT_STATE_SET_PLAYBACK_POSITION:
-			playback_position = atoi(cmd);
+			playback_position = (unsigned long long)atoi(cmd);
 			ret = mc_server_set_playback_position(g_mc_server, playback_position);
 			if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 				g_print("Fail to set playback position");
