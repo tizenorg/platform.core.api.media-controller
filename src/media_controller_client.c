@@ -63,7 +63,7 @@ static void __client_playback_cb(const char *interface_name, const char *signal_
 	}
 
 	playback->state = atoi(params[1]);
-	playback->position = atol(params[2]);
+	playback->position = strtoull(params[2], NULL, 10);
 
 	callback(params[0], (mc_playback_h) playback, reciever->user_data);
 
