@@ -30,10 +30,21 @@
 static GMainLoop *g_mc_svc_mainloop = NULL;
 static int g_connection_cnt = -1;
 
+static GQueue *g_request_queue = NULL;
+static GSource *g_request_source = NULL;
+static int g_queue_work = 0;
+
 #define UID_DBUS_NAME		 "org.freedesktop.login1"
 #define UID_DBUS_PATH		 "/org/freedesktop/login1"
 #define UID_DBUS_INTERFACE	 UID_DBUS_NAME".Manager"
 #define UID_DBUS_METHOD		 "ListUsers"
+#define MAX_MC_REQUEST 100
+
+typedef struct {
+	int client_sock;
+	mc_peer_creds creds;
+	mc_comm_msg_s *req_msg;
+} mc_service_request;
 
 static int __mc_dbus_get_uid(const char *dest, const char *path, const char *interface, const char *method, uid_t *uid)
 {
@@ -132,42 +143,48 @@ static void _mc_svc_destroy_data(gpointer data)
 	}
 }
 
-gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condition, gpointer data)
+static void __destroy_queue(gpointer data)
 {
-	int sock = -1;
-	int client_sock = -1;
+	mc_service_request *req = (mc_service_request *) data;
+
+	if (req != NULL) {
+		MC_SAFE_FREE(req->creds.uid);
+		MC_SAFE_FREE(req->creds.smack);
+		MC_SAFE_FREE(req->req_msg);
+		MC_SAFE_FREE(req);
+	}
+}
+
+gboolean _mc_request_to_service(gpointer data)
+{
+	int req_len = 0;
 	char *sql_query = NULL;
-	mc_comm_msg_s recv_msg;
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	int send_msg = MEDIA_CONTROLLER_ERROR_NONE;
 	int i = 0;
 	mc_svc_data_t *mc_svc_data = (mc_svc_data_t*)data;
-	mc_peer_creds creds = {0, };
 
-	mc_debug("mc_read_service_request_tcp_socket is called!!!!!");
+	req_len = g_queue_get_length(g_request_queue);
 
-	sock = g_io_channel_unix_get_fd(src);
-	if (sock < 0) {
-		mc_error("sock fd is invalid!");
+	mc_debug("Queue length : %d", req_len);
+
+	if (req_len <= 0) {
+		mc_debug("There is no request job in the queue");
+		g_queue_work = 0;
+		return FALSE;
+	}
+
+	mc_service_request *req = NULL;
+	req = (mc_service_request *) g_queue_pop_head(g_request_queue);
+
+	if (req == NULL) {
+		mc_error("Failed to get a request job from queue");
 		return TRUE;
 	}
 
-	/* get client socket fd */
-	ret = mc_ipc_accept_client_tcp(sock, &client_sock);
-	if (ret != MEDIA_CONTROLLER_ERROR_NONE)
-		return TRUE;
-
-	memset(&creds, 0, sizeof(mc_peer_creds));
-
-	ret = mc_cynara_receive_untrusted_message(client_sock, &recv_msg, &creds);
-	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-		mc_error("mc_ipc_receive_message_tcp failed [%d]", ret);
-		send_msg = ret;
-		goto ERROR;
-	}
-
-	if (recv_msg.msg_type == MC_MSG_DB_UPDATE) {
-		sql_query = strndup(recv_msg.msg, recv_msg.msg_size);
+	/* Do something */
+	if (req->req_msg->msg_type == MC_MSG_DB_UPDATE) {
+		sql_query = strndup(req->req_msg->msg, req->req_msg->msg_size);
 		if (sql_query != NULL) {
 			ret = mc_db_util_update_db(mc_svc_data->db_handle, sql_query);
 			if (ret != MEDIA_CONTROLLER_ERROR_NONE)
@@ -178,38 +195,32 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 		} else {
 			send_msg = MEDIA_CONTROLLER_ERROR_OUT_OF_MEMORY;
 		}
-	} else if (recv_msg.msg_type == MC_MSG_CLIENT_SET) {
+	} else if (req->req_msg->msg_type == MC_MSG_CLIENT_SET) {
 		/* check privileage */
-		ret = mc_cynara_check(&creds, MC_CLIENT_PRIVILEGE);
+		ret = mc_cynara_check(&(req->creds), MC_CLIENT_PRIVILEGE);
 		if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 			mc_error("permission is denied![%d]", ret);
 			send_msg = MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED;
 			goto ERROR;
 		}
 
-		MC_SAFE_FREE(creds.uid);
-		MC_SAFE_FREE(creds.smack);
-
 		mc_svc_list_t *set_data = (mc_svc_list_t *)malloc(sizeof(mc_svc_list_t));
-		set_data->pid = recv_msg.pid;
-		set_data->data = strdup(recv_msg.msg);
+		set_data->pid = req->req_msg->pid;
+		set_data->data = strdup(req->req_msg->msg);
 		mc_svc_data->mc_svc_list = g_list_append(mc_svc_data->mc_svc_list, set_data);
-	} else if (recv_msg.msg_type == MC_MSG_CLIENT_GET) {
+	} else if (req->req_msg->msg_type == MC_MSG_CLIENT_GET) {
 		send_msg = MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED;
 		/* check privileage */
-		ret = mc_cynara_check(&creds, MC_SERVER_PRIVILEGE);
+		ret = mc_cynara_check(&(req->creds), MC_SERVER_PRIVILEGE);
 		if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 			mc_error("permission is denied![%d]", ret);
 			goto ERROR;
 		}
 
-		MC_SAFE_FREE(creds.uid);
-		MC_SAFE_FREE(creds.smack);
-
 		mc_svc_list_t *set_data = NULL;
 		for (i = 0; i < (int)g_list_length(mc_svc_data->mc_svc_list); i++) {
 			set_data = (mc_svc_list_t *)g_list_nth_data(mc_svc_data->mc_svc_list, i);
-			if (set_data != NULL && set_data->data != NULL && strcmp(set_data->data, recv_msg.msg) == 0) {
+			if (set_data != NULL && set_data->data != NULL && strcmp(set_data->data, req->req_msg->msg) == 0) {
 				mc_svc_data->mc_svc_list = g_list_remove(mc_svc_data->mc_svc_list, set_data);
 				MC_SAFE_FREE(set_data->data);
 				MC_SAFE_FREE(set_data);
@@ -217,9 +228,9 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 				break;
 			}
 		}
-	} else if (recv_msg.msg_type == MC_MSG_SERVER_CONNECTION) {
-		if (recv_msg.msg_size > 0) {
-			if (strncmp(recv_msg.msg, MC_SERVER_CONNECTION_MSG, recv_msg.msg_size) == 0) {
+	} else if (req->req_msg->msg_type == MC_MSG_SERVER_CONNECTION) {
+		if (req->req_msg->msg_size > 0) {
+			if (strncmp(req->req_msg->msg, MC_SERVER_CONNECTION_MSG, req->req_msg->msg_size) == 0) {
 				if (g_connection_cnt == -1)
 					g_connection_cnt = 1;
 				else
@@ -236,9 +247,9 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 			mc_error("Wrong message!");
 			send_msg = MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 		}
-	} else if (recv_msg.msg_type == MC_MSG_SERVER_DISCONNECTION) {
-		if (recv_msg.msg_size > 0) {
-			if (strncmp(recv_msg.msg, MC_SERVER_DISCONNECTION_MSG, recv_msg.msg_size) == 0) {
+	} else if (req->req_msg->msg_type == MC_MSG_SERVER_DISCONNECTION) {
+		if (req->req_msg->msg_size > 0) {
+			if (strncmp(req->req_msg->msg, MC_SERVER_DISCONNECTION_MSG, req->req_msg->msg_size) == 0) {
 				g_connection_cnt--;
 				mc_error("[No-error] decreased connection count [%d]", g_connection_cnt);
 
@@ -246,7 +257,7 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 				mc_svc_list_t *set_data = NULL;
 				for (i = (int)(g_list_length(mc_svc_data->mc_svc_list)) - 1; i >= 0; i--) {
 					set_data = (mc_svc_list_t *)g_list_nth_data(mc_svc_data->mc_svc_list, i);
-					if ((set_data != NULL) && (set_data->pid == recv_msg.pid)) {
+					if ((set_data != NULL) && (set_data->pid == req->req_msg->pid)) {
 						mc_svc_data->mc_svc_list = g_list_remove(mc_svc_data->mc_svc_list, set_data);
 						MC_SAFE_FREE(set_data->data);
 						MC_SAFE_FREE(set_data);
@@ -268,6 +279,95 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 	}
 
 ERROR:
+	if (write(req->client_sock, &send_msg, sizeof(send_msg)) != sizeof(send_msg))
+		mc_stderror("send failed");
+	else
+		mc_debug("Sent successfully");
+
+	if (close(req->client_sock) < 0)
+		mc_stderror("close failed");
+
+	if (req != NULL) {
+		MC_SAFE_FREE(req->creds.uid);
+		MC_SAFE_FREE(req->creds.smack);
+		MC_SAFE_FREE(req->req_msg);
+		MC_SAFE_FREE(req);
+	}
+
+	return TRUE;
+}
+
+gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condition, gpointer data)
+{
+	int sock = -1;
+	int client_sock = -1;
+	mc_comm_msg_s recv_msg;
+	int ret = MEDIA_CONTROLLER_ERROR_NONE;
+	int send_msg = MEDIA_CONTROLLER_ERROR_NONE;
+	mc_service_request *req = NULL;
+	mc_svc_data_t *mc_svc_data = (mc_svc_data_t*)data;
+
+	mc_debug("mc_read_service_request_tcp_socket is called!!!!!");
+
+	sock = g_io_channel_unix_get_fd(src);
+	if (sock < 0) {
+		mc_error("sock fd is invalid!");
+		return TRUE;
+	}
+
+	/* get client socket fd */
+	ret = mc_ipc_accept_client_tcp(sock, &client_sock);
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE)
+		return TRUE;
+
+	req = (mc_service_request *) g_malloc0 (sizeof(mc_service_request));
+	if (req == NULL) {
+		send_msg = MEDIA_CONTROLLER_ERROR_OUT_OF_MEMORY;
+		goto ERROR;
+	}
+	memset(&(req->creds), 0, sizeof(mc_peer_creds));
+
+	ret = mc_cynara_receive_untrusted_message(client_sock, &recv_msg, &(req->creds));
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+		mc_error("mc_ipc_receive_message_tcp failed [%d]", ret);
+		send_msg = ret;
+		goto ERROR;
+	}
+
+	if (g_request_queue == NULL) {
+		mc_debug("queue is init");
+		g_request_queue = g_queue_new();
+	}
+
+	if (recv_msg.msg_type >= 0 || recv_msg.msg_type < MC_MSG_MAX) {
+		if (g_queue_get_length(g_request_queue) >= MAX_MC_REQUEST) {
+			send_msg = MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+			goto ERROR;
+		}
+
+		req->req_msg = (mc_comm_msg_s *) g_malloc0 (sizeof(mc_comm_msg_s));
+		if (req->req_msg == NULL) {
+			send_msg = MEDIA_CONTROLLER_ERROR_OUT_OF_MEMORY;
+			MC_SAFE_FREE(req->req_msg);
+			goto ERROR;
+		}
+		memcpy(req->req_msg, &recv_msg, sizeof(mc_comm_msg_s));
+
+		mc_debug("msg(%d) is queued", req->req_msg->msg_type);
+		g_queue_push_tail(g_request_queue, (gpointer)req);
+
+		if (!g_queue_work) {
+			GSource *src_request = NULL;
+			src_request = g_idle_source_new();
+			g_source_set_callback(src_request, _mc_request_to_service, mc_svc_data, NULL);
+			g_source_attach(src_request, g_main_context_get_thread_default());
+			g_queue_work = 1;
+		}
+	}
+
+	return TRUE;
+
+ERROR:
 	if (write(client_sock, &send_msg, sizeof(send_msg)) != sizeof(send_msg))
 		mc_stderror("send failed");
 	else
@@ -276,8 +376,12 @@ ERROR:
 	if (close(client_sock) < 0)
 		mc_stderror("close failed");
 
-	MC_SAFE_FREE(creds.uid);
-	MC_SAFE_FREE(creds.smack);
+	if (req != NULL) {
+		MC_SAFE_FREE(req->creds.uid);
+		MC_SAFE_FREE(req->creds.smack);
+		MC_SAFE_FREE(req->req_msg);
+		MC_SAFE_FREE(req);
+	}
 
 	return TRUE;
 }
@@ -390,6 +494,12 @@ gboolean mc_svc_thread(void *data)
 
 	/*close socket*/
 	close(sockfd);
+
+	if (g_request_queue != NULL) {
+		mc_debug("queue is deinit");
+		g_queue_free_full(g_request_queue, __destroy_queue);
+		g_request_queue = NULL;
+	}
 
 	g_main_loop_unref(g_mc_svc_mainloop);
 

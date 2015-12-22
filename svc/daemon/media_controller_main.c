@@ -22,7 +22,7 @@
 GMainLoop *g_mc_mainloop = NULL;
 static int g_mc_timer_id = 0;
 
-#define MC_MAIN_TIMEOUT_SEC_60	600
+#define MC_MAIN_TIMEOUT_SEC_60	60
 
 
 void __mc_main_create_timer(int timer_id);
