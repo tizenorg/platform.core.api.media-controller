@@ -2,7 +2,7 @@ Name:       capi-media-controller
 Summary:    Multimedia Controller for player application
 Version:    0.0.14
 Release:    1
-Group:      System/Libraries
+Group:      Multimedia/API
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
 Source1:    mediacontroller.service
@@ -26,21 +26,22 @@ BuildRequires:  pkgconfig(cynara-client)
 BuildRequires:  pkgconfig(cynara-session)
 
 %description
-A media controller library in SLP C API
+A media controller library in Tizen Native API
 
 %package -n mediacontroller
-Summary:    media Controller service server
+Summary:    A media controller service server
+Group:      Multimedia/Service
 
 %description -n mediacontroller
-A media controller library in SLP C API
+This packeage provides media controller service server for media controller library
 
 %package devel
-Summary:    Multimedia Controller for player Library (DEV)
-Group:      Development/Libraries
+Summary:    A media controller library in Tizen Native API (Developement)
+Group:      Multimedia/Developement
 Requires:   %{name} = %{version}-%{release}
 
 %description devel
-A media controller library in SLP C API
+A media controller library in Tizen Native API(Developement files included)
 
 %prep
 %setup -q
