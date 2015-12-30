@@ -1,8 +1,8 @@
 Name:       capi-media-controller
-Summary:    Multimedia Controller for player application
+Summary:    A media controller library in Tizen Native API
 Version:    0.0.13
 Release:    1
-Group:      System/Libraries
+Group:      Multimedia/API
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
 Source1:    mediacontroller.service
@@ -24,23 +24,26 @@ BuildRequires:  pkgconfig(libsystemd-daemon)
 BuildRequires:  pkgconfig(libtzplatform-config)
 BuildRequires:  pkgconfig(cynara-client)
 BuildRequires:  pkgconfig(cynara-session)
+Requires(post): /sbin/ldconfig
+Requires(postun): /sbin/ldconfig
 
 %description
-A media controller library in SLP C API
+This package provides a media controller library in Tizen Native API
 
 %package -n mediacontroller
-Summary:    media Controller service server
+Summary:    A media controller service for media controller library
+Group:      Multimedia/Service
 
 %description -n mediacontroller
-A media controller library in SLP C API
+This packeage provides media controller service for media controller library
 
 %package devel
-Summary:    Multimedia Controller for player Library (DEV)
-Group:      Development/Libraries
+Summary:    A media controller library in Tizen Native API (Development)
+Group:      Multimedia/Development
 Requires:   %{name} = %{version}-%{release}
 
 %description devel
-A media controller library in SLP C API
+This package provides a media controller library in Tizen Native API(Development files included)
 
 %prep
 %setup -q
@@ -49,58 +52,61 @@ A media controller library in SLP C API
 export CFLAGS+=" -Wextra -Wno-array-bounds"
 export CFLAGS+=" -Wno-ignored-qualifiers -Wno-unused-parameter -Wshadow"
 export CFLAGS+=" -Wwrite-strings -Wswitch-default"
-MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
 export CFLAGS+=" -DGST_EXT_TIME_ANALYSIS -include stdint.h"
+MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
 %cmake . -DFULLVER=%{version} -DMAJORVER=${MAJORVER}
+
 %__make %{?jobs:-j%jobs}
 
 %install
 rm -rf %{buildroot}
 %make_install
+mkdir -p %{buildroot}/%{_datadir}/license
+cp -rf %{_builddir}/%{name}-%{version}/LICENSE.APLv2.0 %{buildroot}/%{_datadir}/license/%{name}
+cp -rf %{_builddir}/%{name}-%{version}/LICENSE.APLv2.0 %{buildroot}/%{_datadir}/license/mediacontroller
 
 # Daemon & socket activation
 mkdir -p %{buildroot}%{_unitdir}
 mkdir -p %{buildroot}%{_unitdir}/sockets.target.wants
+# change
 install -m 644 %{SOURCE1} %{buildroot}%{_unitdir}/mediacontroller.service
 install -m 644 %{SOURCE2} %{buildroot}%{_unitdir}/mediacontroller.socket
 ln -s ../mediacontroller.socket %{buildroot}%{_unitdir}/sockets.target.wants/mediacontroller.socket
 
 # Setup DB creation in user session
+mkdir -p %{buildroot}%{_unitdir_user}
 mkdir -p %{buildroot}%{_unitdir_user}/default.target.wants/
 install -m 644 %{SOURCE3} %{buildroot}%{_unitdir_user}/media-controller-user.service
-ln -sf ../media-controller-user.service %{buildroot}%{_unitdir_user}/default.target.wants/media-controller-user.service
+ln -s ../media-controller-user.service %{buildroot}%{_unitdir_user}/default.target.wants/media-controller-user.service
 
 # Create DB for multi-user
 mkdir -p %{buildroot}%{_bindir}
 install -m 0775 %{SOURCE1001} %{buildroot}%{_bindir}/media-controller_create_db.sh
 
-mkdir -p %{buildroot}/usr/share/license
-cp LICENSE.APLv2.0 %{buildroot}/usr/share/license/%{name}
-
-%post
+%post -p /sbin/ldconfig
 chgrp %TZ_SYS_USER_GROUP %{_bindir}/media-controller_create_db.sh
-%postun
+%postun -p /sbin/ldconfig
 
 %files
+%manifest %{name}.manifest
+%{_bindir}/media-controller_create_db.sh
 %defattr(-,root,root,-)
 %{_libdir}/*.so.*
-%{_bindir}/media-controller_create_db.sh
-#%{_bindir}/*			//disable tests
-%manifest %{name}.manifest
-/usr/share/license/%{name}
+%{_datadir}/license/%{name}
 
 %files -n mediacontroller
-%defattr(-,system,system,-)
+%defattr(-,root,root,-)
 %{_bindir}/mediacontroller
 %manifest media-controller-service.manifest
+%defattr(-,system,system,-)
 %{_unitdir}/mediacontroller.service
 %{_unitdir}/mediacontroller.socket
 %{_unitdir}/sockets.target.wants/mediacontroller.socket
 %{_unitdir_user}/media-controller-user.service
 %{_unitdir_user}/default.target.wants/media-controller-user.service
+%{_datadir}/license/mediacontroller
 
 %files devel
-%defattr(-,root,root,-)
 %{_libdir}/*.so
 %{_includedir}/media/*.h
 %{_libdir}/pkgconfig/capi-media-controller.pc
