@@ -39,7 +39,7 @@
  *
  * @section CAPI_MEDIA_CONTROLLER_OVERVIEW Overview
  * The @ref CAPI_MEDIA_CONTROLLER_MODULE API provides a set of functions to an effective communication between the server and the client for delivering the latest server information. It helps to transfer the information like playback info, shuffle mode, or the metadata of the latest server.  \n
- * To programming the interface, first, create a handler via #mc_client_create() or #mc_server_create(). And then, the client request the necessary information to the server by using #mc_client_set_server_update_callback(), or #mc_client_set_playback_update_callback(). The server provides the requested information to the client by the callback.
+ * To programming the interface, first, create a handler via #mc_client_create() or #mc_server_create(). And then, the client request the necessary information to the server by using #mc_client_set_server_update_cb(), or #mc_client_set_playback_update_cb(). The server provides the requested information to the client by the callback.
  *
  */
 
@@ -51,7 +51,7 @@
 *	\#include <media_controller_server.h>
 *
 * @section CAPI_MEDIA_CONTROLLER_SERVER_MODULE_OVERVIEW Overview
-* The @ref CAPI_MEDIA_CONTROLLER_SERVER_MODULE API allows you to send the playback info(#mc_server_set_playback_state(), #mc_server_set_playback_position), or the metadata(#mc_server_set_metadata()). and to receive the custom command(#mc_server_set_command_received_callback()), to update the status information on the latest server(#mc_server_update_playback_info, #mc_server_update_metadata), or to create/destroy the handle(#mc_server_create()/#mc_server_destroy()). \n
+* The @ref CAPI_MEDIA_CONTROLLER_SERVER_MODULE API allows you to send the playback info(#mc_server_set_playback_state(), #mc_server_set_playback_position), or the metadata(#mc_server_set_metadata()). and to receive the custom command(#mc_server_set_custom_command_received_cb()), to update the status information on the latest server(#mc_server_update_playback_info, #mc_server_update_metadata), or to create/destroy the handle(#mc_server_create()/#mc_server_destroy()). \n
 *
 */
 
@@ -63,8 +63,8 @@
 *	\#include <media_controller_client.h>
 *
 * @section CAPI_MEDIA_CONTROLLER_CLIENT_MODULE_OVERVIEW Overview
-* The @ref CAPI_MEDIA_CONTROLLER_CLIENT_MODULE API allows you to check the activated server status(#mc_client_set_server_update_callback()), the playback info(#mc_client_set_playback_update_callback()), or the metadata(#mc_client_set_metadata_update_callback()). to send the custom command(#mc_client_send_custom_command()), to create/destroy the handle(#mc_client_create()/#mc_client_destroy()). \n
-* If there is no the activated server, you can get the latest server information by using #mc_client_get_latest_server_info(), #mc_client_get_latest_playback_info(), or etc.
+* The @ref CAPI_MEDIA_CONTROLLER_CLIENT_MODULE API allows you to check the activated server status(#mc_client_set_server_update_cb()), the playback info(#mc_client_set_playback_update_cb()), or the metadata(#mc_client_set_metadata_update_cb()). to send the custom command(#mc_client_send_custom_command()), to create/destroy the handle(#mc_client_create()/#mc_client_destroy()). \n
+* If there is no the activated server, you can get the latest server information by using #mc_client_get_latest_server_info().
 *
 */
 
