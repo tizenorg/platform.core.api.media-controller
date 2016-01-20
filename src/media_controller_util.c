@@ -85,7 +85,12 @@ char *mc_util_get_interface_name(const char *type, const char *name)
 	temp = g_strdup_printf("%s.%s.%s", MC_DBUS_INTERFACE_PREFIX, type, name);
 
 	_mc_util_check_valid_name(temp, &interface_name);
-	MC_SAFE_FREE(temp);
+
+	if (temp) {
+		g_free(temp);
+		temp = NULL;
+	}
+
 	return interface_name;
 }
 
@@ -105,7 +110,10 @@ int mc_util_make_filter_interface_name(const char *prefix, const char *filter, c
 
 	_mc_util_check_valid_name(temp, interface_name);
 
-	MC_SAFE_FREE(temp);
+	if (temp) {
+		g_free(temp);
+		temp = NULL;
+	}
 
 	return MEDIA_CONTROLLER_ERROR_NONE;
 }
@@ -127,7 +135,10 @@ int mc_util_set_command_availabe(const char *name, const char *command_type, con
 
 	ret = mc_ipc_send_message_to_server(MC_MSG_CLIENT_SET, message);
 
-	MC_SAFE_FREE(message);
+	if (message) {
+		g_free(message);
+		message = NULL;
+	}
 
 	return ret;
 }
@@ -149,7 +160,10 @@ int mc_util_get_command_availabe(const char *name, const char *command_type, con
 
 	ret = mc_ipc_send_message_to_server(MC_MSG_CLIENT_GET, message);
 
-	MC_SAFE_FREE(message);
+	if (message) {
+		g_free(message);
+		message = NULL;
+	}
 
 	return ret;
 }
