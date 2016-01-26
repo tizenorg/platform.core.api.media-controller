@@ -173,11 +173,11 @@ int mc_ipc_accept_client_tcp(int serv_sock, int *client_sock)
 	client_addr_len = sizeof(client_addr);
 	if ((sockfd = accept(serv_sock, (struct sockaddr *)&client_addr, &client_addr_len)) < 0) {
 		mc_stderror("accept failed");
-		*client_sock  = -1;
+		*client_sock = -1;
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}
 
-	*client_sock  = sockfd;
+	*client_sock = sockfd;
 
 	return MEDIA_CONTROLLER_ERROR_NONE;
 }

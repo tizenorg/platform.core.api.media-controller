@@ -261,74 +261,74 @@ static gboolean _get_info(int type)
 	mc_repeat_mode_e repeate_mode;
 
 	switch (type) {
-		case 1:
-			ret = mc_client_get_latest_server_info(g_mc_client, &g_server_name, &server_state);
-			if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-				g_print("Fail to get latest server info");
-				return FALSE;
-			}
-			g_print("get server name: %s, state: %d", g_server_name, server_state);
-			break;
-		case 2:
-			ret = mc_client_get_server_playback_info(g_mc_client, g_server_name, &playback);
-			if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-				g_print("Fail to get playback info");
-				return FALSE;
-			}
-			ret = mc_client_get_playback_state(playback, &playback_state);
-			if (ret != MEDIA_CONTROLLER_ERROR_NONE)
-				g_print("Fail to get playback state");
+	case 1:
+		ret = mc_client_get_latest_server_info(g_mc_client, &g_server_name, &server_state);
+		if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+			g_print("Fail to get latest server info");
+			return FALSE;
+		}
+		g_print("get server name: %s, state: %d", g_server_name, server_state);
+		break;
+	case 2:
+		ret = mc_client_get_server_playback_info(g_mc_client, g_server_name, &playback);
+		if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+			g_print("Fail to get playback info");
+			return FALSE;
+		}
+		ret = mc_client_get_playback_state(playback, &playback_state);
+		if (ret != MEDIA_CONTROLLER_ERROR_NONE)
+			g_print("Fail to get playback state");
 
-			ret = mc_client_get_playback_position(playback, &playback_position);
-			if (ret != MEDIA_CONTROLLER_ERROR_NONE)
-				g_print("Fail to get playback position");
+		ret = mc_client_get_playback_position(playback, &playback_position);
+		if (ret != MEDIA_CONTROLLER_ERROR_NONE)
+			g_print("Fail to get playback position");
 
-			g_print("playback state: %d, position: %lld", playback_state, playback_position);
+		g_print("playback state: %d, position: %lld", playback_state, playback_position);
 
-			ret = mc_client_destroy_playback(playback);
-			if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-				g_print("Fail to destroy playback");
-				return FALSE;
-			}
-			break;
-		case 3:
-			ret = mc_client_get_server_metadata(g_mc_client, g_server_name, &metadata);
-			if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-				g_print("Fail to get metadata");
-				return FALSE;
-			}
-			ret = mc_client_get_metadata(metadata, MC_META_MEDIA_TITLE, &metadata_value);
-			if (ret != MEDIA_CONTROLLER_ERROR_NONE)
-				g_print("Fail to get infot");
+		ret = mc_client_destroy_playback(playback);
+		if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+			g_print("Fail to destroy playback");
+			return FALSE;
+		}
+		break;
+	case 3:
+		ret = mc_client_get_server_metadata(g_mc_client, g_server_name, &metadata);
+		if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+			g_print("Fail to get metadata");
+			return FALSE;
+		}
+		ret = mc_client_get_metadata(metadata, MC_META_MEDIA_TITLE, &metadata_value);
+		if (ret != MEDIA_CONTROLLER_ERROR_NONE)
+			g_print("Fail to get infot");
 
-			g_print("metadata title: %s", metadata_value);
+		g_print("metadata title: %s", metadata_value);
 
-			ret = mc_client_destroy_metadata(metadata);
-			if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-				g_print("Fail to destroy metadata");
-				return FALSE;
-			}
-			free(metadata_value);
-			break;
-		case 4:
-			ret = mc_client_get_server_shuffle_mode(g_mc_client, g_server_name, &shuffle_mode);
-			if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-				g_print("Fail to get infot");
-				return FALSE;
-			}
-			g_print("shuffle mode: %d", shuffle_mode);
-			break;
-		case 5:
-			ret = mc_client_get_server_repeat_mode(g_mc_client, g_server_name, &repeate_mode);
-			if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-				g_print("Fail to get infot");
-				return FALSE;
-			}
-			g_print("repeate mode: %d", repeate_mode);
-			break;
-		default:
-			g_print("== unknown type!\n");
-			return TRUE;
+		ret = mc_client_destroy_metadata(metadata);
+		if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+			g_print("Fail to destroy metadata");
+			return FALSE;
+		}
+		free(metadata_value);
+		break;
+	case 4:
+		ret = mc_client_get_server_shuffle_mode(g_mc_client, g_server_name, &shuffle_mode);
+		if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+			g_print("Fail to get infot");
+			return FALSE;
+		}
+		g_print("shuffle mode: %d", shuffle_mode);
+		break;
+	case 5:
+		ret = mc_client_get_server_repeat_mode(g_mc_client, g_server_name, &repeate_mode);
+		if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+			g_print("Fail to get infot");
+			return FALSE;
+		}
+		g_print("repeate mode: %d", repeate_mode);
+		break;
+	default:
+		g_print("== unknown type!\n");
+		return TRUE;
 	}
 
 	g_print("== success get information \n");
@@ -466,19 +466,18 @@ void _interpret_information_menu(char *cmd)
 	int len = strlen(cmd);
 
 	if (len == 1) {
-		if (!strncmp(cmd, "1", len)) {
+		if (!strncmp(cmd, "1", len))
 			_get_info(1);
-		} else if (!strncmp(cmd, "2", len)) {
+		else if (!strncmp(cmd, "2", len))
 			_get_info(2);
-		} else if (!strncmp(cmd, "3", len)) {
+		else if (!strncmp(cmd, "3", len))
 			_get_info(3);
-		} else if (!strncmp(cmd, "4", len)) {
+		else if (!strncmp(cmd, "4", len))
 			_get_info(4);
-		} else if (!strncmp(cmd, "5", len)) {
+		else if (!strncmp(cmd, "5", len))
 			_get_info(5);
-		} else if (!strncmp(cmd, "0", len)) {
+		else if (!strncmp(cmd, "0", len))
 			reset_current_menu_state();
-		}
 	} else {
 		g_print("wrong command\n");
 	}
@@ -489,23 +488,22 @@ void _interpret_main_menu(char *cmd)
 	int len = strlen(cmd);
 
 	if (len == 1) {
-		if (!strncmp(cmd, "1", len)) {
+		if (!strncmp(cmd, "1", len))
 			_create();
-		} else if (!strncmp(cmd, "2", len)) {
+		else if (!strncmp(cmd, "2", len))
 			_foreach();
-		} else if (!strncmp(cmd, "3", len)) {
+		else if (!strncmp(cmd, "3", len))
 			_set();
-		} else if (!strncmp(cmd, "4", len)) {
+		else if (!strncmp(cmd, "4", len))
 			_unset();
-		} else if (!strncmp(cmd, "5", len)) {
+		else if (!strncmp(cmd, "5", len))
 			g_menu_state = CURRENT_STATE_INFORMATION_GET_MENU;
-		} else if (!strncmp(cmd, "6", len)) {
+		else if (!strncmp(cmd, "6", len))
 			_send();
-		}  else if (!strncmp(cmd, "9", len)) {
+		else if (!strncmp(cmd, "9", len))
 			_destroy();
-		} else if (!strncmp(cmd, "0", len)) {
+		else if (!strncmp(cmd, "0", len))
 			quit();
-		}
 	} else {
 		g_print("wrong command\n");
 	}
@@ -514,16 +512,16 @@ void _interpret_main_menu(char *cmd)
 static void interpret_cmd(char *cmd)
 {
 	switch (g_menu_state) {
-		case CURRENT_STATE_MAIN_MENU:
-			_interpret_main_menu(cmd);
-			display_menu();
-			break;
-		case CURRENT_STATE_INFORMATION_GET_MENU:
-			_interpret_information_menu(cmd);
-			display_menu();
-			break;
-		default:
-			g_print("Invalid command\n");
+	case CURRENT_STATE_MAIN_MENU:
+		_interpret_main_menu(cmd);
+		display_menu();
+		break;
+	case CURRENT_STATE_INFORMATION_GET_MENU:
+		_interpret_information_menu(cmd);
+		display_menu();
+		break;
+	default:
+		g_print("Invalid command\n");
 	}
 }
 

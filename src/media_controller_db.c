@@ -63,9 +63,8 @@ static int __mc_db_update_db(void *handle, const char *sql_str)
 	mc_retvm_if(!MC_STRING_VALID(sql_str), MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid Query");
 
 	ret = mc_ipc_send_message_to_server(MC_MSG_DB_UPDATE, sql_str);
-	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+	if (ret != MEDIA_CONTROLLER_ERROR_NONE)
 		mc_error("mc_ipc_send_message_to_server failed : %d", ret);
-	}
 
 	return ret;
 }
@@ -156,11 +155,11 @@ int mc_db_connect(void **handle, bool need_write)
 	mc_retvm_if(handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 
 	/*Connect DB*/
-	if (need_write) {
+	if (need_write)
 		ret = db_util_open_with_options(tzplatform_mkpath(TZ_USER_DB, MC_DB_NAME), &db_handle, SQLITE_OPEN_READWRITE, NULL);
-	} else {
+	else
 		ret = db_util_open_with_options(tzplatform_mkpath(TZ_USER_DB, MC_DB_NAME), &db_handle, SQLITE_OPEN_READONLY, NULL);
-	}
+
 	if (SQLITE_OK != ret) {
 		mc_error("error when db open");
 		*handle = NULL;

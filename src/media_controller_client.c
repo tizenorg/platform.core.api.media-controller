@@ -290,7 +290,7 @@ static int __mc_client_unregister_filter_listener(media_controller_client_s *mc_
 			return ret;
 		}
 
-		/*Remove from  filter_list*/
+		/*Remove from filter_list*/
 		for (idx = 0; idx < filter_cnt; idx++) {
 			char * interface_name = NULL;
 			interface_name = g_list_nth_data(*filter_list, idx);
@@ -320,7 +320,7 @@ static int __mc_client_unregister_filter_listener(media_controller_client_s *mc_
 				if (ret != MEDIA_CONTROLLER_ERROR_NONE)
 					mc_error("Fail mc_ipc_unregister_listener");
 
-				/*Remove from  filter_list*/
+				/*Remove from filter_list*/
 				*filter_list = g_list_remove(*filter_list, interface_name);
 				MC_SAFE_FREE(interface_name);
 			}
@@ -561,44 +561,44 @@ int mc_client_subscribe(mc_client_h client, const mc_subscription_type_e subscri
 	mc_retvm_if(!MC_STRING_VALID(server_name), MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid server_name");
 
 	switch (subscription_type) {
-		case MC_SUBSCRIPTION_TYPE_SERVER_STATE:
-			mc_retvm_if(mc_client->server_state_cb.callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid callback");
+	case MC_SUBSCRIPTION_TYPE_SERVER_STATE:
+		mc_retvm_if(mc_client->server_state_cb.callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid callback");
 
-			ret = mc_ipc_unregister_listener(mc_client->listeners, mc_client->dconn, MC_DBUS_UPDATE_INTERFACE, MC_DBUS_SIGNAL_NAME_SERVER_STATE);
-			ret = __mc_client_register_filter_listener(mc_client, &mc_client->server_state_cb.filter_list, server_name, MC_DBUS_SIGNAL_NAME_SERVER_STATE,
-						__client_server_cb, (void *)&(mc_client->server_state_cb));
-			break;
-		case MC_SUBSCRIPTION_TYPE_PLAYBACK:
-			mc_retvm_if(mc_client->playback_cb.callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid callback");
+		ret = mc_ipc_unregister_listener(mc_client->listeners, mc_client->dconn, MC_DBUS_UPDATE_INTERFACE, MC_DBUS_SIGNAL_NAME_SERVER_STATE);
+		ret = __mc_client_register_filter_listener(mc_client, &mc_client->server_state_cb.filter_list, server_name, MC_DBUS_SIGNAL_NAME_SERVER_STATE,
+					__client_server_cb, (void *)&(mc_client->server_state_cb));
+		break;
+	case MC_SUBSCRIPTION_TYPE_PLAYBACK:
+		mc_retvm_if(mc_client->playback_cb.callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid callback");
 
-			ret = mc_ipc_unregister_listener(mc_client->listeners, mc_client->dconn, MC_DBUS_UPDATE_INTERFACE, MC_DBUS_SIGNAL_NAME_PLAY_BACK);
-			ret = __mc_client_register_filter_listener(mc_client, &mc_client->playback_cb.filter_list, server_name, MC_DBUS_SIGNAL_NAME_PLAY_BACK,
-						__client_playback_cb, (void *)&(mc_client->playback_cb));
-			break;
-		case MC_SUBSCRIPTION_TYPE_METADATA:
-			mc_retvm_if(mc_client->metadata_cb.callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid callback");
+		ret = mc_ipc_unregister_listener(mc_client->listeners, mc_client->dconn, MC_DBUS_UPDATE_INTERFACE, MC_DBUS_SIGNAL_NAME_PLAY_BACK);
+		ret = __mc_client_register_filter_listener(mc_client, &mc_client->playback_cb.filter_list, server_name, MC_DBUS_SIGNAL_NAME_PLAY_BACK,
+					__client_playback_cb, (void *)&(mc_client->playback_cb));
+		break;
+	case MC_SUBSCRIPTION_TYPE_METADATA:
+		mc_retvm_if(mc_client->metadata_cb.callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid callback");
 
-			ret = mc_ipc_unregister_listener(mc_client->listeners, mc_client->dconn, MC_DBUS_UPDATE_INTERFACE, MC_DBUS_SIGNAL_NAME_METADATA);
-			ret = __mc_client_register_filter_listener(mc_client, &mc_client->metadata_cb.filter_list, server_name, MC_DBUS_SIGNAL_NAME_METADATA,
-						__client_metadata_cb, (void *)(mc_client));
-			break;
-		case MC_SUBSCRIPTION_TYPE_SHUFFLE_MODE:
-			mc_retvm_if(mc_client->shuffle_cb.callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid callback");
+		ret = mc_ipc_unregister_listener(mc_client->listeners, mc_client->dconn, MC_DBUS_UPDATE_INTERFACE, MC_DBUS_SIGNAL_NAME_METADATA);
+		ret = __mc_client_register_filter_listener(mc_client, &mc_client->metadata_cb.filter_list, server_name, MC_DBUS_SIGNAL_NAME_METADATA,
+					__client_metadata_cb, (void *)(mc_client));
+		break;
+	case MC_SUBSCRIPTION_TYPE_SHUFFLE_MODE:
+		mc_retvm_if(mc_client->shuffle_cb.callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid callback");
 
-			ret = mc_ipc_unregister_listener(mc_client->listeners, mc_client->dconn, MC_DBUS_UPDATE_INTERFACE, MC_DBUS_SIGNAL_NAME_PLAYBACK_SHUFFLE);
-			ret = __mc_client_register_filter_listener(mc_client, &mc_client->shuffle_cb.filter_list, server_name, MC_DBUS_SIGNAL_NAME_PLAYBACK_SHUFFLE,
-						__client_shuffle_cb, (void *)&(mc_client->shuffle_cb));
-			break;
-		case MC_SUBSCRIPTION_TYPE_REPEAT_MODE:
-			mc_retvm_if(mc_client->repeat_cb.callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid callback");
+		ret = mc_ipc_unregister_listener(mc_client->listeners, mc_client->dconn, MC_DBUS_UPDATE_INTERFACE, MC_DBUS_SIGNAL_NAME_PLAYBACK_SHUFFLE);
+		ret = __mc_client_register_filter_listener(mc_client, &mc_client->shuffle_cb.filter_list, server_name, MC_DBUS_SIGNAL_NAME_PLAYBACK_SHUFFLE,
+					__client_shuffle_cb, (void *)&(mc_client->shuffle_cb));
+		break;
+	case MC_SUBSCRIPTION_TYPE_REPEAT_MODE:
+		mc_retvm_if(mc_client->repeat_cb.callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid callback");
 
-			ret = mc_ipc_unregister_listener(mc_client->listeners, mc_client->dconn, MC_DBUS_UPDATE_INTERFACE, MC_DBUS_SIGNAL_NAME_PLAYBACK_REPEAT);
-			ret = __mc_client_register_filter_listener(mc_client, &mc_client->repeat_cb.filter_list, server_name, MC_DBUS_SIGNAL_NAME_PLAYBACK_REPEAT,
-						__client_repeat_cb, (void *)&(mc_client->repeat_cb));
-			break;
-		default:
-			mc_error("Invalid subscription_type [%d]", subscription_type);
-			return MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER;
+		ret = mc_ipc_unregister_listener(mc_client->listeners, mc_client->dconn, MC_DBUS_UPDATE_INTERFACE, MC_DBUS_SIGNAL_NAME_PLAYBACK_REPEAT);
+		ret = __mc_client_register_filter_listener(mc_client, &mc_client->repeat_cb.filter_list, server_name, MC_DBUS_SIGNAL_NAME_PLAYBACK_REPEAT,
+					__client_repeat_cb, (void *)&(mc_client->repeat_cb));
+		break;
+	default:
+		mc_error("Invalid subscription_type [%d]", subscription_type);
+		return MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER;
 	}
 
 	return ret;
@@ -613,39 +613,39 @@ int mc_client_unsubscribe(mc_client_h client, const mc_subscription_type_e subsc
 	mc_retvm_if(!MC_STRING_VALID(server_name), MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid server_name");
 
 	switch (subscription_type) {
-		case MC_SUBSCRIPTION_TYPE_SERVER_STATE:
-			mc_retvm_if(mc_client->server_state_cb.callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid callback. No list to unsubscribe");
-			mc_retvm_if(mc_client->server_state_cb.filter_list == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid filter_list. No list to unsubscribe");
+	case MC_SUBSCRIPTION_TYPE_SERVER_STATE:
+		mc_retvm_if(mc_client->server_state_cb.callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid callback. No list to unsubscribe");
+		mc_retvm_if(mc_client->server_state_cb.filter_list == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid filter_list. No list to unsubscribe");
 
-			ret = __mc_client_unregister_filter_listener(mc_client, &mc_client->server_state_cb.filter_list, server_name, MC_DBUS_SIGNAL_NAME_SERVER_STATE);
-			break;
-		case MC_SUBSCRIPTION_TYPE_PLAYBACK:
-			mc_retvm_if(mc_client->playback_cb.callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid callback. No list to unsubscribe");
-			mc_retvm_if(mc_client->playback_cb.filter_list == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid filter_list. No list to unsubscribe");
+		ret = __mc_client_unregister_filter_listener(mc_client, &mc_client->server_state_cb.filter_list, server_name, MC_DBUS_SIGNAL_NAME_SERVER_STATE);
+		break;
+	case MC_SUBSCRIPTION_TYPE_PLAYBACK:
+		mc_retvm_if(mc_client->playback_cb.callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid callback. No list to unsubscribe");
+		mc_retvm_if(mc_client->playback_cb.filter_list == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid filter_list. No list to unsubscribe");
 
-			ret = __mc_client_unregister_filter_listener(mc_client, &mc_client->playback_cb.filter_list, server_name, MC_DBUS_SIGNAL_NAME_PLAY_BACK);
-			break;
-		case MC_SUBSCRIPTION_TYPE_METADATA:
-			mc_retvm_if(mc_client->metadata_cb.callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid callback. No list to unsubscribe");
-			mc_retvm_if(mc_client->metadata_cb.filter_list == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid filter_list. No list to unsubscribe");
+		ret = __mc_client_unregister_filter_listener(mc_client, &mc_client->playback_cb.filter_list, server_name, MC_DBUS_SIGNAL_NAME_PLAY_BACK);
+		break;
+	case MC_SUBSCRIPTION_TYPE_METADATA:
+		mc_retvm_if(mc_client->metadata_cb.callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid callback. No list to unsubscribe");
+		mc_retvm_if(mc_client->metadata_cb.filter_list == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid filter_list. No list to unsubscribe");
 
-			ret = __mc_client_unregister_filter_listener(mc_client, &mc_client->metadata_cb.filter_list, server_name, MC_DBUS_SIGNAL_NAME_METADATA);
-			break;
-		case MC_SUBSCRIPTION_TYPE_SHUFFLE_MODE:
-			mc_retvm_if(mc_client->shuffle_cb.callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid callback. No list to unsubscribe");
-			mc_retvm_if(mc_client->shuffle_cb.filter_list == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid filter_list. No list to unsubscribe");
+		ret = __mc_client_unregister_filter_listener(mc_client, &mc_client->metadata_cb.filter_list, server_name, MC_DBUS_SIGNAL_NAME_METADATA);
+		break;
+	case MC_SUBSCRIPTION_TYPE_SHUFFLE_MODE:
+		mc_retvm_if(mc_client->shuffle_cb.callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid callback. No list to unsubscribe");
+		mc_retvm_if(mc_client->shuffle_cb.filter_list == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid filter_list. No list to unsubscribe");
 
-			ret = __mc_client_unregister_filter_listener(mc_client, &mc_client->shuffle_cb.filter_list, server_name, MC_DBUS_SIGNAL_NAME_PLAYBACK_SHUFFLE);
-			break;
-		case MC_SUBSCRIPTION_TYPE_REPEAT_MODE:
-			mc_retvm_if(mc_client->repeat_cb.callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid callback. No list to unsubscribe");
-			mc_retvm_if(mc_client->repeat_cb.filter_list == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid filter_list. No list to unsubscribe");
+		ret = __mc_client_unregister_filter_listener(mc_client, &mc_client->shuffle_cb.filter_list, server_name, MC_DBUS_SIGNAL_NAME_PLAYBACK_SHUFFLE);
+		break;
+	case MC_SUBSCRIPTION_TYPE_REPEAT_MODE:
+		mc_retvm_if(mc_client->repeat_cb.callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid callback. No list to unsubscribe");
+		mc_retvm_if(mc_client->repeat_cb.filter_list == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Invalid filter_list. No list to unsubscribe");
 
-			ret = __mc_client_unregister_filter_listener(mc_client, &mc_client->repeat_cb.filter_list, server_name, MC_DBUS_SIGNAL_NAME_PLAYBACK_REPEAT);
-			break;
-		default:
-			mc_error("Invalid subscription_type [%d]", subscription_type);
-			return MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER;
+		ret = __mc_client_unregister_filter_listener(mc_client, &mc_client->repeat_cb.filter_list, server_name, MC_DBUS_SIGNAL_NAME_PLAYBACK_REPEAT);
+		break;
+	default:
+		mc_error("Invalid subscription_type [%d]", subscription_type);
+		return MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER;
 	}
 
 	return ret;
@@ -665,24 +665,24 @@ int mc_client_foreach_server_subscribed(mc_client_h client, const mc_subscriptio
 	mc_retvm_if(callback == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "callback is NULL");
 
 	switch (subscription_type) {
-		case MC_SUBSCRIPTION_TYPE_SERVER_STATE:
-			filter_list = mc_client->server_state_cb.filter_list;
-			break;
-		case MC_SUBSCRIPTION_TYPE_PLAYBACK:
-			filter_list = mc_client->playback_cb.filter_list;
-			break;
-		case MC_SUBSCRIPTION_TYPE_METADATA:
-			filter_list = mc_client->metadata_cb.filter_list;
-			break;
-		case MC_SUBSCRIPTION_TYPE_SHUFFLE_MODE:
-			filter_list = mc_client->shuffle_cb.filter_list;
-			break;
-		case MC_SUBSCRIPTION_TYPE_REPEAT_MODE:
-			filter_list = mc_client->repeat_cb.filter_list;
-			break;
-		default:
-			mc_error("Invalid subscription_type [%d]", subscription_type);
-			return MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER;
+	case MC_SUBSCRIPTION_TYPE_SERVER_STATE:
+		filter_list = mc_client->server_state_cb.filter_list;
+		break;
+	case MC_SUBSCRIPTION_TYPE_PLAYBACK:
+		filter_list = mc_client->playback_cb.filter_list;
+		break;
+	case MC_SUBSCRIPTION_TYPE_METADATA:
+		filter_list = mc_client->metadata_cb.filter_list;
+		break;
+	case MC_SUBSCRIPTION_TYPE_SHUFFLE_MODE:
+		filter_list = mc_client->shuffle_cb.filter_list;
+		break;
+	case MC_SUBSCRIPTION_TYPE_REPEAT_MODE:
+		filter_list = mc_client->repeat_cb.filter_list;
+		break;
+	default:
+		mc_error("Invalid subscription_type [%d]", subscription_type);
+		return MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER;
 	}
 
 	if (filter_list == NULL) {
@@ -747,53 +747,53 @@ int mc_client_get_metadata(mc_metadata_h metadata, mc_meta_e attribute, char **v
 	mc_debug("attribute[%d]", attribute);
 
 	switch (attribute) {
-		case MC_META_MEDIA_TITLE:
-			if (mc_metadata->title != NULL)
-				meta_val = strdup(mc_metadata->title);
-			break;
-		case MC_META_MEDIA_ARTIST:
-			if (mc_metadata->artist != NULL)
-				meta_val = strdup(mc_metadata->artist);
-			break;
-		case MC_META_MEDIA_ALBUM:
-			if (mc_metadata->album != NULL)
-				meta_val = strdup(mc_metadata->album);
-			break;
-		case MC_META_MEDIA_AUTHOR:
-			if (mc_metadata->author != NULL)
-				meta_val = strdup(mc_metadata->author);
-			break;
-		case MC_META_MEDIA_GENRE:
-			if (mc_metadata->genre != NULL)
-				meta_val = strdup(mc_metadata->genre);
-			break;
-		case MC_META_MEDIA_DURATION:
-			if (mc_metadata->duration != NULL)
-				meta_val = strdup(mc_metadata->duration);
-			break;
-		case MC_META_MEDIA_DATE:
-			if (mc_metadata->date != NULL)
-				meta_val = strdup(mc_metadata->date);
-			break;
-		case MC_META_MEDIA_COPYRIGHT:
-			if (mc_metadata->copyright != NULL)
-				meta_val = strdup(mc_metadata->copyright);
-			break;
-		case MC_META_MEDIA_DESCRIPTION:
-			if (mc_metadata->description != NULL)
-				meta_val = strdup(mc_metadata->description);
-			break;
-		case MC_META_MEDIA_TRACK_NUM:
-			if (mc_metadata->track_num != NULL)
-				meta_val = strdup(mc_metadata->track_num);
-			break;
-		case MC_META_MEDIA_PICTURE:
-			if (mc_metadata->picture != NULL)
-				meta_val = strdup(mc_metadata->picture);
-			break;
-		default:
-			mc_error("Invalid Parameter [%d]", attribute);
-			return MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER;
+	case MC_META_MEDIA_TITLE:
+		if (mc_metadata->title != NULL)
+			meta_val = strdup(mc_metadata->title);
+		break;
+	case MC_META_MEDIA_ARTIST:
+		if (mc_metadata->artist != NULL)
+			meta_val = strdup(mc_metadata->artist);
+		break;
+	case MC_META_MEDIA_ALBUM:
+		if (mc_metadata->album != NULL)
+			meta_val = strdup(mc_metadata->album);
+		break;
+	case MC_META_MEDIA_AUTHOR:
+		if (mc_metadata->author != NULL)
+			meta_val = strdup(mc_metadata->author);
+		break;
+	case MC_META_MEDIA_GENRE:
+		if (mc_metadata->genre != NULL)
+			meta_val = strdup(mc_metadata->genre);
+		break;
+	case MC_META_MEDIA_DURATION:
+		if (mc_metadata->duration != NULL)
+			meta_val = strdup(mc_metadata->duration);
+		break;
+	case MC_META_MEDIA_DATE:
+		if (mc_metadata->date != NULL)
+			meta_val = strdup(mc_metadata->date);
+		break;
+	case MC_META_MEDIA_COPYRIGHT:
+		if (mc_metadata->copyright != NULL)
+			meta_val = strdup(mc_metadata->copyright);
+		break;
+	case MC_META_MEDIA_DESCRIPTION:
+		if (mc_metadata->description != NULL)
+			meta_val = strdup(mc_metadata->description);
+		break;
+	case MC_META_MEDIA_TRACK_NUM:
+		if (mc_metadata->track_num != NULL)
+			meta_val = strdup(mc_metadata->track_num);
+		break;
+	case MC_META_MEDIA_PICTURE:
+		if (mc_metadata->picture != NULL)
+			meta_val = strdup(mc_metadata->picture);
+		break;
+	default:
+		mc_error("Invalid Parameter [%d]", attribute);
+		return MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER;
 	}
 
 	*value = meta_val;
@@ -1000,7 +1000,7 @@ int mc_client_send_custom_command(mc_client_h client, const char *server_name, c
 		mc_retvm_if(ret != MEDIA_CONTROLLER_ERROR_NONE, ret, "fail while encoding bundle [%d]", ret);
 	}
 
-	if ((size_r == 0)  || (raw_data == NULL))
+	if ((size_r == 0) || (raw_data == NULL))
 		message = g_strdup_printf("%s%s%s%s%d", mc_client->client_name, MC_STRING_DELIMITER, command, MC_STRING_DELIMITER, size_r);
 	else
 		message = g_strdup_printf("%s%s%s%s%d%s%s", mc_client->client_name, MC_STRING_DELIMITER, command, MC_STRING_DELIMITER, size_r, MC_STRING_DELIMITER, (unsigned char *)raw_data);

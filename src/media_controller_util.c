@@ -38,9 +38,9 @@ static void _mc_util_check_valid_name(const char *name, char **new_name)
 	/* only 0~9, a~z, A~Z, '.', '_' will be used */
 	for (i = 0; i < strlen(old_word); i++) {
 		if ((old_word[i] >= '0' && old_word[i] <= '9') ||
-		    (old_word[i] >= 'a' && old_word[i] <= 'z') ||
-		    (old_word[i] >= 'A' && old_word[i] <= 'Z') ||
-		    (old_word[i] == '.' && i != 0)) {
+			(old_word[i] >= 'a' && old_word[i] <= 'z') ||
+			(old_word[i] >= 'A' && old_word[i] <= 'Z') ||
+			(old_word[i] == '.' && i != 0)) {
 			new_word[i] = old_word[i];
 		} else {
 			new_word[i] = 'x';

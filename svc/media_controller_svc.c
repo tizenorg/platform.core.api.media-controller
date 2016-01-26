@@ -375,16 +375,15 @@ gboolean mc_svc_thread(void *data)
 
 	mc_debug("*** Media Controller Service thread will be closed ***");
 
-	g_io_channel_shutdown(channel,  FALSE, NULL);
+	g_io_channel_shutdown(channel, FALSE, NULL);
 	g_io_channel_unref(channel);
 
 	if (mc_svc_data->mc_svc_list != NULL)
 		g_list_free_full(mc_svc_data->mc_svc_list, _mc_svc_destroy_data);
 
 	/* Disconnect media controller DB*/
-	if (mc_db_util_disconnect(mc_svc_data->db_handle) != MEDIA_CONTROLLER_ERROR_NONE) {
+	if (mc_db_util_disconnect(mc_svc_data->db_handle) != MEDIA_CONTROLLER_ERROR_NONE)
 		mc_error("Failed to connect DB");
-	}
 
 	MC_SAFE_FREE(mc_svc_data);
 

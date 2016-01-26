@@ -162,44 +162,44 @@ static gboolean _set_info(int type, char *cmd)
 	char *metadata = NULL;
 
 	switch (type) {
-		case CURRENT_STATE_SET_PLAYBACK_STATE:
-			playback_state = atoi(cmd);
-			ret = mc_server_set_playback_state(g_mc_server, playback_state);
-			if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-				g_print("Fail to set playback state");
-				return FALSE;
-			}
-			g_print("set state: %d", playback_state);
-			break;
-		case CURRENT_STATE_SET_PLAYBACK_POSITION:
-			playback_position = strtoull(cmd, NULL, 10);
-			ret = mc_server_set_playback_position(g_mc_server, playback_position);
-			if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-				g_print("Fail to set playback position");
-				return FALSE;
-			}
-			g_print("set position: %lld", playback_position);
-			break;
-		case CURRENT_STATE_SET_METADATA_NAME:
-			g_metadata_type = atoi(cmd);
-			g_print("set metadata name: %d", g_metadata_type);
-			break;
-		case CURRENT_STATE_SET_METADATA_VALUE:
-			metadata = strdup(cmd);
-			ret = mc_server_set_metadata(g_mc_server, g_metadata_type, metadata);
-			if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-				g_print("Fail to set metadata");
-				if (metadata != NULL)
-					free(metadata);
-				return FALSE;
-			}
-			g_print("set metadata value: %s", metadata);
+	case CURRENT_STATE_SET_PLAYBACK_STATE:
+		playback_state = atoi(cmd);
+		ret = mc_server_set_playback_state(g_mc_server, playback_state);
+		if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+			g_print("Fail to set playback state");
+			return FALSE;
+		}
+		g_print("set state: %d", playback_state);
+		break;
+	case CURRENT_STATE_SET_PLAYBACK_POSITION:
+		playback_position = strtoull(cmd, NULL, 10);
+		ret = mc_server_set_playback_position(g_mc_server, playback_position);
+		if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+			g_print("Fail to set playback position");
+			return FALSE;
+		}
+		g_print("set position: %lld", playback_position);
+		break;
+	case CURRENT_STATE_SET_METADATA_NAME:
+		g_metadata_type = atoi(cmd);
+		g_print("set metadata name: %d", g_metadata_type);
+		break;
+	case CURRENT_STATE_SET_METADATA_VALUE:
+		metadata = strdup(cmd);
+		ret = mc_server_set_metadata(g_mc_server, g_metadata_type, metadata);
+		if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+			g_print("Fail to set metadata");
 			if (metadata != NULL)
 				free(metadata);
-			break;
-		default:
-			g_print(" == unknown type!\n");
-			return TRUE;
+			return FALSE;
+		}
+		g_print("set metadata value: %s", metadata);
+		if (metadata != NULL)
+			free(metadata);
+		break;
+	default:
+		g_print(" == unknown type!\n");
+		return TRUE;
 	}
 
 	g_print(" == success get information \n");
@@ -213,45 +213,45 @@ static gboolean _update_info(int type)
 	int ret;
 
 	switch (type) {
-		case 1:
-			ret = mc_server_update_playback_info(g_mc_server);
-			if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-				g_print("Fail to update playback info err=%d", ret);
-				return FALSE;
-			}
-			break;
-		case 2:
-			ret = mc_server_update_metadata(g_mc_server);
-			if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-				g_print("Fail to update metadata err=%d", ret);
-				return FALSE;
-			}
-			break;
-		case 3:
-			if (g_shuffle_mode == MC_SHUFFLE_MODE_OFF)
-				g_shuffle_mode = MC_SHUFFLE_MODE_ON;
-			else
-				g_shuffle_mode = MC_SHUFFLE_MODE_OFF;
-			ret = mc_server_update_shuffle_mode(g_mc_server, g_shuffle_mode);
-			if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-				g_print("Fail to update shuffle mode err=%d", ret);
-				return FALSE;
-			}
-			break;
-		case 4:
-			if (g_repeat_mode == MC_REPEAT_MODE_OFF)
-				g_repeat_mode = MC_REPEAT_MODE_ON;
-			else
-				g_repeat_mode = MC_REPEAT_MODE_OFF;
-			ret = mc_server_update_repeat_mode(g_mc_server, g_repeat_mode);
-			if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-				g_print("Fail to update repeat mode err=%d", ret);
-				return FALSE;
-			}
-			break;
-		default:
-			g_print(" == unknown type!\n");
-			return TRUE;
+	case 1:
+		ret = mc_server_update_playback_info(g_mc_server);
+		if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+			g_print("Fail to update playback info err=%d", ret);
+			return FALSE;
+		}
+		break;
+	case 2:
+		ret = mc_server_update_metadata(g_mc_server);
+		if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+			g_print("Fail to update metadata err=%d", ret);
+			return FALSE;
+		}
+		break;
+	case 3:
+		if (g_shuffle_mode == MC_SHUFFLE_MODE_OFF)
+			g_shuffle_mode = MC_SHUFFLE_MODE_ON;
+		else
+			g_shuffle_mode = MC_SHUFFLE_MODE_OFF;
+		ret = mc_server_update_shuffle_mode(g_mc_server, g_shuffle_mode);
+		if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+			g_print("Fail to update shuffle mode err=%d", ret);
+			return FALSE;
+		}
+		break;
+	case 4:
+		if (g_repeat_mode == MC_REPEAT_MODE_OFF)
+			g_repeat_mode = MC_REPEAT_MODE_ON;
+		else
+			g_repeat_mode = MC_REPEAT_MODE_OFF;
+		ret = mc_server_update_repeat_mode(g_mc_server, g_repeat_mode);
+		if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+			g_print("Fail to update repeat mode err=%d", ret);
+			return FALSE;
+		}
+		break;
+	default:
+		g_print(" == unknown type!\n");
+		return TRUE;
 	}
 
 	g_print(" == success update information \n");
@@ -277,7 +277,7 @@ static gboolean _destroy()
 
 
 /***************************************************************/
-/**  Testsuite */
+/** Testsuite */
 /***************************************************************/
 void quit(void)
 {
@@ -350,15 +350,15 @@ static void display_main_menu(void)
 
 static void display_menu(void)
 {
-	if (g_menu_state == CURRENT_STATE_MAIN_MENU) {
+	if (g_menu_state == CURRENT_STATE_MAIN_MENU)
 		display_main_menu();
-	} else if (g_menu_state == CURRENT_STATE_INFORMATION_SET_MENU) {
+	else if (g_menu_state == CURRENT_STATE_INFORMATION_SET_MENU)
 		display_set_info_menu();
-	} else if (g_menu_state == CURRENT_STATE_INFORMATION_UPDATE_MENU) {
+	else if (g_menu_state == CURRENT_STATE_INFORMATION_UPDATE_MENU)
 		display_update_info_menu();
-	} else {
+	else
 		g_print("*** Unknown status.\n");
-	}
+
 }
 
 void _interpret_update_info_menu(char *cmd)
@@ -366,17 +366,16 @@ void _interpret_update_info_menu(char *cmd)
 	int len = strlen(cmd);
 
 	if (len == 1) {
-		if (!strncmp(cmd, "1", len)) {
+		if (!strncmp(cmd, "1", len))
 			_update_info(1);
-		} else if (!strncmp(cmd, "2", len)) {
+		else if (!strncmp(cmd, "2", len))
 			_update_info(2);
-		} else if (!strncmp(cmd, "3", len)) {
+		else if (!strncmp(cmd, "3", len))
 			_update_info(3);
-		} else if (!strncmp(cmd, "4", len)) {
+		else if (!strncmp(cmd, "4", len))
 			_update_info(4);
-		} else if (!strncmp(cmd, "0", len)) {
+		else if (!strncmp(cmd, "0", len))
 			reset_current_menu_state();
-		}
 	} else {
 		g_print("wrong command\n");
 	}
@@ -387,15 +386,15 @@ void _interpret_set_info_menu(char *cmd)
 	int len = strlen(cmd);
 
 	if (len == 1) {
-		if (!strncmp(cmd, "1", len)) {
+		if (!strncmp(cmd, "1", len))
 			g_menu_set_state = CURRENT_STATE_SET_PLAYBACK_STATE;
-		} else if (!strncmp(cmd, "2", len)) {
+		else if (!strncmp(cmd, "2", len))
 			g_menu_set_state = CURRENT_STATE_SET_PLAYBACK_POSITION;
-		} else if (!strncmp(cmd, "3", len)) {
+		else if (!strncmp(cmd, "3", len))
 			g_menu_set_state = CURRENT_STATE_SET_METADATA_NAME;
-		} else if (!strncmp(cmd, "4", len)) {
+		else if (!strncmp(cmd, "4", len))
 			g_menu_set_state = CURRENT_STATE_SET_METADATA_VALUE;
-		} else if (!strncmp(cmd, "0", len)) {
+		else if (!strncmp(cmd, "0", len)) {
 			reset_current_menu_state();
 			display_menu();
 		}
@@ -409,19 +408,18 @@ void _interpret_main_menu(char *cmd)
 	int len = strlen(cmd);
 
 	if (len == 1) {
-		if (!strncmp(cmd, "1", len)) {
+		if (!strncmp(cmd, "1", len))
 			_create();
-		} else if (!strncmp(cmd, "2", len)) {
+		else if (!strncmp(cmd, "2", len))
 			_set_cb();
-		} else if (!strncmp(cmd, "3", len)) {
+		else if (!strncmp(cmd, "3", len))
 			g_menu_state = CURRENT_STATE_INFORMATION_SET_MENU;
-		} else if (!strncmp(cmd, "4", len)) {
+		else if (!strncmp(cmd, "4", len))
 			g_menu_state = CURRENT_STATE_INFORMATION_UPDATE_MENU;
-		}   else if (!strncmp(cmd, "9", len)) {
+		else if (!strncmp(cmd, "9", len))
 			_destroy();
-		} else if (!strncmp(cmd, "0", len)) {
+		else if (!strncmp(cmd, "0", len))
 			quit();
-		}
 	} else {
 		g_print("wrong command\n");
 	}
@@ -430,32 +428,32 @@ void _interpret_main_menu(char *cmd)
 static void interpret_cmd(char *cmd)
 {
 	switch (g_menu_state) {
-		case CURRENT_STATE_MAIN_MENU:
-			_interpret_main_menu(cmd);
+	case CURRENT_STATE_MAIN_MENU:
+		_interpret_main_menu(cmd);
+		display_menu();
+		break;
+	case CURRENT_STATE_INFORMATION_SET_MENU:
+		switch (g_menu_set_state) {
+		case CURRENT_STATE_SET_MODE_NONE:
+			_interpret_set_info_menu(cmd);
+			break;
+		case CURRENT_STATE_SET_PLAYBACK_STATE:
+		case CURRENT_STATE_SET_PLAYBACK_POSITION:
+		case CURRENT_STATE_SET_METADATA_NAME:
+		case CURRENT_STATE_SET_METADATA_VALUE:
+			_set_info(g_menu_set_state, cmd);
+			reset_current_set_menu_state();
 			display_menu();
-			break;
-		case CURRENT_STATE_INFORMATION_SET_MENU:
-			switch (g_menu_set_state) {
-				case CURRENT_STATE_SET_MODE_NONE:
-					_interpret_set_info_menu(cmd);
-					break;
-				case CURRENT_STATE_SET_PLAYBACK_STATE:
-				case CURRENT_STATE_SET_PLAYBACK_POSITION:
-				case CURRENT_STATE_SET_METADATA_NAME:
-				case CURRENT_STATE_SET_METADATA_VALUE:
-					_set_info(g_menu_set_state, cmd);
-					reset_current_set_menu_state();
-					display_menu();
-				default:
-					break;
-			}
-			break;
-		case CURRENT_STATE_INFORMATION_UPDATE_MENU:
-			_interpret_update_info_menu(cmd);
-			display_menu();
-			break;
 		default:
-			g_print("Invalid command\n");
+			break;
+		}
+		break;
+	case CURRENT_STATE_INFORMATION_UPDATE_MENU:
+		_interpret_update_info_menu(cmd);
+		display_menu();
+		break;
+	default:
+		g_print("Invalid command\n");
 	}
 }
 

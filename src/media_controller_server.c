@@ -365,64 +365,64 @@ int mc_server_set_metadata(mc_server_h server, mc_meta_e attribute, const char *
 	mc_debug("meta data set attribute [%d] value [%s]", attribute, value);
 
 	switch (attribute) {
-		case MC_META_MEDIA_TITLE:
-			MC_SAFE_FREE(mc_server->metadata->title);
-			if (value != NULL)
-				mc_server->metadata->title = strdup(value);
-			break;
-		case MC_META_MEDIA_ARTIST:
-			MC_SAFE_FREE(mc_server->metadata->artist);
-			if (value != NULL)
-				mc_server->metadata->artist = strdup(value);
-			break;
-		case MC_META_MEDIA_ALBUM:
-			MC_SAFE_FREE(mc_server->metadata->album);
-			if (value != NULL)
-				mc_server->metadata->album = strdup(value);
-			break;
-		case MC_META_MEDIA_AUTHOR:
-			MC_SAFE_FREE(mc_server->metadata->author);
-			if (value != NULL)
-				mc_server->metadata->author = strdup(value);
-			break;
-		case MC_META_MEDIA_GENRE:
-			MC_SAFE_FREE(mc_server->metadata->genre);
-			if (value != NULL)
-				mc_server->metadata->genre = strdup(value);
-			break;
-		case MC_META_MEDIA_DURATION:
-			MC_SAFE_FREE(mc_server->metadata->duration);
-			if (value != NULL)
-				mc_server->metadata->duration = strdup(value);
-			break;
-		case MC_META_MEDIA_DATE:
-			MC_SAFE_FREE(mc_server->metadata->date);
-			if (value != NULL)
-				mc_server->metadata->date = strdup(value);
-			break;
-		case MC_META_MEDIA_COPYRIGHT:
-			MC_SAFE_FREE(mc_server->metadata->copyright);
-			if (value != NULL)
-				mc_server->metadata->copyright = strdup(value);
-			break;
-		case MC_META_MEDIA_DESCRIPTION:
-			MC_SAFE_FREE(mc_server->metadata->description);
-			if (value != NULL)
-				mc_server->metadata->description = strdup(value);
-			break;
-		case MC_META_MEDIA_TRACK_NUM:
-			MC_SAFE_FREE(mc_server->metadata->track_num);
-			if (value != NULL)
-				mc_server->metadata->track_num = strdup(value);
-			break;
-		case MC_META_MEDIA_PICTURE:
-			MC_SAFE_FREE(mc_server->metadata->picture);
-			if (value != NULL)
-				mc_server->metadata->picture = strdup(value);
-			break;
-		default:
-			mc_error("Invalid Parameter [%d]", attribute);
-			return MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER;
+	case MC_META_MEDIA_TITLE:
+		MC_SAFE_FREE(mc_server->metadata->title);
+		if (value != NULL)
+			mc_server->metadata->title = strdup(value);
+		break;
+	case MC_META_MEDIA_ARTIST:
+		MC_SAFE_FREE(mc_server->metadata->artist);
+		if (value != NULL)
+			mc_server->metadata->artist = strdup(value);
+		break;
+	case MC_META_MEDIA_ALBUM:
+		MC_SAFE_FREE(mc_server->metadata->album);
+		if (value != NULL)
+			mc_server->metadata->album = strdup(value);
+		break;
+	case MC_META_MEDIA_AUTHOR:
+		MC_SAFE_FREE(mc_server->metadata->author);
+		if (value != NULL)
+			mc_server->metadata->author = strdup(value);
+		break;
+	case MC_META_MEDIA_GENRE:
+		MC_SAFE_FREE(mc_server->metadata->genre);
+		if (value != NULL)
+			mc_server->metadata->genre = strdup(value);
+		break;
+	case MC_META_MEDIA_DURATION:
+		MC_SAFE_FREE(mc_server->metadata->duration);
+		if (value != NULL)
+			mc_server->metadata->duration = strdup(value);
+		break;
+	case MC_META_MEDIA_DATE:
+		MC_SAFE_FREE(mc_server->metadata->date);
+		if (value != NULL)
+			mc_server->metadata->date = strdup(value);
+		break;
+	case MC_META_MEDIA_COPYRIGHT:
+		MC_SAFE_FREE(mc_server->metadata->copyright);
+		if (value != NULL)
+			mc_server->metadata->copyright = strdup(value);
+		break;
+	case MC_META_MEDIA_DESCRIPTION:
+		MC_SAFE_FREE(mc_server->metadata->description);
+		if (value != NULL)
+			mc_server->metadata->description = strdup(value);
+		break;
+	case MC_META_MEDIA_TRACK_NUM:
+		MC_SAFE_FREE(mc_server->metadata->track_num);
+		if (value != NULL)
+			mc_server->metadata->track_num = strdup(value);
+		break;
+	case MC_META_MEDIA_PICTURE:
+		MC_SAFE_FREE(mc_server->metadata->picture);
+		if (value != NULL)
+			mc_server->metadata->picture = strdup(value);
+		break;
+	default:
+		mc_error("Invalid Parameter [%d]", attribute);
+		return MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER;
 	}
 
 	return MEDIA_CONTROLLER_ERROR_NONE;

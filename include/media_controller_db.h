@@ -67,8 +67,8 @@ int mc_db_check_server_table_exist(void *handle, const char *server_name, bool *
 
 int mc_db_update_playback_info(void *handle, const char *table_name, int playback_state, unsigned long long playback_position);
 int mc_db_update_whole_metadata(void *handle, const char *server_name,
-                                const char *title, const char *artist, const char *album, const char *author, const char *genre, const char *duration, const char *date,
-                                const char *copyright, const char *description, const char *track_num, const char *picture);
+						const char *title, const char *artist, const char *album, const char *author, const char *genre, const char *duration, const char *date,
+						const char *copyright, const char *description, const char *track_num, const char *picture);
 int mc_db_update_shuffle_mode(void *handle, const char *table_name, int shuffle_mode);
 int mc_db_update_repeat_mode(void *handle, const char *table_name, int repeat_mode);
 

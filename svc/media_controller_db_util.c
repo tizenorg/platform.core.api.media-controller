@@ -24,8 +24,8 @@
 #include "media_controller_private.h"
 #include "media_controller_db_util.h"
 
-#define FAT_FILEPATH_LEN_MAX           4096    /* inc null */
-#define MC_FILE_PATH_LEN_MAX           FAT_FILEPATH_LEN_MAX             /**< File path max length (include file name) on file system */
+#define FAT_FILEPATH_LEN_MAX	4096	/* inc null */
+#define MC_FILE_PATH_LEN_MAX	FAT_FILEPATH_LEN_MAX	/**< File path max length (include file name) on file system */
 
 static int __mc_db_util_busy_handler(void *pData, int count)
 {
@@ -99,7 +99,7 @@ static int __mc_create_latest_server_table(sqlite3 *handle)
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	char *sql_str = NULL;
 
-	sql_str = sqlite3_mprintf("CREATE TABLE IF NOT EXISTS %q (server_name   TEXT PRIMARY KEY);", MC_DB_TABLE_LATEST_SERVER);
+	sql_str = sqlite3_mprintf("CREATE TABLE IF NOT EXISTS %q (server_name TEXT PRIMARY KEY);", MC_DB_TABLE_LATEST_SERVER);
 
 	ret = mc_db_util_update_db(handle, sql_str);
 
@@ -114,7 +114,7 @@ static int __mc_create_server_list_table(sqlite3 *handle)
 	char *sql_str = NULL;
 
 	sql_str = sqlite3_mprintf("CREATE TABLE IF NOT EXISTS %s (\
-				server_name   TEXT PRIMARY KEY);",
+				server_name TEXT PRIMARY KEY);",
 				MC_DB_TABLE_SERVER_LIST);
 
 	ret = mc_db_util_update_db(handle, sql_str);
