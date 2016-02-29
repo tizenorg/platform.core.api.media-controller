@@ -25,16 +25,12 @@
 #define MC_SVC_NAME "mediacontroller"
 
 /* This checks if service daemon is running */
-static gboolean __is_service_activated()
+static int __is_service_activated()
 {
-	gboolean ret = FALSE;
+	int  ret = MEDIA_CONTROLLER_ERROR_NONE;
 	ret = mc_ipc_send_message_to_server(MC_MSG_SERVER_CONNECTION, MC_SERVER_CONNECTION_MSG);
-	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
-		mc_error("Failed to mc_ipc_send_message_to_server [%d]", ret);
-		return FALSE;
-	}
 
-	return TRUE;
+	return ret;
 }
 
 static char *__make_key_for_map(const char *main_key, const char *sub_key)
@@ -387,9 +383,15 @@ int mc_ipc_service_connect(void)
 	struct sockaddr_un serv_addr;
 	unsigned int retrycount = 0;
 
-	if (__is_service_activated() == TRUE) {
+	 ret = __is_service_activated();
+
+	if (ret == MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_debug("service is already running!");
-		return MEDIA_CONTROLLER_ERROR_NONE;
+		return ret;
+	}
+	else if (ret == MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED) {
+		mc_error("Permission deny!");
+		return ret;
 	}
 
 	/*Create Socket*/
@@ -411,7 +413,7 @@ int mc_ipc_service_connect(void)
 
 	mc_ipc_delete_client_socket(&sock_info);
 
-	while ((__is_service_activated() == FALSE) && (retrycount++ < MAX_WAIT_COUNT)) {
+	while ((__is_service_activated() != MEDIA_CONTROLLER_ERROR_NONE) && (retrycount++ < MAX_WAIT_COUNT)) {
 		MC_MILLISEC_SLEEP(200);
 		mc_error("[No-Error] retry count [%d]", retrycount);
 	}

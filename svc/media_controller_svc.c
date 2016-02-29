@@ -218,6 +218,21 @@ gboolean _mc_read_service_request_tcp_socket(GIOChannel *src, GIOCondition condi
 			}
 		}
 	} else if (recv_msg.msg_type == MC_MSG_SERVER_CONNECTION) {
+		ret = mc_cynara_check(&creds, MC_CLIENT_PRIVILEGE);
+		if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+			mc_error("permission is denied![%d]", ret);
+			ret = mc_cynara_check(&creds, MC_SERVER_PRIVILEGE);
+			if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
+				mc_error("permission is denied![%d]", ret);
+
+				send_msg = MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED;
+				goto ERROR;
+			}
+		}
+
+		MC_SAFE_FREE(creds.uid);
+		MC_SAFE_FREE(creds.smack);
+
 		if (recv_msg.msg_size > 0) {
 			if (strncmp(recv_msg.msg, MC_SERVER_CONNECTION_MSG, recv_msg.msg_size) == 0) {
 				if (g_connection_cnt == -1)
