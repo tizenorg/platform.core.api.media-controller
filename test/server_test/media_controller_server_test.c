@@ -114,6 +114,8 @@ void __custom_command_received_cb(const char *client_name, const char *command, 
 		mc_error("Fail to mc_server_send_command_reply");
 
 	bundle_free(bundle_reply);
+	if (bundle_data != NULL)
+		g_free(bundle_data);
 }
 
 static gboolean _create()
