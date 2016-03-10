@@ -383,7 +383,7 @@ int mc_ipc_service_connect(void)
 	struct sockaddr_un serv_addr;
 	unsigned int retrycount = 0;
 
-	 ret = __is_service_activated();
+	ret = __is_service_activated();
 
 	if (ret == MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_debug("service is already running!");
@@ -408,7 +408,10 @@ int mc_ipc_service_connect(void)
 	if (connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
 		mc_stderror("connect error");
 		mc_ipc_delete_client_socket(&sock_info);
-		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+		if (errno == EACCES)
+			return MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED;
+		else
+			return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}
 
 	mc_ipc_delete_client_socket(&sock_info);
