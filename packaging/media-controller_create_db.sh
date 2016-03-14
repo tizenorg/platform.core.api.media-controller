@@ -13,11 +13,6 @@ sqlite3 ${TZ_USER_DB}/.media_controller.db 'PRAGMA journal_mode = PERSIST;
 chmod 644 ${TZ_USER_DB}/.media_controller.db
 chmod 644 ${TZ_USER_DB}/.media_controller.db-journal
 
-#if [ -f /opt/usr/dbspace/.media_controller.db ]
-#then
-#        chsmack -a 'mediacontroller::db' /opt/usr/dbspace/.media_controller.db*
-#fi
-
 #Change group (6017: db_filemanager 5000: app)
 chgrp $TZ_SYS_USER_GROUP ${TZ_USER_DB}
 #chgrp 6017 ${TZ_USER_DB}/.media_controller.db
