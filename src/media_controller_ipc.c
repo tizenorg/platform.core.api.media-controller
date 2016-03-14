@@ -388,7 +388,8 @@ int mc_ipc_service_connect(void)
 	if (ret == MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_debug("service is already running!");
 		return ret;
-	} else if (ret == MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED) {
+	}
+	else if (ret == MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED) {
 		mc_error("Permission deny!");
 		return ret;
 	}
