@@ -327,7 +327,10 @@ int mc_ipc_send_message_to_server(mc_msg_type_e msg_type, const char *request_ms
 	if (connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
 		mc_stderror("connect error");
 		mc_ipc_delete_client_socket(&sock_info);
-		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+		if (errno == EACCES)
+			return MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED;
+		else
+			return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}
 
 	/* Send request */
@@ -415,17 +418,19 @@ int mc_ipc_service_connect(void)
 
 	mc_ipc_delete_client_socket(&sock_info);
 
-	while ((__is_service_activated() != MEDIA_CONTROLLER_ERROR_NONE) && (retrycount++ < MAX_WAIT_COUNT)) {
+	ret = __is_service_activated();
+	if (ret == MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED) {
+		mc_error("Permission deny!");
+		return ret;
+	}
+	while ((ret != MEDIA_CONTROLLER_ERROR_NONE) && (retrycount++ < MAX_WAIT_COUNT)) {
 		MC_MILLISEC_SLEEP(200);
 		mc_error("[No-Error] retry count [%d]", retrycount);
-	}
-
-	if (retrycount < MAX_WAIT_COUNT) {
-		mc_debug("CONNECT OK");
-		ret = MEDIA_CONTROLLER_ERROR_NONE;
-	} else {
-		mc_error("CONNECT FAIL");
-		ret = MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+		ret = __is_service_activated();
+		if (ret == MEDIA_CONTROLLER_ERROR_PERMISSION_DENIED) {
+			mc_error("Permission deny!");
+			return ret;
+		}
 	}
 
 	return ret;
