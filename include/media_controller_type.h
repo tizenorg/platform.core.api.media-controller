@@ -37,31 +37,31 @@ extern "C" {
 
 /**
  * @brief The structure type for the media server handle.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  */
 typedef void *mc_server_h;
 
 /**
  * @brief The structure type for the media client handle.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  */
 typedef void *mc_client_h;
 
 /**
  * @brief The structure type for the media controller playback handle.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  */
 typedef void *mc_playback_h;
 
 /**
  * @brief The structure type for the media controller metadata handle.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  */
 typedef void *mc_metadata_h;
 
 /**
  * @brief Enumeration for the media controller error.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  */
 typedef enum {
 	MEDIA_CONTROLLER_ERROR_NONE						= TIZEN_ERROR_NONE,						/**< Successful */
@@ -74,7 +74,7 @@ typedef enum {
 
 /**
  * @brief Enumeration for the media controller server state.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  */
 typedef enum {
 	MC_SERVER_STATE_NONE = 0,					/**< None state*/
@@ -84,7 +84,7 @@ typedef enum {
 
 /**
  * @brief Enumeration for the media meta info.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  */
 typedef enum {
 	MC_META_MEDIA_TITLE = 0,					/**< Title */
@@ -102,7 +102,7 @@ typedef enum {
 
 /**
  * @brief Enumeration for the media playback state.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  */
 typedef enum {
 	MC_PLAYBACK_STATE_NONE = 0,				/**< None */
@@ -117,7 +117,7 @@ typedef enum {
 
 /**
  * @brief Enumeration for the shuffle mode.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  */
 typedef enum {
 	MC_SHUFFLE_MODE_ON = 0,				/**< Shuffle mode on */
@@ -126,7 +126,7 @@ typedef enum {
 
 /**
  * @brief Enumeration for the repeat mode.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  */
 typedef enum {
 	MC_REPEAT_MODE_ON = 0,					/**< Repeat mode on */
@@ -135,7 +135,7 @@ typedef enum {
 
 /**
  * @brief Enumeration for the subscription type.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  */
 typedef enum {
 	MC_SUBSCRIPTION_TYPE_SERVER_STATE = 0,					/**< Server state */

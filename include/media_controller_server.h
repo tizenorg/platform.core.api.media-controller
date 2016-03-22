@@ -36,7 +36,7 @@ extern "C" {
 
 /**
  * @brief Called when the Server received playback state command from the client.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @details This callback is called when server received playback state recommand from client.
  *
@@ -52,7 +52,7 @@ typedef void (*mc_server_playback_state_command_received_cb)(const char* client_
 
 /**
  * @brief Called when the Server received custom command from the client.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @details This callback is called when server received custom recommand from client.
  *                If there is reply for command, call mc_server_send_command_reply() function.
@@ -70,7 +70,7 @@ typedef void (*mc_server_custom_command_received_cb)(const char* client_name, co
 
 /**
  * @brief Creates a media controller server.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  * @remarks You must release @a server using mc_server_destroy().
  *
  * @privlevel public
@@ -89,7 +89,7 @@ int mc_server_create(mc_server_h *server);
 
 /**
  * @brief Sets the playback state to update the latest state info
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  * @param [in] server The handle to media controller server
  * @param [in] state The state to set
  * @return @c 0 on success,
@@ -107,7 +107,7 @@ int mc_server_set_playback_state(mc_server_h server, mc_playback_states_e state)
 
 /**
  * @brief Sets the playback position to update the latest playback info
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  * @param [in] server The handle to media controller server
  * @param [in] position The position to set in milliseconds
  * @return @c 0 on success,
@@ -126,7 +126,7 @@ int mc_server_set_playback_position(mc_server_h server, unsigned long long posit
 /**
  * @brief Update the modified playback info
  * @details If this API is called, the updated playback information will be sent to the controller.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.server
@@ -146,7 +146,7 @@ int mc_server_update_playback_info(mc_server_h server);
 
 /**
  * @brief Sets the metadata to update the latest metadata info
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.server
@@ -171,7 +171,7 @@ int mc_server_set_metadata(mc_server_h server, mc_meta_e attribute, const char *
 /**
  * @brief Update the modified metadata info.
  * @details If this API is called, the updated metadata will be sent to all controllers.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.server
@@ -192,7 +192,7 @@ int mc_server_update_metadata(mc_server_h server);
 /**
  * @brief Update the modified shuffle mode
  * @details If this API is called, the updated mode information will be sent to all controllers.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.server
@@ -214,7 +214,7 @@ int mc_server_update_shuffle_mode(mc_server_h server, mc_shuffle_mode_e mode);
 /**
  * @brief Updates the modified repeat mode
  * @details If this API is called, the updated mode information will be sent to all controllers.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.server
@@ -235,7 +235,7 @@ int mc_server_update_repeat_mode(mc_server_h server, mc_repeat_mode_e mode);
 
 /**
  * @brief Sets the callback for receiving playback state command from client.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.server
@@ -256,7 +256,7 @@ int mc_server_set_playback_state_command_received_cb(mc_server_h server, mc_serv
 
 /**
  * @brief Unsets the callback for receiving playback state command from client.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.server
@@ -275,7 +275,7 @@ int mc_server_unset_playback_state_command_received_cb(mc_server_h server);
 
 /**
  * @brief Sets the callback for receiving custom command from client.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.server
@@ -296,7 +296,7 @@ int mc_server_set_custom_command_received_cb(mc_server_h server, mc_server_custo
 
 /**
  * @brief Unsets the callback for receiving custom command from client.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.server
@@ -315,7 +315,7 @@ int mc_server_unset_custom_command_received_cb(mc_server_h server);
 
 /**
  * @brief Sends a reply for the requested command to the client.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  * @remarks When server recieve command, this API can be called by mc_server_custom_command_received_cb().
  *
  * @privlevel public
@@ -339,7 +339,7 @@ int mc_server_send_command_reply(mc_server_h server, const char *client_name, in
 
 /**
  * @brief Destroys media controller server.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  * @param [in] server The handle to media controller server
  * @return @c 0 on success,
  *         otherwise a negative error value

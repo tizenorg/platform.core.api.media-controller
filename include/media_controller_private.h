@@ -94,28 +94,28 @@ extern "C" {
 /**
 * @ingroup CAPI_MEDIA_CONTROLLER_MODULE
 * @brief DBus path for media controller.
-* @since_tizen 2.4
+* @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
 */
 #define MC_DBUS_PATH "/org/tizen/mediacontroller/dbus/notify"
 
 /**
 * @ingroup CAPI_MEDIA_CONTROLLER_MODULE
 * @brief DBus interface to update from server to client.
-* @since_tizen 2.4
+* @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
 */
 #define MC_DBUS_UPDATE_INTERFACE "org.tizen.mediacontroller.update"
 
 /**
 * @ingroup CAPI_MEDIA_CONTROLLER_MODULE
 * @brief DBus interface prefix name.
-* @since_tizen 2.4
+* @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
 */
 #define MC_DBUS_INTERFACE_PREFIX "org.tizen"
 
 /**
 * @ingroup CAPI_MEDIA_CONTROLLER_MODULE
 * @brief DBus interface type name.
-* @since_tizen 2.4
+* @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
 */
 #define MC_CLIENT "mediacontroller.client"
 #define MC_SERVER "mediacontroller.server"

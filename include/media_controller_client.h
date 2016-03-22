@@ -36,7 +36,7 @@ extern "C" {
 
 /**
  * @brief Called when updating status of the media controller server.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @param[in] server_name,    The app_id of the updated media controller server
  * @param[in] state,    The state of the updated media controller server
@@ -50,7 +50,7 @@ typedef void (*mc_server_state_updated_cb)(const char *server_name, mc_server_st
 
 /**
  * @brief Called when updating the playback information of the media controller server.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @param[in] server_name,    The app_id of the updated media controller server
  * @param[in] playback,        The playback information of the updated media controller server
@@ -64,7 +64,7 @@ typedef void (*mc_playback_updated_cb)(const char *server_name, mc_playback_h pl
 
 /**
  * @brief Called when updating the metadata of the media controller server.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @param[in] server_name,    The app_id of the updated media controller server
  * @param[in] metadata,        the metadata of the updated media controller server
@@ -78,7 +78,7 @@ typedef void (*mc_metadata_updated_cb)(const char *server_name, mc_metadata_h me
 
 /**
  * @brief Called when updating the shuffle mode of the media controller server.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @param[in] server_name,    The app_id of the updated media controller server
  * @param[in] mode,            The shuffle mode of the updated media controller server
@@ -92,7 +92,7 @@ typedef void (*mc_shuffle_mode_changed_cb)(const char *server_name, mc_shuffle_m
 
 /**
  * @brief Called when updating the repeat mode of the media controller server.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @param[in] server_name,    The app_id of the updated media controller server
  * @param[in] mode,            The repeat mode of the updated media controller server
@@ -106,7 +106,7 @@ typedef void (*mc_repeat_mode_changed_cb)(const char *server_name, mc_repeat_mod
 
 /**
  * @brief Called when requesting the list of activated servers.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @param[in] server_name,    The app_id of the activated media controller server
  * @param[in] user_data        The user data passed from the mc_client_foreach_server() fuction
@@ -122,7 +122,7 @@ typedef bool (*mc_activated_server_cb)(const char *server_name, void *user_data)
 
 /**
  * @brief Called when receiving the command processing result from the server.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @param[in] server_name    The app_id of the updated media controller server
  * @param[in] result_code    The result code of custom command
@@ -137,7 +137,7 @@ typedef void (*mc_command_reply_received_cb)(const char *server_name, int result
 
 /**
  * @brief Called when requesting the list of subscribed servers.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @param[in] server_name,    The app_id of the subscribed media controller server
  * @param[in] user_data        The user data passed from the mc_client_foreach_server_subscribed() fuction
@@ -154,7 +154,7 @@ typedef bool (*mc_subscribed_server_cb)(const char *server_name, void *user_data
 /**
  * @brief Creates a media controller client.
  * @details The media controller client binds the latest media controller server when handlers are created.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.client
@@ -174,7 +174,7 @@ int mc_client_create(mc_client_h *client);
 
 /**
  * @brief Sets the callback for monitoring status of the media controller server.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  * @details If media controller client call this function, basically the media controller client recieve the callback from all media controller servers.
  *
  * @privlevel public
@@ -196,7 +196,7 @@ int mc_client_set_server_update_cb(mc_client_h client, mc_server_state_updated_c
 
 /**
  * @brief Unsets the callback for monitoring status of the media controller server.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.client
@@ -215,7 +215,7 @@ int mc_client_unset_server_update_cb(mc_client_h client);
 
 /**
  * @brief Sets the callback for monitoring playback status of the media controller server.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  * @details If media controller client call this function, basically the media controller client recieve the callback from all media controller servers. \n
  *
  * @privlevel public
@@ -237,7 +237,7 @@ int mc_client_set_playback_update_cb(mc_client_h client, mc_playback_updated_cb 
 
 /**
  * @brief Unsets the callback for monitoring playback status of the media controller server.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.client
@@ -256,7 +256,7 @@ int mc_client_unset_playback_update_cb(mc_client_h client);
 
 /**
  * @brief Sets the callback for monitoring metadata status of the media controller server.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  * @details If media controller client call this function, basically the media controller client recieve the callback from all media controller servers.
  *
  * @privlevel public
@@ -278,7 +278,7 @@ int mc_client_set_metadata_update_cb(mc_client_h client, mc_metadata_updated_cb 
 
 /**
  * @brief Unsets the callback for monitoring metadata status of the media controller server.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.client
@@ -297,7 +297,7 @@ int mc_client_unset_metadata_update_cb(mc_client_h client);
 
 /**
  * @brief Sets the callback for monitoring shuffle mode of the media controller server.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  * @details If media controller client call this function, basically the media controller client recieve the callback from all media controller servers.
  *
  * @privlevel public
@@ -319,7 +319,7 @@ int mc_client_set_shuffle_mode_update_cb(mc_client_h client, mc_shuffle_mode_cha
 
 /**
  * @brief Unsets the callback for monitoring shuffle mode of the media controller server.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.client
@@ -338,7 +338,7 @@ int mc_client_unset_shuffle_mode_update_cb(mc_client_h client);
 
 /**
  * @brief Sets the callback for monitoring repeat mode of the media controller server.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  * @details If media controller client call this function, basically the media controller client recieve the callback from all media controller servers.
  *
  * @privlevel public
@@ -360,7 +360,7 @@ int mc_client_set_repeat_mode_update_cb(mc_client_h client, mc_repeat_mode_chang
 
 /**
  * @brief Unsets the callback for monitoring repeat mode of the media controller server.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.client
@@ -379,7 +379,7 @@ int mc_client_unset_repeat_mode_update_cb(mc_client_h client);
 
 /**
  * @brief Subscribes media controller server for monitoring status.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  * @details If media controller client subscribe media controller server, \n
  *              the media controller client recieve callback from subscribed media controller server. \n
  *              If media controller client subscribe media controller server one or more, \n
@@ -407,7 +407,7 @@ int mc_client_subscribe(mc_client_h client, mc_subscription_type_e subscription_
 
 /**
  * @brief Unsubscribes media controller server for monitoring status.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  * @details If media controller client unsubscribe media controller server, \n
  *              the media controller client don't recieve callback from unsubscribed media controller server. \n
  *              If media controller client unsubscribe all subscibed media controller server, \n
@@ -433,7 +433,7 @@ int mc_client_unsubscribe(mc_client_h client, mc_subscription_type_e subscriptio
 
 /**
  * @brief Retrieves all subscribed Server.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.client
@@ -455,7 +455,7 @@ int mc_client_foreach_server_subscribed(mc_client_h client, mc_subscription_type
 
 /**
  * @brief Gets the playback state.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @remarks You must release @a playback using @c mc_client_destroy_playback().
  *
@@ -473,7 +473,7 @@ int mc_client_get_playback_state(mc_playback_h playback, mc_playback_states_e *s
 
 /**
  * @brief Gets the playback position.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @remarks You must release @a playback using @c mc_client_destroy_playback().
  *
@@ -491,7 +491,7 @@ int mc_client_get_playback_position(mc_playback_h playback, unsigned long long *
 
 /**
  * @brief Destroys playback
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @param [in] playback    The handle to playback
  * @return @c 0 on success,
@@ -505,7 +505,7 @@ int mc_client_destroy_playback(mc_playback_h playback);
 
 /**
  * @brief Gets the metadata.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @remarks You must release @a metadata using @c mc_client_destroy_metadata(). \n
  *               And also You must release @a value using free().
@@ -525,7 +525,7 @@ int mc_client_get_metadata(mc_metadata_h metadata, mc_meta_e attribute, char **v
 
 /**
  * @brief Destroys metadata
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @param [in] playback    The handle to metadata
  * @return @c 0 on success,
@@ -541,7 +541,7 @@ int mc_client_destroy_metadata(mc_metadata_h metadata);
  * @brief Gets the latest media controller server info.
  * @details The media controller client will get the most recently updated information by the server.
  *
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.client
@@ -562,7 +562,7 @@ int mc_client_get_latest_server_info(mc_client_h client, char **server_name, mc_
 /**
  * @brief Gets the latest playback info.
  * @details The media controller client will get the most recently updated information from @a server_name.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.client
@@ -584,7 +584,7 @@ int mc_client_get_server_playback_info(mc_client_h client, const char *server_na
 /**
  * @brief Gets the latest metadata.
  * @details The media controller client will get the most recently updated information from @a server_name.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.client
@@ -606,7 +606,7 @@ int mc_client_get_server_metadata(mc_client_h client, const char *server_name, m
 /**
  * @brief Gets the latest shuffle mode.
  * @details The media controller client will get the most recently updated information from @a server_name.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.client
@@ -627,7 +627,7 @@ int mc_client_get_server_shuffle_mode(mc_client_h client, const char *server_nam
 /**
  * @brief Gets the latest repeat mode.
  * @details The media controller client will get the most recently updated information from @a server_name.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.client
@@ -647,7 +647,7 @@ int mc_client_get_server_repeat_mode(mc_client_h client, const char *server_name
 
 /**
  * @brief Retrieves all activated Server.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.client
@@ -667,7 +667,7 @@ int mc_client_foreach_server(mc_client_h client, mc_activated_server_cb callback
 
 /**
  * @brief Sends the playback state command to server.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
  * @privlevel public
  * @privilege %http://tizen.org/privilege/mediacontroller.client
@@ -688,7 +688,7 @@ int mc_client_send_playback_state_command(mc_client_h client, const char *server
 
 /**
  * @brief Sends the custom command to server.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  * @details If there is the result for comand from server, the media controller client will get the result of the custom command by mc_command_reply_received_cb() callback.
  *
  * @privlevel public
@@ -712,7 +712,7 @@ int mc_client_send_custom_command(mc_client_h client, const char *server_name, c
 
 /**
  * @brief Destroys client.
- * @since_tizen 2.4
+ * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  * @param [in] client The handle to the media controller client
  * @return @c 0 on success,
  *         otherwise a negative error value
