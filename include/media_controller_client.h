@@ -721,7 +721,7 @@ int mc_client_send_custom_command(mc_client_h client, const char *server_name, c
  * @pre Create a media controller client handle by calling mc_client_create().
  * @see mc_client_create()
  */
-int mc_client_destroy(mc_client_h client);	//deregistered internally
+int mc_client_destroy(mc_client_h client);
 
 
 /**

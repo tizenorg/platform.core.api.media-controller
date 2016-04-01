@@ -348,7 +348,7 @@ int mc_server_send_command_reply(mc_server_h server, const char *client_name, in
  * @pre Create a media controller server handle by calling mc_server_create().
  * @see mc_server_create()
  */
-int mc_server_destroy(mc_server_h server);	//deregistered internally
+int mc_server_destroy(mc_server_h server);
 
 
 /**
