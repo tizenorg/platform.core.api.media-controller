@@ -56,8 +56,8 @@
 #define DB_COLUMN_PLAYBACK_STATE			"playback_state"
 #define DB_COLUMN_PLAYBACK_POSITION		"playback_position"
 
-#define SQLITE3_SAFE_FREE(sql_string) 	{if(sql_string) { sqlite3_free(sql_string); sql_string = NULL;}}
-#define SQLITE3_FINALIZE(x)	{if(x != NULL) {sqlite3_finalize(x);}}
+#define SQLITE3_SAFE_FREE(sql_string)	{if (sql_string) { sqlite3_free(sql_string); sql_string = NULL; } }
+#define SQLITE3_FINALIZE(x)	{if (x != NULL) sqlite3_finalize(x); }
 
 int mc_db_connect(void **db_handle, bool need_write);
 int mc_db_disconnect(void *db_handle);
