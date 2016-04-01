@@ -29,18 +29,18 @@ extern "C" {
 #define SERVER_IP			"127.0.0.1"
 #define MC_TIMEOUT_SEC_5					5		/**< Response from Server time out */
 #define MAX_MSG_SIZE				4096*2
-#define MC_SOCK_NOT_ALLOCATE 		-1
-//#define MC_SOCK_ACTIVATION_PATH		tzplatform_mkpath(TZ_SYS_RUN, "media-controller/media_sa_controller")
+#define MC_SOCK_NOT_ALLOCATE		-1
+/*#define MC_SOCK_ACTIVATION_PATH		tzplatform_mkpath(TZ_SYS_RUN, "media-controller/media_sa_controller") */
 #define MC_IPC_PATH					tzplatform_mkpath(TZ_SYS_RUN, "media-controller/media_ipc_controller")
 #define MC_SERVER_CONNECTION_MSG			"Connect"
 #define MC_SERVER_DISCONNECTION_MSG		"Disonnect"
 
-typedef enum{
+typedef enum {
 	MC_DB_UPDATE_PORT,		/**< Media Controller DB Update */
 	MC_PORT_MAX,
 } mc_msg_port_type_e;
 
-typedef enum{
+typedef enum {
 	MC_MSG_DB_UPDATE,		/**< Media Controller DB Update */
 	MC_MSG_CLIENT_SET,
 	MC_MSG_CLIENT_GET,
@@ -52,7 +52,7 @@ typedef enum{
 typedef struct {
 	int sock_fd;
 	char *sock_path;
-}mc_sock_info_s;
+} mc_sock_info_s;
 
 typedef struct {
 	mc_msg_type_e msg_type;
@@ -61,7 +61,7 @@ typedef struct {
 	int result;
 	size_t msg_size; /*this is size of message below and this does not include the terminationg null byte ('\0'). */
 	char msg[MAX_MSG_SIZE];
-}mc_comm_msg_s;
+} mc_comm_msg_s;
 
 int mc_ipc_create_client_socket(int timeout_sec, mc_sock_info_s* sock_info);
 int mc_ipc_delete_client_socket(mc_sock_info_s* sock_info);

@@ -67,14 +67,14 @@ extern "C" {
 	} while (0)
 
 #define mc_retm_if(expr, fmt, arg...) do { \
-		if(expr) { \
+		if (expr) { \
 			LOGE(FONT_COLOR_RED""fmt"", ##arg);     \
 			return; \
 		} \
 	} while (0)
 
 #define mc_retvm_if(expr, val, fmt, arg...) do { \
-		if(expr) { \
+		if (expr) { \
 			LOGE(FONT_COLOR_RED""fmt"", ##arg);     \
 			return (val); \
 		} \
@@ -87,7 +87,7 @@ extern "C" {
 		LOGE(fmt" : standard error= [%s]", mc_stderror_buf); \
 	} while (0)
 
-#define MC_SAFE_FREE(src)			{if(src) {free(src); src = NULL;}}
+#define MC_SAFE_FREE(src)			{ if (src) {free(src); src = NULL; } }
 #define MC_STRING_VALID(str)				((str != NULL && strlen(str) > 0) ? TRUE : FALSE)
 #define MC_STRING_DELIMITER			"VAL_SEP"
 
@@ -134,7 +134,7 @@ extern "C" {
 
 #define MC_MILLISEC_SLEEP(msec) \
 	do { \
-		if(msec) { \
+		if (msec) { \
 			unsigned long sec_t = 0; \
 			unsigned long nsec_t = 0; \
 			unsigned long cal_time = msec * 1000000; \
@@ -151,12 +151,12 @@ typedef struct {
 	void *callback;
 	void *user_data;
 	GList *filter_list;
-}media_controller_receiver_s;
+} media_controller_receiver_s;
 
 typedef struct {
 	mc_playback_states_e state;
 	unsigned long long position;
-}media_controller_playback_s;
+} media_controller_playback_s;
 
 typedef struct {
 	char *title;
@@ -170,7 +170,7 @@ typedef struct {
 	char *description;
 	char *track_num;
 	char *picture;
-}media_controller_metadata_s;
+} media_controller_metadata_s;
 
 typedef struct {
 	char *server_name;
@@ -187,7 +187,7 @@ typedef struct {
 
 	media_controller_receiver_s playback_state_reciever;
 	media_controller_receiver_s custom_cmd_reciever;
-}media_controller_server_s;
+} media_controller_server_s;
 
 typedef struct {
 	char		*client_name;
@@ -204,7 +204,7 @@ typedef struct {
 	media_controller_receiver_s shuffle_cb;
 	media_controller_receiver_s repeat_cb;
 	media_controller_receiver_s reply_cb;
-}media_controller_client_s;
+} media_controller_client_s;
 
 /* formal callback to receive signal */
 typedef void(*mc_signal_received_cb)(const char *interface_name, const char *signal_name, const char *message, int size, void *user_data);

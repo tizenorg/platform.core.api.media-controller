@@ -28,8 +28,8 @@
 
 #define DB_SELECT_ALL_SERVER_LIST_EXCEPT_LATEST	"SELECT name FROM SQLITE_MASTER WHERE type='table' AND (name != '%q') AND (name NOT IN (SELECT server_name FROM "MC_DB_TABLE_LATEST_SERVER"))"
 
-#define SQLITE3_SAFE_FREE(sql_string) 	{if(sql_string) { sqlite3_free(sql_string); sql_string = NULL;}}
-#define SQLITE3_FINALIZE(x)	{if(x != NULL) {sqlite3_finalize(x);}}
+#define SQLITE3_SAFE_FREE(sql_string)	{if (sql_string) {sqlite3_free(sql_string); sql_string = NULL; } }
+#define SQLITE3_FINALIZE(x)	{if (x != NULL) sqlite3_finalize(x); }
 
 int mc_db_util_connect(void **handle, uid_t uid, bool need_write);
 int mc_db_util_disconnect(void *handle);
