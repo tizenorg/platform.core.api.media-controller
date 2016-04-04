@@ -22,7 +22,7 @@
 GMainLoop *g_mc_mainloop = NULL;
 static int g_mc_timer_id = 0;
 
-#define MC_MAIN_TIMEOUT_SEC_60	600
+#define MC_MAIN_TIMEOUT_SEC_60	60
 
 
 void __mc_main_create_timer(int timer_id);
@@ -64,6 +64,9 @@ int main(int argc, char **argv)
 {
 	GThread *svc_thread = NULL;
 	int fd = -1;
+	int client_fd = -1;
+	struct sockaddr_in client_addr;
+	int client_addr_size = 0;
 
 	/*Init main loop*/
 	g_mc_mainloop = g_main_loop_new(NULL, FALSE);
@@ -74,8 +77,14 @@ int main(int argc, char **argv)
 	}
 
 	fd = mc_create_socket_activation();
-	if (fd < 0)
+	if (fd < 0) {
 		mc_error("Failed to socekt creation");
+	} else {
+		client_addr_size = sizeof(client_addr);
+		client_fd = accept(fd, (struct sockaddr*)&client_addr, (socklen_t *)&client_addr_size);
+		if (client_fd == -1)
+			mc_error("accept failed");
+	}
 
 	/*create each threads*/
 	svc_thread  = g_thread_new("mc_svc_thread", (GThreadFunc)mc_svc_thread, NULL);

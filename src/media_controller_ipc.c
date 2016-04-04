@@ -404,7 +404,7 @@ int mc_ipc_service_connect(void)
 	/*Set server Address*/
 	memset(&serv_addr, 0, sizeof(serv_addr));
 	serv_addr.sun_family = AF_UNIX;
-	strncpy(serv_addr.sun_path, MC_IPC_PATH, sizeof(serv_addr.sun_path) - 1);
+	strncpy(serv_addr.sun_path, MC_SOCK_ACTIVATION_PATH, sizeof(serv_addr.sun_path) - 1);
 
 	/* Connecting to the media controller service */
 	if (connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
