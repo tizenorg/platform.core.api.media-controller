@@ -392,6 +392,7 @@ gboolean mc_svc_thread(void *data)
 
 	g_io_channel_shutdown(channel, FALSE, NULL);
 	g_io_channel_unref(channel);
+	g_source_unref(source);
 
 	if (mc_svc_data->mc_svc_list != NULL)
 		g_list_free_full(mc_svc_data->mc_svc_list, _mc_svc_destroy_data);

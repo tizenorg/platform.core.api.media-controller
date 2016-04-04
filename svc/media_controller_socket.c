@@ -23,11 +23,6 @@
 #include "media_controller_db_util.h"
 #include "media_controller_socket.h"
 
-#define MC_SOCK_PATH_PRFX "/tmp/.media_ipc_mc_client"
-#define MC_SOCK_PATH_TEMPLATE "XXXXXX"
-#define MC_SOCK_PATH MC_SOCK_PATH_PRFX MC_SOCK_PATH_TEMPLATE
-#define MC_SOCK_UDP_BLOCK_SIZE 512
-
 int mc_ipc_create_client_socket(int timeout_sec, mc_sock_info_s *sock_info)
 {
 	int sock = -1;
@@ -58,13 +53,16 @@ int mc_ipc_delete_client_socket(mc_sock_info_s *sock_info)
 {
 	int ret = 0;
 
-	close(sock_info->sock_fd);
 	mc_debug("sockfd %d close", sock_info->sock_fd);
+	if (close(sock_info->sock_fd) < 0)
+		mc_stderror("sockfd close failed");
+
 	if (sock_info->sock_path != NULL) {
+#if 0
 		ret = unlink(sock_info->sock_path);
 		if (ret < 0)
 			mc_stderror("unlink failed");
-
+#endif
 		free(sock_info->sock_path);
 	}
 
