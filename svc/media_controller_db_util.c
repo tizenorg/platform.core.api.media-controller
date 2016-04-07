@@ -166,7 +166,7 @@ static char* __mc_get_db_name(uid_t uid)
 	return result_psswd_rtn;
 }
 
-int mc_db_util_connect(void **handle, uid_t uid, bool need_write)
+int mc_db_util_connect(void **handle, uid_t uid)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	sqlite3 *db_handle = NULL;
@@ -183,10 +183,7 @@ int mc_db_util_connect(void **handle, uid_t uid, bool need_write)
 	}
 
 	/*Connect DB*/
-	if (need_write)
-		ret = db_util_open_with_options(db_name, &db_handle, SQLITE_OPEN_READWRITE, NULL);
-	else
-		ret = db_util_open_with_options(db_name, &db_handle, SQLITE_OPEN_READONLY, NULL);
+	ret = db_util_open_with_options(db_name, &db_handle, SQLITE_OPEN_READWRITE, NULL);
 
 	MC_SAFE_FREE(db_name);
 
