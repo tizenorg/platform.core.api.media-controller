@@ -183,10 +183,7 @@ int mc_db_util_connect(void **handle, uid_t uid, bool need_write)
 	}
 
 	/*Connect DB*/
-	if (need_write)
-		ret = db_util_open_with_options(db_name, &db_handle, SQLITE_OPEN_READWRITE, NULL);
-	else
-		ret = db_util_open_with_options(db_name, &db_handle, SQLITE_OPEN_READONLY, NULL);
+	ret = db_util_open_with_options(db_name, &db_handle, SQLITE_OPEN_READWRITE, NULL);
 
 	MC_SAFE_FREE(db_name);
 
