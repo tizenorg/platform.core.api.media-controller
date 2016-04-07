@@ -155,10 +155,7 @@ int mc_db_connect(void **handle, bool need_write)
 	mc_retvm_if(handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 
 	/*Connect DB*/
-	if (need_write)
-		ret = db_util_open_with_options(tzplatform_mkpath(TZ_USER_DB, MC_DB_NAME), &db_handle, SQLITE_OPEN_READWRITE, NULL);
-	else
-		ret = db_util_open_with_options(tzplatform_mkpath(TZ_USER_DB, MC_DB_NAME), &db_handle, SQLITE_OPEN_READONLY, NULL);
+	ret = db_util_open_with_options(tzplatform_mkpath(TZ_USER_DB, MC_DB_NAME), &db_handle, SQLITE_OPEN_READWRITE, NULL);
 
 	if (SQLITE_OK != ret) {
 		mc_error("error when db open");
