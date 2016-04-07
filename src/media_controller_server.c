@@ -46,7 +46,7 @@ static int __mc_server_create(media_controller_server_s **mc_server)
 		goto ERROR;
 	}
 
-	ret = mc_db_connect(&(_server->db_handle), false);
+	ret = mc_db_connect(&(_server->db_handle));
 	if (ret != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("fail mc_db_connect [%d]", ret);
 		goto ERROR;

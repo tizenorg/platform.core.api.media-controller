@@ -329,7 +329,7 @@ gboolean mc_svc_thread(void *data)
 	}
 
 	/* Connect media controller DB*/
-	if (mc_db_util_connect(&(mc_svc_data->db_handle), uid, true) != MEDIA_CONTROLLER_ERROR_NONE) {
+	if (mc_db_util_connect(&(mc_svc_data->db_handle), uid) != MEDIA_CONTROLLER_ERROR_NONE) {
 		mc_error("Failed to connect DB");
 		MC_SAFE_FREE(mc_svc_data);
 		return FALSE;

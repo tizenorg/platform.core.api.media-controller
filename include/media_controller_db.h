@@ -59,7 +59,7 @@
 #define SQLITE3_SAFE_FREE(sql_string)	{if (sql_string) { sqlite3_free(sql_string); sql_string = NULL; } }
 #define SQLITE3_FINALIZE(x)	{if (x != NULL) sqlite3_finalize(x); }
 
-int mc_db_connect(void **db_handle, bool need_write);
+int mc_db_connect(void **db_handle);
 int mc_db_disconnect(void *db_handle);
 int mc_db_create_server_table(void *handle, const char *server_name);
 int mc_db_delete_server_table(void *handle, const char *server_name);

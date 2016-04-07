@@ -145,7 +145,7 @@ static int __mc_db_get_ulong_value_of_key(void *handle, const char *server_name,
 	return MEDIA_CONTROLLER_ERROR_NONE;
 }
 
-int mc_db_connect(void **handle, bool need_write)
+int mc_db_connect(void **handle)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
 	sqlite3 *db_handle = NULL;
@@ -155,10 +155,7 @@ int mc_db_connect(void **handle, bool need_write)
 	mc_retvm_if(handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 
 	/*Connect DB*/
-	if (need_write)
-		ret = db_util_open_with_options(tzplatform_mkpath(TZ_USER_DB, MC_DB_NAME), &db_handle, SQLITE_OPEN_READWRITE, NULL);
-	else
-		ret = db_util_open_with_options(tzplatform_mkpath(TZ_USER_DB, MC_DB_NAME), &db_handle, SQLITE_OPEN_READONLY, NULL);
+	ret = db_util_open_with_options(tzplatform_mkpath(TZ_USER_DB, MC_DB_NAME), &db_handle, SQLITE_OPEN_READWRITE, NULL);
 
 	if (SQLITE_OK != ret) {
 		mc_error("error when db open");
