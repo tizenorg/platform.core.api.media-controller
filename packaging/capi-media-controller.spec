@@ -1,6 +1,6 @@
 Name:       capi-media-controller
 Summary:    A media controller library in Tizen Native API
-Version:    0.0.17
+Version:    0.0.18
 Release:    1
 Group:      Multimedia/API
 License:    Apache-2.0
@@ -24,8 +24,6 @@ BuildRequires:  pkgconfig(libsystemd-daemon)
 BuildRequires:  pkgconfig(libtzplatform-config)
 BuildRequires:  pkgconfig(cynara-client)
 BuildRequires:  pkgconfig(cynara-session)
-Requires(post): /sbin/ldconfig
-Requires(postun): /sbin/ldconfig
 
 %description
 This package provides a media controller library in Tizen Native API
@@ -83,9 +81,9 @@ ln -s ../media-controller-user.service %{buildroot}%{_unitdir_user}/default.targ
 mkdir -p %{buildroot}%{_bindir}
 install -m 0775 %{SOURCE1001} %{buildroot}%{_bindir}/media-controller_create_db.sh
 
-%post -p /sbin/ldconfig
+%post
 chgrp %TZ_SYS_USER_GROUP %{_bindir}/media-controller_create_db.sh
-%postun -p /sbin/ldconfig
+%postun
 
 %files
 %manifest %{name}.manifest
