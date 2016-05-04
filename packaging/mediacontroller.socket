@@ -2,8 +2,8 @@
 Description=MediaController Service socket
 
 [Socket]
-SocketUser=system
-SocketGroup=system
+SocketUser=multimedia_fw
+SocketGroup=multimedia_fw
 ListenStream=/var/run/media-controller/media_sa_controller
 Service=mediacontroller.service
 

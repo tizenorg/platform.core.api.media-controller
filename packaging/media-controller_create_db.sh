@@ -8,3 +8,5 @@ mkdir -p $TZ_USER_DB
 sqlite3 ${TZ_USER_DB}/.media_controller.db 'PRAGMA journal_mode = PERSIST;
 		CREATE TABLE IF NOT EXISTS latest_server (server_name TEXT PRIMARY KEY);
 '
+chown multimedia_fw:multimedia_fw %{TZ_USER_DB}/.media_controller.db;
+chown multimedia_fw:multimedia_fw %{TZ_USER_DB}/.media_controller.db-journal;
