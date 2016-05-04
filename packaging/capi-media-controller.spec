@@ -1,6 +1,6 @@
 Name:       capi-media-controller
 Summary:    A media controller library in Tizen Native API
-Version:    0.0.18
+Version:    0.0.19
 Release:    1
 Group:      Multimedia/API
 License:    Apache-2.0
@@ -82,12 +82,10 @@ mkdir -p %{buildroot}%{_bindir}
 install -m 0775 %{SOURCE1001} %{buildroot}%{_bindir}/media-controller_create_db.sh
 
 %post
-chgrp %TZ_SYS_USER_GROUP %{_bindir}/media-controller_create_db.sh
 %postun
 
 %files
 %manifest %{name}.manifest
-%{_bindir}/media-controller_create_db.sh
 %defattr(-,root,root,-)
 %{_libdir}/*.so.*
 %{_datadir}/license/%{name}
@@ -95,6 +93,7 @@ chgrp %TZ_SYS_USER_GROUP %{_bindir}/media-controller_create_db.sh
 %files -n mediacontroller
 %defattr(-,root,root,-)
 %{_bindir}/mediacontroller
+%{_bindir}/media-controller_create_db.sh
 %manifest media-controller-service.manifest
 %defattr(-,system,system,-)
 %{_unitdir}/mediacontroller.service
