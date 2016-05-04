@@ -31,7 +31,7 @@ extern "C" {
 #define MAX_MSG_SIZE				4096*2
 #define MC_SOCK_NOT_ALLOCATE 		-1
 #define MC_SOCK_ACTIVATION_PATH		tzplatform_mkpath(TZ_SYS_RUN, "media-controller/media_sa_controller")
-#define MC_IPC_PATH					tzplatform_mkpath(TZ_SYS_RUN, "media-controller/media_ipc_controller")
+#define MC_IPC_PATH					"/tmp/.media_ipc_controller" /* tzplatform_mkpath(TZ_SYS_RUN, "media-controller/media_ipc_controller") */
 #define MC_SERVER_CONNECTION_MSG			"Connect"
 #define MC_SERVER_DISCONNECTION_MSG		"Disonnect"
 
