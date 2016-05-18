@@ -132,6 +132,8 @@ extern "C" {
 #define MC_COMMAND_PLAYBACKSTATE		"_playback_command_"
 #define MC_COMMAND_CUSTOM				"_custom_command_"
 
+#define DEFAULT_USER_UID 5001	/* owner */
+
 #define MC_MILLISEC_SLEEP(msec) \
 	do { \
 		if (msec) { \

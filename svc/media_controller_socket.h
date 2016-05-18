@@ -30,8 +30,8 @@ extern "C" {
 #define MC_TIMEOUT_SEC_5					5		/**< Response from Server time out */
 #define MAX_MSG_SIZE				4096*2
 #define MC_SOCK_NOT_ALLOCATE 		-1
-#define MC_SOCK_ACTIVATION_PATH		tzplatform_mkpath(TZ_SYS_RUN, "media-controller/media_sa_controller")
-#define MC_IPC_PATH					tzplatform_mkpath(TZ_SYS_RUN, "media-controller/media_ipc_controller")
+#define MC_SOCK_ACTIVATION_PATH		"/run/.mediacontroller.sock"		/* tzplatform_mkpath(TZ_SYS_RUN, ".media_controller.sock") */
+#define MC_IPC_PATH					"/run/.mediacontroller-comm.sock"	/* tzplatform_mkpath(TZ_SYS_RUN, ".media_controller-comm.sock") */
 #define MC_SERVER_CONNECTION_MSG			"Connect"
 #define MC_SERVER_DISCONNECTION_MSG		"Disonnect"
 

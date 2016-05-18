@@ -145,6 +145,41 @@ static int __mc_db_get_ulong_value_of_key(void *handle, const char *server_name,
 	return MEDIA_CONTROLLER_ERROR_NONE;
 }
 
+static char* __mc_get_db_name(uid_t uid)
+{
+	char result_psswd[MC_FILE_PATH_LEN_MAX] = {0, };
+	char *result_psswd_rtn = NULL;
+	struct group *grpinfo = NULL;
+	char * dir = NULL;
+
+	memset(result_psswd, 0, sizeof(result_psswd));
+
+	struct passwd *userinfo = getpwuid(uid);
+	if (userinfo == NULL) {
+		mc_error("getpwuid(%d) returns NULL !", uid);
+		return NULL;
+	}
+	grpinfo = getgrnam("users");
+	if (grpinfo == NULL) {
+		mc_error("getgrnam(users) returns NULL !");
+		return NULL;
+	}
+	/* Compare git_t type and not group name */
+	if (grpinfo->gr_gid != userinfo->pw_gid) {
+		mc_error("UID [%d] does not belong to 'users' group!", uid);
+		return NULL;
+	}
+	snprintf(result_psswd, sizeof(result_psswd), "%s/.applications/dbspace/%s", userinfo->pw_dir, MC_DB_NAME);
+
+	dir = strrchr(result_psswd, '/');
+	if (!dir)
+		return strdup(result_psswd);
+
+	result_psswd_rtn = strdup(result_psswd);
+
+	return result_psswd_rtn;
+}
+
 int mc_db_connect(void **handle)
 {
 	int ret = MEDIA_CONTROLLER_ERROR_NONE;
@@ -155,7 +190,10 @@ int mc_db_connect(void **handle)
 	mc_retvm_if(handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 
 	/*Connect DB*/
-	ret = db_util_open_with_options(tzplatform_mkpath(TZ_USER_DB, MC_DB_NAME), &db_handle, SQLITE_OPEN_READWRITE, NULL);
+	char * db_name = NULL;
+	db_name = __mc_get_db_name(getuid());
+	ret = db_util_open_with_options(db_name, &db_handle, SQLITE_OPEN_READONLY, NULL);
+	MC_SAFE_FREE(db_name);
 
 	if (SQLITE_OK != ret) {
 		mc_error("error when db open");

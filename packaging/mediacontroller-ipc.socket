@@ -2,8 +2,7 @@
 Description=MediaController Service socket
 
 [Socket]
-ListenStream=/run/.mediacontroller.sock
-Service=mediacontroller.service
+ListenStream=/run/.mediacontroller-comm.sock
 
 [Install]
 WantedBy=sockets.target
