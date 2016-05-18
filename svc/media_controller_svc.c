@@ -30,6 +30,7 @@
 static GMainLoop *g_mc_svc_mainloop = NULL;
 static int g_connection_cnt = -1;
 
+#ifdef MULTI_USER
 #define UID_DBUS_NAME		 "org.freedesktop.login1"
 #define UID_DBUS_PATH		 "/org/freedesktop/login1"
 #define UID_DBUS_INTERFACE	 UID_DBUS_NAME".Manager"
@@ -102,6 +103,7 @@ static int __mc_dbus_get_uid(const char *dest, const char *path, const char *int
 
 	return result;
 }
+#endif
 
 static int __create_socket_activation(void)
 {
@@ -310,7 +312,7 @@ gboolean mc_svc_thread(void *data)
 	GIOChannel *channel = NULL;
 	GMainContext *context = NULL;
 	mc_svc_data_t *mc_svc_data = NULL;
-	uid_t uid = -1;
+	uid_t uid = DEFAULT_USER_UID;
 
 	mc_svc_data = (mc_svc_data_t *)g_malloc(sizeof(mc_svc_data_t));
 	if (mc_svc_data == NULL) {
@@ -319,6 +321,7 @@ gboolean mc_svc_thread(void *data)
 	}
 	memset(mc_svc_data, 0, sizeof(mc_svc_data_t));
 
+#ifdef MULTI_USER
 	ret = __mc_dbus_get_uid(UID_DBUS_NAME, UID_DBUS_PATH, UID_DBUS_INTERFACE, UID_DBUS_METHOD, &uid);
 	if (ret < 0) {
 		mc_debug("Failed to send dbus (%d)", ret);
@@ -327,6 +330,7 @@ gboolean mc_svc_thread(void *data)
 	} else {
 		mc_debug("%d get UID[%d]", ret, uid);
 	}
+#endif
 
 	/* Connect media controller DB*/
 	if (mc_db_util_connect(&(mc_svc_data->db_handle), uid) != MEDIA_CONTROLLER_ERROR_NONE) {

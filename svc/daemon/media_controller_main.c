@@ -60,6 +60,11 @@ void __mc_main_create_timer(int timer_id)
 	g_mc_timer_id = g_source_attach(timer_src, g_main_context_get_thread_default());
 }
 
+void __mc_main_destroy_timer()
+{
+	g_source_destroy(g_main_context_find_source_by_id(g_main_context_get_thread_default(), g_mc_timer_id));
+}
+
 int main(int argc, char **argv)
 {
 	GThread *svc_thread = NULL;
@@ -68,7 +73,7 @@ int main(int argc, char **argv)
 	struct sockaddr_in client_addr;
 	int client_addr_size = 0;
 
-	/*Init main loop*/
+	/* Init main loop */
 	g_mc_mainloop = g_main_loop_new(NULL, FALSE);
 
 	if (mc_cynara_initialize() != MEDIA_CONTROLLER_ERROR_NONE) {
@@ -86,7 +91,7 @@ int main(int argc, char **argv)
 			mc_error("accept failed");
 	}
 
-	/*create each threads*/
+	/* Create media controller service thread */
 	svc_thread  = g_thread_new("mc_svc_thread", (GThreadFunc)mc_svc_thread, NULL);
 
 	/* Create Timer */
@@ -99,6 +104,7 @@ int main(int argc, char **argv)
 	g_thread_join(svc_thread);
 	g_main_loop_unref(g_mc_mainloop);
 
+	__mc_main_destroy_timer(g_mc_timer_id);
 	mc_cynara_finish();
 
 	mc_debug("*** Media Controller Daemon is stopped ***");
