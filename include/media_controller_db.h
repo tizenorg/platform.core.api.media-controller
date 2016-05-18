@@ -21,7 +21,11 @@
 #include <sqlite3.h>
 #include <tzplatform_config.h>
 
+#define FAT_FILEPATH_LEN_MAX	4096	/* inc null */
+#define MC_FILE_PATH_LEN_MAX	FAT_FILEPATH_LEN_MAX	/**< File path max length (include file name) on file system */
+
 #define MC_DB_NAME ".media_controller.db"
+#define MC_DB_PATH tzplatform_mkpath(TZ_USER_DB, MC_DB_NAME)
 
 #define MC_DB_TABLE_SERVER_LIST		"server_list"
 #define MC_DB_TABLE_LATEST_SERVER		"latest_server"

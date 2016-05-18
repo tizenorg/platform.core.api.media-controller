@@ -154,7 +154,7 @@ static char* __mc_get_db_name(uid_t uid)
 			mc_error("UID [%d] does not belong to 'users' group!", uid);
 			return NULL;
 		}
-		snprintf(result_psswd, sizeof(result_psswd), "%s/.applications/dbspace/.media_controller.db", userinfo->pw_dir);
+		snprintf(result_psswd, sizeof(result_psswd), "%s/.applications/dbspace/%s", userinfo->pw_dir, MC_DB_NAME);
 	}
 
 	dir = strrchr(result_psswd, '/');
@@ -183,7 +183,7 @@ int mc_db_util_connect(void **handle, uid_t uid)
 	}
 
 	/*Connect DB*/
-	ret = db_util_open_with_options(db_name, &db_handle, SQLITE_OPEN_READWRITE, NULL);
+	ret = db_util_open_with_options(db_name, &db_handle, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
 
 	MC_SAFE_FREE(db_name);
 
@@ -206,6 +206,24 @@ int mc_db_util_connect(void **handle, uid_t uid)
 	}
 
 	*handle = db_handle;
+
+#ifndef MULTI_USER
+	char *sql = NULL;
+	sql = sqlite3_mprintf("%s", "PRAGMA journal_mode = PERSIST");
+	ret = sqlite3_exec(*handle, sql, NULL, NULL, NULL);
+	sqlite3_free(sql);
+	if (SQLITE_OK != ret) {
+
+		if (*handle) {
+			mc_error("[error when change the journal mode] %s", sqlite3_errmsg(*handle));
+		}
+
+		db_util_close(*handle);
+		*handle = NULL;
+
+		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+	}
+#endif
 
 	return MEDIA_CONTROLLER_ERROR_NONE;
 }
