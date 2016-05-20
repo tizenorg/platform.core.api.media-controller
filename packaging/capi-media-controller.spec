@@ -118,7 +118,7 @@ chgrp %TZ_SYS_USER_GROUP %{_bindir}/media-controller_create_db.sh
 %{_bindir}/media-controller_create_db.sh
 %endif
 %manifest media-controller-service.manifest
-%defattr(-,system,system,-)
+%defattr(-,multimedia_fw,multimedia_fw,-)
 %{_unitdir}/mediacontroller.service
 %{_unitdir}/mediacontroller.socket
 %{_unitdir}/sockets.target.wants/mediacontroller.socket

@@ -2,6 +2,8 @@
 Description=MediaController Service socket
 
 [Socket]
+SocketOwner=multimedia_fw
+SocketGroup=multimedia_fw
 ListenStream=/run/.mediacontroller.sock
 Service=mediacontroller.service
 
