@@ -2,6 +2,8 @@
 Description=Media controller
 
 [Service]
+Owner=multimedia_fw
+Group=multimedia_fw
 ExecStart=/usr/bin/mediacontroller
 Type=simple
 
