@@ -1,6 +1,6 @@
 Name:       capi-media-controller
 Summary:    A media controller library in Tizen Native API
-Version:    0.1.20
+Version:    0.1.21
 Release:    1
 Group:      Multimedia/API
 License:    Apache-2.0
@@ -85,20 +85,6 @@ install -m 644 %{SOURCE4} %{buildroot}%{_unitdir}/mediacontroller-ipc.socket
 ln -s ../mediacontroller.socket %{buildroot}%{_unitdir}/sockets.target.wants/mediacontroller.socket
 ln -s ../mediacontroller-ipc.socket %{buildroot}%{_unitdir}/sockets.target.wants/mediacontroller-ipc.socket
 
-# Setup DB creation in user session
-%if 0%{?multi_user}
-mkdir -p %{buildroot}%{_unitdir_user}
-mkdir -p %{buildroot}%{_unitdir_user}/default.target.wants/
-install -m 644 %{SOURCE3} %{buildroot}%{_unitdir_user}/media-controller-user.service
-ln -s ../media-controller-user.service %{buildroot}%{_unitdir_user}/default.target.wants/media-controller-user.service
-%endif
-
-# Create DB
-%if 0%{?multi_user}
-mkdir -p %{buildroot}%{_bindir}
-install -m 0775 %{SOURCE1001} %{buildroot}%{_bindir}/media-controller_create_db.sh
-%endif
-
 %post
 
 %postun
@@ -112,9 +98,6 @@ install -m 0775 %{SOURCE1001} %{buildroot}%{_bindir}/media-controller_create_db.
 %files -n mediacontroller
 %defattr(-,root,root,-)
 %{_bindir}/mediacontroller
-%if 0%{?multi_user}
-%{_bindir}/media-controller_create_db.sh
-%endif
 %manifest media-controller-service.manifest
 %defattr(-,multimedia_fw,multimedia_fw,-)
 %{_unitdir}/mediacontroller.service
@@ -122,10 +105,6 @@ install -m 0775 %{SOURCE1001} %{buildroot}%{_bindir}/media-controller_create_db.
 %{_unitdir}/sockets.target.wants/mediacontroller.socket
 %{_unitdir}/mediacontroller-ipc.socket
 %{_unitdir}/sockets.target.wants/mediacontroller-ipc.socket
-%if 0%{?multi_user}
-%{_unitdir_user}/media-controller-user.service
-%{_unitdir_user}/default.target.wants/media-controller-user.service
-%endif
 %{_datadir}/license/mediacontroller
 
 %files devel
