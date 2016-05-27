@@ -207,7 +207,6 @@ int mc_db_util_connect(void **handle, uid_t uid)
 
 	*handle = db_handle;
 
-#ifndef MULTI_USER
 	char *sql = NULL;
 	sql = sqlite3_mprintf("%s", "PRAGMA journal_mode = PERSIST");
 	ret = sqlite3_exec(*handle, sql, NULL, NULL, NULL);
@@ -223,7 +222,6 @@ int mc_db_util_connect(void **handle, uid_t uid)
 
 		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
 	}
-#endif
 
 	return MEDIA_CONTROLLER_ERROR_NONE;
 }
