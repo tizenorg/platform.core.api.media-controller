@@ -20,6 +20,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <systemd/sd-daemon.h>
+#include <systemd/sd-login.h>
 
 #include "media_controller_svc.h"
 #include "media_controller_private.h"
@@ -30,80 +31,19 @@
 static GMainLoop *g_mc_svc_mainloop = NULL;
 static int g_connection_cnt = -1;
 
-#ifdef MULTI_USER
-#define UID_DBUS_NAME		 "org.freedesktop.login1"
-#define UID_DBUS_PATH		 "/org/freedesktop/login1"
-#define UID_DBUS_INTERFACE	 UID_DBUS_NAME".Manager"
-#define UID_DBUS_METHOD		 "ListUsers"
-
-static int __mc_dbus_get_uid(const char *dest, const char *path, const char *interface, const char *method, uid_t *uid)
+static int __mc_sys_get_uid(uid_t *uid)
 {
-	DBusConnection *conn = NULL;
-	DBusMessage *msg = NULL;
-	DBusMessage *reply = NULL;
-	DBusError err;
-	DBusMessageIter iiiter;
-	DBusMessageIter iter;
-	DBusMessageIter aiter, piter;
-	int result = 0;
-
-	int val_int = 0;
-	char *val_str = NULL;
-
-	conn = dbus_bus_get(DBUS_BUS_SYSTEM, NULL);
-	if (!conn) {
-		mc_error("dbus_bus_get error");
-		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
+	uid_t *list = NULL;
+	int users = -1;
+	users = sd_get_uids(&list);
+	if (users > 0) {
+		*uid = list[0];
+		MC_SAFE_FREE(list);
+	} else {
+		mc_error("No login user!.");
 	}
-
-	msg = dbus_message_new_method_call(dest, path, interface, method);
-	if (!msg) {
-		mc_error("dbus_message_new_method_call(%s:%s-%s)",
-		path, interface, method);
-		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
-	}
-
-	dbus_message_iter_init_append(msg, &iiiter);
-
-	dbus_error_init(&err);
-
-	reply = dbus_connection_send_with_reply_and_block(conn, msg, -1, &err);
-	dbus_message_unref(msg);
-	if (!reply) {
-		mc_error("dbus_connection_send error(%s:%s) %s %s:%s-%s",
-		err.name, err.message, dest, path, interface, method);
-		dbus_error_free(&err);
-		return MEDIA_CONTROLLER_ERROR_INVALID_OPERATION;
-	}
-
-	dbus_message_iter_init(reply, &iter);
-	dbus_message_iter_recurse(&iter, &aiter);
-
-	result = 0;
-	while (dbus_message_iter_get_arg_type(&aiter) != DBUS_TYPE_INVALID) {
-		result++;
-		mc_debug("(%d)th block device information", result);
-
-		dbus_message_iter_recurse(&aiter, &piter);
-		dbus_message_iter_get_basic(&piter, &val_int);
-		mc_debug("\tType(%d)", val_int);
-
-		dbus_message_iter_next(&piter);
-		dbus_message_iter_get_basic(&piter, &val_str);
-		mc_debug("\tdevnode(%s)", val_str);
-
-		dbus_message_iter_next(&piter);
-		dbus_message_iter_get_basic(&piter, &val_str);
-		mc_debug("\tsyspath(%s)", val_str);
-
-		dbus_message_iter_next(&aiter);
-	}
-
-	*uid = (uid_t) val_int;
-
-	return result;
+	return users;
 }
-#endif
 
 static int __create_socket_activation(void)
 {
@@ -321,16 +261,14 @@ gboolean mc_svc_thread(void *data)
 	}
 	memset(mc_svc_data, 0, sizeof(mc_svc_data_t));
 
-#ifdef MULTI_USER
-	ret = __mc_dbus_get_uid(UID_DBUS_NAME, UID_DBUS_PATH, UID_DBUS_INTERFACE, UID_DBUS_METHOD, &uid);
+	ret = __mc_sys_get_uid(&uid);
 	if (ret < 0) {
-		mc_debug("Failed to send dbus (%d)", ret);
+		mc_debug("Failed to get login user (%d)", ret);
 		MC_SAFE_FREE(mc_svc_data);
 		return FALSE;
 	} else {
-		mc_debug("%d get UID[%d]", ret, uid);
+		mc_debug("%d sys get UID[%d]", ret, uid);
 	}
-#endif
 
 	/* Connect media controller DB*/
 	if (mc_db_util_connect(&(mc_svc_data->db_handle), uid) != MEDIA_CONTROLLER_ERROR_NONE) {

@@ -1,5 +1,5 @@
 # for package file
-SET(dependents "capi-base-common glib-2.0 gio-2.0 dlog dbus-glib-1 sqlite3 db-util libsystemd-daemon libtzplatform-config cynara-client cynara-session cynara-creds-socket")
+SET(dependents "capi-base-common glib-2.0 gio-2.0 dlog dbus-glib-1 sqlite3 db-util libsystemd-daemon libsystemd-login libtzplatform-config cynara-client cynara-session cynara-creds-socket")
 SET(fw_svc "media-controller-svc")
 
 PROJECT(${fw_svc})

@@ -1,6 +1,6 @@
 Name:       capi-media-controller
 Summary:    A media controller library in Tizen Native API
-Version:    0.1.21
+Version:    0.1.22
 Release:    1
 Group:      Multimedia/API
 License:    Apache-2.0
@@ -9,7 +9,6 @@ Source1:    mediacontroller.service
 Source2:    mediacontroller.socket
 Source3:    media-controller-user.service
 Source4:    mediacontroller-ipc.socket
-Source1001: media-controller_create_db.sh
 BuildRequires:  cmake
 BuildRequires:  sqlite
 BuildRequires:  pkgconfig(capi-base-common)
@@ -22,6 +21,7 @@ BuildRequires:  pkgconfig(db-util)
 BuildRequires:  pkgconfig(aul)
 BuildRequires:  pkgconfig(bundle)
 BuildRequires:  pkgconfig(libsystemd-daemon)
+BuildRequires:  pkgconfig(libsystemd-login)
 BuildRequires:  pkgconfig(libtzplatform-config)
 BuildRequires:  pkgconfig(cynara-client)
 BuildRequires:  pkgconfig(cynara-session)
@@ -44,12 +44,6 @@ Requires:   %{name} = %{version}-%{release}
 %description devel
 This package provides a media controller library in Tizen Native API(Development files included)
 
-%if 0%{?TIZEN_PRODUCT_TV}
-%define multi_user 0
-%else
-%define multi_user 1
-%endif
-
 %prep
 %setup -q
 
@@ -59,12 +53,7 @@ export CFLAGS+=" -Wno-ignored-qualifiers -Wno-unused-parameter -Wshadow"
 export CFLAGS+=" -Wwrite-strings -Wswitch-default"
 export CFLAGS+=" -DGST_EXT_TIME_ANALYSIS -include stdint.h"
 MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
-%cmake . -DFULLVER=%{version} \
-%if 0%{?multi_user}
- -DMAJORVER=${MAJORVER} -DMULTI_USER=YES
-%else
- -DMAJORVER=${MAJORVER}
-%endif
+%cmake . -DFULLVER=%{version} -DMAJORVER=${MAJORVER}
 
 %__make %{?jobs:-j%jobs}
 
