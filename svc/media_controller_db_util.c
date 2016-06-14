@@ -213,9 +213,8 @@ int mc_db_util_connect(void **handle, uid_t uid)
 	sqlite3_free(sql);
 	if (SQLITE_OK != ret) {
 
-		if (*handle) {
+		if (*handle)
 			mc_error("[error when change the journal mode] %s", sqlite3_errmsg(*handle));
-		}
 
 		db_util_close(*handle);
 		*handle = NULL;
