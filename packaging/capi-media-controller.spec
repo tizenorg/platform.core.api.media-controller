@@ -1,6 +1,6 @@
 Name:       capi-media-controller
 Summary:    A media controller library in Tizen Native API
-Version:    0.1.22
+Version:    0.1.23
 Release:    1
 Group:      Multimedia/API
 License:    Apache-2.0

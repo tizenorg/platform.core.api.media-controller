@@ -81,6 +81,7 @@ static int __mc_db_get_int_value_of_key(void *handle, const char *server_name, c
 	mc_retvm_if(key == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "key is NULL");
 
 	sql_str = sqlite3_mprintf(DB_SELECT_VALUE_OF_KEY, key, server_name);
+	mc_retvm_if(!MC_STRING_VALID(sql_str), MEDIA_CONTROLLER_ERROR_INVALID_OPERATION, "SQL string is null");
 
 	ret = sqlite3_prepare_v2(db_handle, sql_str, strlen(sql_str), &stmt, NULL);
 	if (SQLITE_OK != ret) {
@@ -119,6 +120,7 @@ static int __mc_db_get_ulong_value_of_key(void *handle, const char *server_name,
 	mc_retvm_if(key == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "key is NULL");
 
 	sql_str = sqlite3_mprintf(DB_SELECT_VALUE_OF_KEY, key, server_name);
+	mc_retvm_if(!MC_STRING_VALID(sql_str), MEDIA_CONTROLLER_ERROR_INVALID_OPERATION, "SQL string is null");
 
 	ret = sqlite3_prepare_v2(db_handle, sql_str, strlen(sql_str), &stmt, NULL);
 	if (SQLITE_OK != ret) {
@@ -306,6 +308,7 @@ int mc_db_get_latest_server_name(void *handle, char **latest_server_name)
 	*latest_server_name = NULL;
 
 	sql_str = sqlite3_mprintf(DB_SELECT_LATEST_SERVER_NAME);
+	mc_retvm_if(!MC_STRING_VALID(sql_str), MEDIA_CONTROLLER_ERROR_INVALID_OPERATION, "SQL string is null");
 
 	ret = sqlite3_prepare_v2(db_handle, sql_str, strlen(sql_str), &stmt, NULL);
 	if (SQLITE_OK != ret) {
@@ -376,6 +379,7 @@ int mc_db_get_metadata_info(void *handle, const char *server_name, mc_metadata_h
 	mc_retvm_if(server_name == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "server_name is NULL");
 
 	sql_str = sqlite3_mprintf(DB_SELECT_METADATA_FROM_DB, server_name);
+	mc_retvm_if(!MC_STRING_VALID(sql_str), MEDIA_CONTROLLER_ERROR_INVALID_OPERATION, "SQL string is null");
 
 	ret = sqlite3_prepare_v2(db_handle, sql_str, strlen(sql_str), &stmt, NULL);
 	if (SQLITE_OK != ret) {
@@ -576,6 +580,7 @@ int mc_db_check_server_table_exist(void *handle, const char *server_name, bool *
 	mc_retvm_if(server_name == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "server_name is NULL");
 
 	sql_str = sqlite3_mprintf("SELECT COUNT(*) FROM SQLITE_MASTER WHERE type='table' and name='%q'", server_name);
+	mc_retvm_if(!MC_STRING_VALID(sql_str), MEDIA_CONTROLLER_ERROR_INVALID_OPERATION, "SQL string is null");
 
 	ret = sqlite3_prepare_v2(handle, sql_str, strlen(sql_str), &stmt, NULL);
 	if (SQLITE_OK != ret) {
@@ -617,6 +622,7 @@ int mc_db_foreach_server_list(void *handle, mc_activated_server_cb callback, voi
 	mc_retvm_if(db_handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 
 	sql_str = sqlite3_mprintf(DB_SELECT_ALL_SERVER_LIST);
+	mc_retvm_if(!MC_STRING_VALID(sql_str), MEDIA_CONTROLLER_ERROR_INVALID_OPERATION, "SQL string is null");
 	ret = sqlite3_prepare_v2(db_handle, sql_str, strlen(sql_str), &stmt, NULL);
 	if (SQLITE_OK != ret) {
 		mc_error("prepare error [%s]\n", sqlite3_errmsg(db_handle));
