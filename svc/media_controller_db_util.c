@@ -46,6 +46,7 @@ static int __mc_foreach_table_list(void *handle, GList **list)
 	mc_retvm_if(handle == NULL, MEDIA_CONTROLLER_ERROR_INVALID_PARAMETER, "Handle is NULL");
 
 	sql_str = sqlite3_mprintf(DB_SELECT_ALL_SERVER_LIST_EXCEPT_LATEST, MC_DB_TABLE_LATEST_SERVER);
+	mc_retvm_if(!MC_STRING_VALID(sql_str), MEDIA_CONTROLLER_ERROR_INVALID_OPERATION, "SQL string is null");
 
 	ret = sqlite3_prepare_v2(db_handle, sql_str, strlen(sql_str), &stmt, NULL);
 	if (SQLITE_OK != ret) {
@@ -209,6 +210,7 @@ int mc_db_util_connect(void **handle, uid_t uid)
 
 	char *sql = NULL;
 	sql = sqlite3_mprintf("%s", "PRAGMA journal_mode = PERSIST");
+	mc_retvm_if(!MC_STRING_VALID(sql), MEDIA_CONTROLLER_ERROR_INVALID_OPERATION, "SQL string is null");
 	ret = sqlite3_exec(*handle, sql, NULL, NULL, NULL);
 	sqlite3_free(sql);
 	if (SQLITE_OK != ret) {
