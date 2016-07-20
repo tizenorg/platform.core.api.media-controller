@@ -4,6 +4,7 @@ Description=Media controller
 [Service]
 User=multimedia_fw
 Group=multimedia_fw
+SmackProcessLabel=System
 ExecStart=/usr/bin/mediacontroller
 Type=simple
 
