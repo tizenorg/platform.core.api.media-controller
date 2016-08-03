@@ -40,6 +40,8 @@ extern "C" {
  *
  * @details This callback is called when server received playback state recommand from client.
  *
+ * @remarks The callback is called in the dbus event loop.
+ *
  * @param[in] client_name    The app_id of the media controller client
  * @param[in] state    The received playback state
  * @param[in] user_data        The user data passed from the mc_server_set_playback_state_command_received_cb() fuction
@@ -56,6 +58,8 @@ typedef void (*mc_server_playback_state_command_received_cb)(const char* client_
  *
  * @details This callback is called when server received custom recommand from client.
  *                If there is reply for command, call mc_server_send_command_reply() function.
+ *
+ * @remarks The callback is called in the dbus event loop.
  *
  * @param[in] client_name    The app_id of the media controller client
  * @param[in] command    The received command
