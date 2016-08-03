@@ -38,6 +38,8 @@ extern "C" {
  * @brief Called when updating status of the media controller server.
  * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
+ * @remarks The callback is called in a separate process.
+ *
  * @param[in] server_name,    The app_id of the updated media controller server
  * @param[in] state,    The state of the updated media controller server
  * @param[in] user_data        The user data passed from the mc_client_set_server_update_cb() fuction
@@ -51,6 +53,8 @@ typedef void (*mc_server_state_updated_cb)(const char *server_name, mc_server_st
 /**
  * @brief Called when updating the playback information of the media controller server.
  * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
+ *
+ * @remarks The callback is called in a separate process.
  *
  * @param[in] server_name,    The app_id of the updated media controller server
  * @param[in] playback,        The playback information of the updated media controller server
@@ -66,6 +70,8 @@ typedef void (*mc_playback_updated_cb)(const char *server_name, mc_playback_h pl
  * @brief Called when updating the metadata of the media controller server.
  * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
+ * @remarks The callback is called in a separate process.
+ *
  * @param[in] server_name,    The app_id of the updated media controller server
  * @param[in] metadata,        the metadata of the updated media controller server
  * @param[in] user_data        The user data passed from the mc_client_set_metadata_update_cb() fuction
@@ -79,6 +85,8 @@ typedef void (*mc_metadata_updated_cb)(const char *server_name, mc_metadata_h me
 /**
  * @brief Called when updating the shuffle mode of the media controller server.
  * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
+ *
+ * @remarks The callback is called in a separate process.
  *
  * @param[in] server_name,    The app_id of the updated media controller server
  * @param[in] mode,            The shuffle mode of the updated media controller server
@@ -94,6 +102,8 @@ typedef void (*mc_shuffle_mode_changed_cb)(const char *server_name, mc_shuffle_m
  * @brief Called when updating the repeat mode of the media controller server.
  * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
+ * @remarks The callback is called in a separate process.
+ *
  * @param[in] server_name,    The app_id of the updated media controller server
  * @param[in] mode,            The repeat mode of the updated media controller server
  * @param[in] user_data        The user data passed from the mc_client_set_repeat_mode_update_cb() fuction
@@ -107,6 +117,8 @@ typedef void (*mc_repeat_mode_changed_cb)(const char *server_name, mc_repeat_mod
 /**
  * @brief Called when requesting the list of activated servers.
  * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
+ *
+ * @remarks The callback is called in a separate process.
  *
  * @param[in] server_name,    The app_id of the activated media controller server
  * @param[in] user_data        The user data passed from the mc_client_foreach_server() fuction
@@ -124,6 +136,8 @@ typedef bool (*mc_activated_server_cb)(const char *server_name, void *user_data)
  * @brief Called when receiving the command processing result from the server.
  * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
  *
+ * @remarks The callback is called in a separate process.
+ *
  * @param[in] server_name    The app_id of the updated media controller server
  * @param[in] result_code    The result code of custom command
  * @param[in] data The extra data
@@ -138,6 +152,8 @@ typedef void (*mc_command_reply_received_cb)(const char *server_name, int result
 /**
  * @brief Called when requesting the list of subscribed servers.
  * @since_tizen @if MOBILE 2.4 @elseif WEARABLE 3.0 @endif
+ *
+ * @remarks The callback is called in a separate process.
  *
  * @param[in] server_name,    The app_id of the subscribed media controller server
  * @param[in] user_data        The user data passed from the mc_client_foreach_server_subscribed() fuction
